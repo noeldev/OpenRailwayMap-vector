@@ -1,0 +1,11 @@
+{
+  "name": "features-tools",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check-tags": "node check-tags.mjs"
+  },
+  "dependencies": {
+    "yaml": "^2.4.0"
+  }
+}
