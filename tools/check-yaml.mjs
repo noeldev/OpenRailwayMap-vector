@@ -1,21 +1,22 @@
-// check-tags.mjs
-//
-// Static analysis tool for signals_railway_signals.yaml.
-//
-// Detects issues that would otherwise surface as opaque errors during
-// the Docker build (signal_features.sql.js) or cause silent mismatches
-// between features and the database schema.
-//
-// Usage:
-//   npm install
-//   npm run check-tags
-//
-// Requires Node.js 21+.
+#!/usr/bin/env node
+// check-yaml.mjs
+// Static analysis of signals_railway_signals.yaml.
 
 import fs from 'fs';
 import yaml from 'yaml';
+import { resolve } from 'node:path';
 
-const YAML_FILE = 'signals_railway_signals.yaml';
+import { DEFAULT_YAML_FILE } from './lib/shared.mjs';
+
+// First CLI arg overrides the file (resolved against cwd); otherwise the default.
+const YAML_FILE = process.argv[2]
+  ? resolve(process.argv[2])
+  : DEFAULT_YAML_FILE;
+
+if (!fs.existsSync(YAML_FILE)) {
+  console.error(`✗ YAML file not found: ${YAML_FILE}`);
+  process.exit(1);
+}
 
 // ---------------------------------------------------------------------------
 // Helpers

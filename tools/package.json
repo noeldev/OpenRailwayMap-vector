@@ -1,0 +1,17 @@
+{
+  "name": "orm-tools",
+  "private": true,
+  "type": "module",
+  "bin": { "orm-tools": "./cli.mjs" },
+  "scripts": {
+    "audit": "node audit-svg.mjs",
+    "audit:text": "node audit-svg.mjs --format text",
+    "check": "node check-yaml.mjs",
+    "optimize": "node optimize-svg.mjs",
+    "resize": "node resize-svg.mjs --apply"
+  },
+  "dependencies": {
+    "svgo": "^3.0.0",
+    "yaml": "^2.4.0"
+  }
+}
