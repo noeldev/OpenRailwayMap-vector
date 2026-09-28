@@ -74,21 +74,47 @@ function allIconCombinations(feature) {
   ]
 }
 
+// TODO
+// const generateSignalFeatures = (features, types) =>
+//   requireUniqueEntries([
+//     ...features.flatMap(allIconCombinations),
+//     ...types.map(type => [
+//       `general/signal-unknown-${type.type}`,
+//       {
+//         name: `Unknown signal (${type.type})`,
+//       }
+//     ]),
+//     [
+//       'general/signal-unknown',
+//       {
+//         name: 'Unknown signal',
+//       },
+//     ],
+//   ]);
+
+const mergeDuplicateIcons = entries => {
+  const byKey = Object.groupBy(entries.filter(it => it[0]), it => it[0]);
+  return Object.entries(byKey).map(([key, items]) => {
+    if (items.length === 1) return items[0];
+
+    const countries = new Set(items.map(it => it[1].country).filter(Boolean));
+    if (countries.size > 1) {
+      throw new Error(`Icon '${key}' used across countries: ${[...countries].join(', ')}`);
+    }
+
+    const names = items.map(it => it[1].name).filter(Boolean);
+    return [key, { country: items[0][1].country, name: names.join(' / ') }];
+  });
+};
+
 const generateSignalFeatures = (features, types) =>
   requireUniqueEntries([
-    ...features.flatMap(allIconCombinations),
+    ...mergeDuplicateIcons(features.flatMap(allIconCombinations)),
     ...types.map(type => [
       `general/signal-unknown-${type.type}`,
-      {
-        name: `Unknown signal (${type.type})`,
-      }
+      { name: `Unknown signal (${type.type})` },
     ]),
-    [
-      'general/signal-unknown',
-      {
-        name: 'Unknown signal',
-      },
-    ],
+    ['general/signal-unknown', { name: 'Unknown signal' }],
   ]);
 
 // TODO move icon SVGs to proxy
