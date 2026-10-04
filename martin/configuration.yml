@@ -21,6 +21,8 @@ postgres:
   # # You may set this to `false` to disable.
   auto_publish: false
 
+  reload_interval: ${POSTGRES_RELOAD_INTERVAL:-0s}
+
   # No tables, see function sources below
   tables: {}
 
@@ -78,9 +80,9 @@ postgres:
       function: standard_railway_grouped_station_areas
       minzoom: 13
 
-    standard_railway_symbols:
+    points_of_interest:
       schema: public
-      function: standard_railway_symbols
+      function: points_of_interest
       minzoom: 10
 
     standard_station_entrances:
@@ -108,6 +110,16 @@ postgres:
       function: standard_railway_switch_ref
       minzoom: 17
 
+    standard_interlocking:
+      schema: public
+      function: standard_interlocking
+      minzoom: 13
+
+    standard_interlocking_text:
+      schema: public
+      function: standard_interlocking_text
+      minzoom: 13
+
     # --- Speed --- #
 
     speed_railway_line_low:
@@ -115,12 +127,12 @@ postgres:
       function: speed_railway_line_low
       maxzoom: 7
 
-    speed_railway_signals:
-      schema: public
-      function: speed_railway_signals
-      minzoom: 13
-
     # --- Signals --- #
+
+    signals_railway_line_low_construction:
+      schema: public
+      function: signals_railway_line_low_construction
+      maxzoom: 7
 
     signals_railway_line_low:
       schema: public
@@ -131,11 +143,11 @@ postgres:
       schema: public
       function: signals_signal_boxes
       minzoom: 8
-      maxzoom: 14
+      maxzoom: 16
 
-    signals_railway_signals:
+    railway_signals:
       schema: public
-      function: signals_railway_signals
+      function: railway_signals
       minzoom: 13
 
     # --- Electrification --- #
@@ -144,16 +156,6 @@ postgres:
       schema: public
       function: electrification_railway_line_low
       maxzoom: 7
-
-    electrification_signals:
-      schema: public
-      function: electrification_signals
-      minzoom: 13
-
-    electrification_railway_symbols:
-      schema: public
-      function: electrification_railway_symbols
-      minzoom: 13
 
     electrification_substation:
       schema: public
@@ -179,17 +181,9 @@ postgres:
       function: operator_railway_line_low
       maxzoom: 7
 
-    operator_railway_symbols:
-      schema: public
-      function: operator_railway_symbols
-      minzoom: 13
-
     # --- Route --- #
 
     route_railway_line_low:
       schema: public
       function: route_railway_line_low
       maxzoom: 7
-
-fonts:
-  - /config/fonts

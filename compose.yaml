@@ -54,6 +54,7 @@ services:
         condition: service_completed_successfully
     environment:
       - DATABASE_URL=postgresql://postgres@db:5432/gis
+      - POSTGRES_RELOAD_INTERVAL=10s
     ulimits:
       nproc: 65535
       nofile:
@@ -107,7 +108,7 @@ services:
 
   api:
     build:
-      context: api
+      dockerfile: api.Dockerfile
     depends_on:
       db:
         condition: service_healthy
@@ -139,3 +140,8 @@ services:
       '--variable', 'base_url=http://api:5000/api',
       '/hurl/api.hurl'
     ]
+
+  feature-test:
+    build:
+      context: features
+      dockerfile: test/Dockerfile
