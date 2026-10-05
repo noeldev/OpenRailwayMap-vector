@@ -1,0 +1,259 @@
+{
+  "_comment": "Each job's 'values' come straight from the matching regex in signals_railway_signals.yaml (see the regex quoted in each job's own _source comment) - this file is the single list of 'which aspects to generate', kept next to the YAML regex it mirrors so the two can be checked against each other by eye. _source comments give only the tag/regex and whatever is specific to that job; the job mode (split/digits/fused) and its base+overlay-vs-fused wiring are already explained once in generate-aspects.mjs.",
+
+  "jobs": [
+    {
+      "name": "TIV-D_B",
+      "_source": "railway:signal:speed_limit_distant:fast:speed, regex ^([67]0|[89][05]|1[0-5][05]|1[6-9]0)$",
+      "mode": "fused",
+      "template": "signs/TIV-D_B.svg",
+      "overlayDir": "signs/TIV",
+      "values": [ 60, 70, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150, 155, 160, 170, 180, 190 ]
+    },
+    {
+      "name": "TIV-D_C",
+      "_source": "railway:signal:speed_limit_distant:railcar:speed, regex ^([4-7]0|[89][05]|1[0-5][05]|160)$",
+      "mode": "fused",
+      "template": "signs/TIV-D_C.svg",
+      "overlayDir": "signs/TIV",
+      "values": [ 40, 50, 60, 70, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150, 155, 160 ]
+    },
+    {
+      "name": "TIV-R",
+      "_source": "railway:signal:speed_limit:switchable:speed, regex ^([2-4]|[6-9]|1[0-6])0$ (also covers the narrower :speed_limit_reminder:speed legacy regex) - 2-digit values, font-size matches the non-suffixed template",
+      "mode": "fused",
+      "template": "signs/TIV-R.svg",
+      "overlayDir": "signs/TIV",
+      "values": [ 20, 30, 40, 60, 70, 80, 90 ]
+    },
+    {
+      "name": "TIV-R",
+      "_source": "railway:signal:speed_limit:switchable:speed - 3-digit values, font-size matches the _fast template (same base icon as the 2-digit job above: only font-size/position differ)",
+      "mode": "fused",
+      "template": "signs/TIV-R_fast.svg",
+      "overlayDir": "signs/TIV",
+      "values": [ 100, 110, 120, 130, 140, 150, 160 ]
+    },
+    {
+      "name": "TIV-D_pentagonal",
+      "_source": "railway:signal:speed_limit_distant:freight:speed, regex ^[1-9]0$ - the plate only ever shows the tens digit (displayDivisor: 10), filename keeps the full value",
+      "mode": "fused",
+      "template": "signs/TIV-D_pentagonal.svg",
+      "overlayDir": "signs/TIV",
+      "values": [ 10, 20, 30, 40, 50, 60, 70, 80, 90 ],
+      "displayDivisor": 10
+    },
+    {
+      "name": "TIV-E_pentagonal",
+      "_source": "railway:signal:speed_limit:freight:speed, regex ^[1-9]0$ - the plate only ever shows the tens digit (displayDivisor: 10), filename keeps the full value",
+      "mode": "fused",
+      "template": "signs/TIV-E_pentagonal.svg",
+      "overlayDir": "signs/TIV",
+      "values": [ 10, 20, 30, 40, 50, 60, 70, 80, 90 ],
+      "displayDivisor": 10
+    },
+
+    {
+      "name": "TIV-D_diamond",
+      "_source": "railway:signal:speed_limit:permanent:speed + :switchable:speed (union) - 2-digit values, font-size matches the non-suffixed template",
+      "mode": "fused",
+      "template": "signs/TIV-D_diamond.svg",
+      "overlayDir": "signs/TIV",
+      "values": [ 10, 20, 30, 40, 50, 60, 70, 80, 85, 90, 95 ]
+    },
+    {
+      "name": "TIV-D_diamond",
+      "_source": "railway:signal:speed_limit:permanent:speed + :switchable:speed (union) - 3-digit values, font-size matches the _fast template (same base icon as the 2-digit job above: only font-size/position differ)",
+      "mode": "fused",
+      "template": "signs/TIV-D_diamond_fast.svg",
+      "overlayDir": "signs/TIV",
+      "values": [ 100, 105, 110, 115, 120, 130, 140, 150, 160 ]
+    },
+    {
+      "name": "TIV-D_diamond",
+      "_source": "railway:signal:speed_limit:permanent:speed only - top AND bottom share the same value list",
+      "template": "signs/TIV-D_diamond_split.svg",
+      "base": "signs/TIV-D_diamond_split",
+      "overlayDir": "signs/TIV",
+      "slots": [ "top", "bottom" ],
+      "values": [ 10, 20, 30, 40, 50, 60, 70, 80, 85, 90, 95, 100, 105, 110, 115, 120 ]
+    },
+    {
+      "name": "TIV-D_square",
+      "_source": "railway:signal:speed_limit:permanent:speed only - 2-digit values, font-size matches the non-suffixed template",
+      "mode": "fused",
+      "template": "signs/TIV-D_square.svg",
+      "overlayDir": "signs/TIV",
+      "values": [ 10, 20, 30, 40, 50, 60, 70, 80, 85, 90, 95 ]
+    },
+    {
+      "name": "TIV-D_square",
+      "_source": "railway:signal:speed_limit:permanent:speed only - 3-digit values, font-size matches the _fast template (same base icon as the 2-digit job above: only font-size/position differ)",
+      "mode": "fused",
+      "template": "signs/TIV-D_square_fast.svg",
+      "overlayDir": "signs/TIV",
+      "values": [ 100, 105, 110, 115, 120, 125, 130, 135, 140 ]
+    },
+    {
+      "name": "TIV-D_square",
+      "_source": "railway:signal:speed_limit:permanent:speed only - top AND bottom share the same value list",
+      "template": "signs/TIV-D_square_split.svg",
+      "base": "signs/TIV-D_square_split",
+      "overlayDir": "signs/TIV",
+      "slots": [ "top", "bottom" ],
+      "values": [ 10, 20, 30, 40, 50, 60, 70, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140 ]
+    },
+
+    {
+      "name": "TIV-D_diamond",
+      "_source": "illuminated board, railway:signal:speed_limit:permanent:speed only (switchable has no board form) - 2-digit values, font-size matches the non-suffixed template",
+      "mode": "fused",
+      "template": "boards/TIV-D_diamond.svg",
+      "overlayDir": "boards/TIV",
+      "values": [ 10, 20, 30, 40, 50, 60, 70, 80, 85, 90, 95 ]
+    },
+    {
+      "name": "TIV-D_diamond",
+      "_source": "illuminated board, railway:signal:speed_limit:permanent:speed only - 3-digit values, font-size matches the _fast template (same base icon as the 2-digit job above: only font-size/position differ)",
+      "mode": "fused",
+      "template": "boards/TIV-D_diamond_fast.svg",
+      "overlayDir": "boards/TIV",
+      "values": [ 100, 105, 110, 115, 120 ]
+    },
+    {
+      "name": "TIV-D_diamond",
+      "_source": "illuminated board, railway:signal:speed_limit:permanent:speed only - top AND bottom share the same value list",
+      "template": "boards/TIV-D_diamond_split.svg",
+      "base": "boards/TIV-D_diamond_split",
+      "overlayDir": "boards/TIV",
+      "slots": [ "top", "bottom" ],
+      "values": [ 10, 20, 30, 40, 50, 60, 70, 80, 85, 90, 95, 100, 105, 110, 115, 120 ]
+    },
+    {
+      "name": "TIV-D_square",
+      "_source": "illuminated board, railway:signal:speed_limit:permanent:speed only - 2-digit values, font-size matches the non-suffixed template",
+      "mode": "fused",
+      "template": "boards/TIV-D_square.svg",
+      "overlayDir": "boards/TIV",
+      "values": [ 10, 20, 30, 40, 50, 60, 70, 80, 85, 90, 95 ]
+    },
+    {
+      "name": "TIV-D_square",
+      "_source": "illuminated board, railway:signal:speed_limit:permanent:speed only - 3-digit values, font-size matches the _fast template (same base icon as the 2-digit job above: only font-size/position differ)",
+      "mode": "fused",
+      "template": "boards/TIV-D_square_fast.svg",
+      "overlayDir": "boards/TIV",
+      "values": [ 100, 105, 110, 115, 120, 125, 130, 135, 140 ]
+    },
+    {
+      "name": "TIV-D_square",
+      "_source": "illuminated board, railway:signal:speed_limit:permanent:speed only - top AND bottom share the same value list",
+      "template": "boards/TIV-D_square_split.svg",
+      "base": "boards/TIV-D_square_split",
+      "overlayDir": "boards/TIV",
+      "slots": [ "top", "bottom" ],
+      "values": [ 10, 20, 30, 40, 50, 60, 70, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140 ]
+    },
+
+    {
+      "name": "TIV-D",
+      "_source": "TIV-D Mobile, illuminated box form - 2-digit values, font-size matches the non-suffixed template; no separate base layer in the YAML",
+      "mode": "fused",
+      "template": "boxes/TIV-D.svg",
+      "overlayDir": "boxes/TIV",
+      "values": [ 60, 70, 80, 90 ]
+    },
+    {
+      "name": "TIV-D",
+      "_source": "TIV-D Mobile, illuminated box form - 3-digit values, font-size matches the _fast template (same base icon as the 2-digit job above: only font-size/position differ)",
+      "mode": "fused",
+      "template": "boxes/TIV-D_fast.svg",
+      "overlayDir": "boxes/TIV",
+      "values": [ 100, 110, 120, 130, 140, 150, 160 ]
+    },
+    {
+      "name": "TIV-R",
+      "_source": "TIV-R Mobile, illuminated box form, regular (non-wide) width - 2-digit values. Each digit is its own <text> element in the SNCF-Lightbox glyph font. No separate base layer in the YAML: 'fr/boxes/TIV-R_open' remains the no-match fallback; 'fr/boxes/TIV-R' off icon confirmed unused.",
+      "mode": "fused",
+      "template": "boxes/TIV-R.svg",
+      "overlayDir": "boxes/TIV",
+      "values": [ 20, 30, 40, 60, 70, 80, 90 ]
+    },
+    {
+      "name": "TIV-R",
+      "_source": "TIV-R Mobile, illuminated box form, wide variant for 3-digit values - genuinely different (wider) shape, not just a font-size tweak. Overlay filenames are shared with the regular-width job above ('fr/boxes/TIV/TIV-R_{}' covers both digit counts in the YAML), hence the same job.name; no `base` since each file already carries its own shape.",
+      "mode": "fused",
+      "template": "boxes/TIV-R_wide.svg",
+      "overlayDir": "boxes/TIV",
+      "values": [ 100, 110, 120, 130, 140, 150, 160 ]
+    },
+
+    {
+      "name": "L",
+      "_source": "railway:signal:stop:any:length, regex ^(75|80|90|110|115|120|130|140|150|160|170|200|220|225|245|260|410|480)$ - matches 'fr/signs/L/L{}'",
+      "mode": "fused",
+      "template": "signs/train_length.svg",
+      "overlayDir": "signs/L",
+      "fileName": "{name}{v}",
+      "values": [ 75, 80, 90, 110, 115, 120, 130, 140, 150, 160, 170, 200, 220, 225, 245, 260, 410, 480 ]
+    },
+    {
+      "name": "L_uncoupling",
+      "_source": "railway:signal:coupling:length (2TMV) - PROVISIONAL: no official value list confirmed yet, reusing the L... plate's standard lengths as a placeholder. Filed next to the L... plates (signs/L), named L{v}_uncoupling.",
+      "mode": "fused",
+      "template": "signs/uncoupling_max_length.svg",
+      "overlayDir": "signs/L",
+      "fileName": "L{v}_uncoupling",
+      "values": [ 75, 80, 90, 110, 115, 120, 130, 140, 150, 160, 170, 200, 220, 225, 245, 260, 410, 480 ]
+    },
+    {
+      "name": "L_RBT",
+      "_source": "railway:signal:stop:any:length, regex ^[0-9]+$ (Pancarte L... RBT) - matches 'fr/signs/L/L_{}_RBT'. Known values: 50|80|120|160|200.",
+      "mode": "fused",
+      "template": "signs/train_length_RBT.svg",
+      "overlayDir": "signs/L",
+      "fileName": "L_{v}_RBT",
+      "values": [ 50, 80, 120, 160, 200 ]
+    },
+    {
+      "name": "V",
+      "_source": "railway:signal:stop:conventional:number, 1-digit case (1-9), drawn from the V.svg template. Confirmed by Noel: V_1digit/V_2digit are retired, V/V_long are the live names in both the template files and the YAML.",
+      "mode": "fused",
+      "template": "signs/V.svg",
+      "overlayDir": "signs/V",
+      "fileName": "{v}{name}",
+      "values": [ 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
+    },
+    {
+      "name": "V",
+      "_source": "railway:signal:stop:conventional:number, 2-digit case (10-19), drawn from the V_long.svg template (two separately-positioned <text> elements, one per digit, kept separate rather than merged into a single tspan since there is no room to display both digits as one string).",
+      "mode": "fused",
+      "template": "signs/V_long.svg",
+      "overlayDir": "signs/V",
+      "fileName": "{v}{name}",
+      "values": [ 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 ]
+    },
+    {
+      "name": "V_U-turn",
+      "_source": "railway:signal:stop:conventional:number, 1/2-train U-turn sign ('1/2 t' = demi-tour, drawn as a fixed vector shape, not literal <text>), regex widened from ^[56]$ to ^[1-9]$ per the simplification to 1-19 vehicles. No `base` field: Noel hand-draws 'fr/signs/V_U-turn_empty' himself (confirmed present on disk, directly under signs/, matching the YAML default and the sibling 'fr/signs/V_empty') - the tool must not auto-generate or overwrite it.",
+      "mode": "fused",
+      "overlayDir": "signs/V",
+      "fileName": "{v}{name}",
+      "template": "signs/V_U-turn.svg",
+      "values": [ 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
+    },
+    {
+      "name": "V",
+      "_source": "railway:signal:stop:conventional:number, 2-number split case (replaces the old hardcoded pair enumeration), top/bottom share consecutive ranges - path matches the YAML's layer-1 case value 'fr/signs/V_split' (no V/ subfolder)",
+      "template": "signs/V_split.svg",
+      "base": "signs/V_split",
+      "overlayDir": "signs/V",
+      "slots": [ "top", "bottom" ],
+      "fileName": "{v}{name}_{slot}",
+      "valuesBySlot": {
+        "top": [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18 ],
+        "bottom": [ 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 ]
+      }
+    }
+  ]
+}

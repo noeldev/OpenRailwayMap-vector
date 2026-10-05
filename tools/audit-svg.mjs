@@ -19,6 +19,7 @@ import { readFile, writeFile, stat } from 'node:fs/promises';
 import { dirname, join, relative, resolve } from 'node:path';
 
 import {
+  DEFAULT_MIN_VIEWBOX_DIM,
   DEFAULT_SVG_ROOT,
   TOOLS_DIR,
   color,
@@ -41,7 +42,7 @@ Usage:
 
 Options:
   --root <dir>     Directory to scan (default: <project>/symbols/fr)
-  --min  <n>       Minimum viewBox dimension (default: 100)
+  --min  <n>       Minimum viewBox dimension (default: ${DEFAULT_MIN_VIEWBOX_DIM})
   --format <fmt>   html | text | json (default: html)
   --out  <file>    Output file for --format html (default: <tools>/audit-svg.html)
   -h, --help       Show this help
@@ -62,7 +63,7 @@ const vbLabelOf = (vb) => vb ? `${fmt(vb.w)} × ${fmt(vb.h)}` : 'missing';
 function parseArgs(argv) {
   const opts = {
     root: DEFAULT_SVG_ROOT,
-    min: 100,
+    min: DEFAULT_MIN_VIEWBOX_DIM,
     format: 'html',
     out: join(TOOLS_DIR, 'audit-svg.html'),
   };

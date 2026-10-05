@@ -2,16 +2,19 @@
   "name": "orm-tools",
   "private": true,
   "type": "module",
-  "bin": { "orm-tools": "./cli.mjs" },
+  "bin": { "orm-tools": "./orm.mjs" },
   "scripts": {
     "audit": "node audit-svg.mjs",
     "audit:text": "node audit-svg.mjs --format text",
     "check": "node check-yaml.mjs",
     "optimize": "node optimize-svg.mjs",
-    "resize": "node resize-svg.mjs --apply"
+    "resize": "node resize-svg.mjs",
+    "resize:apply": "node resize-svg.mjs --apply",
+    "aspects": "node generate-aspects.mjs"
   },
   "dependencies": {
     "svgo": "^3.0.0",
-    "yaml": "^2.4.0"
+    "yaml": "^2.4.0",
+    "@xmldom/xmldom": "^0.9.12"
   }
 }

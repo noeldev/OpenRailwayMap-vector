@@ -144,6 +144,14 @@ h1 {
   transition: box-shadow .15s ease, border-color .15s ease, background-color .15s ease;
 }
 
+  /* The author rule above overrides the browser's default [hidden] { display:
+   none } (author styles always beat the UA stylesheet), so without this
+   rule the path/warnings filter toggles the hidden attribute but every
+   card stays visually visible. This restores the expected behavior. */
+  .card[hidden] {
+    display: none;
+  }
+
   .card:hover {
     box-shadow: 0 2px 10px rgba(0,0,0,.10);
   }

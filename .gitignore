@@ -21,3 +21,4 @@ taginfo.json
 .DS_Store
 /.vs
 /symbols/fr/_backup
+/tools/package-lock.json

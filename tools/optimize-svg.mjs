@@ -1,16 +1,29 @@
 #!/usr/bin/env node
 // optimize-svg.mjs
 //
-// Prepares SVG files for the SDF sprite generator by running two phases:
+// Prepares SVG files for the SDF sprite generator by running three phases:
+//
+//   Phase 0 - Tidy pass (see ./lib/svg-tidy.mjs), run before text-to-path so
+//             dead text/tspan attributes and styles are gone before Inkscape
+//             bakes them onto the resulting <path> (SVGO's convertStyleToAttrs
+//             would otherwise promote that dead CSS onto real attributes
+//             instead of removing it).
 //
 //   Phase 1 - Convert <text> / <tspan> elements to paths using Inkscape.
 //             Required because the sprite generator cannot handle text.
+//             Inkscape crashes occasionally, so this phase retries only the
+//             files still containing text, up to MAX_TEXT_PASSES times.
 //
 //   Phase 2 - Optimize all SVGs with SVGO (library mode).
-//             Reduces file size and cleans up markup.
+//             Reduces file size and cleans up markup, including flattening
+//             any leftover transform attributes onto the path data (see the
+//             svgoPlugins() comment below).
 //
-// Files are backed up to symbols/fr/_backup/ on first modification and never
-// overwritten, so the pristine originals are always preserved.
+// Files are backed up to tools/_backup/ on first modification and never
+// overwritten, so the pristine originals are always preserved. The backup
+// directory lives under tools/, not under symbols/fr/, so it never gets
+// walked as part of the SVG tree and never interferes with a rebuild of that
+// tree; see .gitignore in this folder.
 //
 // Run from anywhere: the project root is derived from the script location.
 
@@ -19,15 +32,23 @@ import { mkdir, copyFile, readFile, stat, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join, dirname, relative, sep } from 'node:path';
 import { optimize } from 'svgo';
+import { DOMParser, XMLSerializer } from '@xmldom/xmldom';
 
 import {
   DEFAULT_SVG_ROOT,
   PROJECT_ROOT,
+  TOOLS_DIR,
   color,
   walkFiles,
 } from './lib/shared.mjs';
+import { tidySvgDocument } from './lib/svg-tidy.mjs';
 
 const BACKUP_DIR_NAME = '_backup';
+
+// Safety cap on Phase 1 retry passes: Inkscape's crashes are transient, but a
+// file that still has text after this many attempts is failing for a real
+// reason and further retries would just waste time.
+const MAX_TEXT_PASSES = 5;
 
 // ---------- executable discovery (Inkscape only) ----------
 
@@ -94,6 +115,31 @@ async function backupFile(filePath, rootDir, backupDir) {
   return backupPath;
 }
 
+// ---------- Phase 0: tidy pass ----------
+
+async function tidyOne(filePath) {
+  const original = await readFile(filePath, 'utf8');
+  const doc = new DOMParser().parseFromString(original, 'text/xml');
+  tidySvgDocument(doc.documentElement);
+  const cleaned = new XMLSerializer().serializeToString(doc.documentElement);
+
+  // Keep whichever line ending the source file already used.
+  const eol = original.includes('\r\n') ? '\r\n' : '\n';
+  const content = `<?xml version="1.0" encoding="UTF-8"?>${eol}${cleaned}${eol}`;
+  if (content === original) return false;
+  await writeFile(filePath, content, 'utf8');
+  return true;
+}
+
+async function runTidyBatch(files, targetDir, backupDir) {
+  let tidied = 0;
+  for (const file of files) {
+    await backupFile(file, targetDir, backupDir);
+    if (await tidyOne(file)) tidied++;
+  }
+  return { tidied };
+}
+
 // ---------- Phase 1: text to paths ----------
 
 async function convertTextToPaths(inkscapePath, filePath) {
@@ -115,9 +161,12 @@ async function convertTextToPaths(inkscapePath, filePath) {
   return true;
 }
 
+// Runs one pass over `files`. Returns which ones converted and which are
+// still failing (restored to their original, still-text-bearing state), so
+// the caller can decide whether another pass is worth attempting.
 async function runTextConversionBatch(files, inkscapePath, targetDir, backupDir) {
   let converted = 0;
-  let failed = 0;
+  const failedFiles = [];
   const total = files.length;
   let index = 0;
 
@@ -131,17 +180,60 @@ async function runTextConversionBatch(files, inkscapePath, targetDir, backupDir)
     } else {
       await copyFile(backupPath, file);
       console.log(color.yellow('    Restored original'));
-      failed++;
+      failedFiles.push(file);
     }
   }
-  return { converted, failed };
+  return { converted, failedFiles };
+}
+
+// Repeats text-to-path conversion on whatever still needs it, since
+// Inkscape's failures are typically transient crashes rather than files it
+// will never manage to convert. Stops as soon as a pass makes no progress at
+// all, rather than burning through every remaining pass on the same files.
+async function runTextConversionUntilStable(files, inkscapePath, targetDir, backupDir) {
+  let remaining = files;
+  let converted = 0;
+  let pass = 0;
+
+  while (remaining.length > 0 && pass < MAX_TEXT_PASSES) {
+    pass++;
+    console.log(color.cyan(`  Pass ${pass}/${MAX_TEXT_PASSES}: converting ${remaining.length} file(s)...`));
+    const result = await runTextConversionBatch(remaining, inkscapePath, targetDir, backupDir);
+    converted += result.converted;
+
+    if (result.failedFiles.length === remaining.length) {
+      console.log(color.red(`  No progress in pass ${pass}; stopping retries.`));
+      remaining = result.failedFiles;
+      break;
+    }
+    remaining = result.failedFiles;
+  }
+
+  if (remaining.length > 0) {
+    console.log(color.red(`  Still failing after ${pass} pass(es):`));
+    for (const f of remaining) console.log(color.red(`    ${relative(targetDir, f).split(sep).join('/')}`));
+  }
+
+  return { converted, failed: remaining.length };
 }
 
 // ---------- Phase 2: SVGO (library mode) ----------
 
+// preset-default already runs convertPathData, which applies any transform
+// on a <path> to its own "d" data (removing the transform attribute) - but
+// only when the element carries no "style" attribute and no "id". Inkscape's
+// text-to-path output puts its fill/stroke in a "style" attribute, which
+// silently blocks that step. convertStyleToAttrs moves those declarations
+// onto plain presentation attributes first, so transforms left behind by
+// Phase 1 (or by generate-aspects.mjs's inherited-transform wrapping) are
+// actually flattened away instead of lingering in the optimized output.
+function svgoPlugins() {
+  return ['convertStyleToAttrs', 'preset-default'];
+}
+
 async function optimizeOne(filePath) {
   const source = await readFile(filePath, 'utf8');
-  const result = optimize(source, { path: filePath, multipass: true });
+  const result = optimize(source, { path: filePath, multipass: true, plugins: svgoPlugins() });
   if (typeof result.data !== 'string' || !result.data) return false;
   await writeFile(filePath, result.data, 'utf8');
   return true;
@@ -182,7 +274,7 @@ async function runSvgoBatch(files, targetDir, backupDir) {
 
 async function main() {
   const targetDir = DEFAULT_SVG_ROOT;
-  const backupDir = join(targetDir, BACKUP_DIR_NAME);
+  const backupDir = join(TOOLS_DIR, BACKUP_DIR_NAME);
 
   if (!existsSync(targetDir)) {
     console.error(color.red(`ERROR: target directory not found: ${targetDir}`));
@@ -198,14 +290,27 @@ async function main() {
     console.log(color.cyan(`Created backup directory: ${backupDir}`));
   }
 
-  // Collect the SVG list once; both phases use it.
+  // Collect the SVG list once; both phases use it. skipDirs guards against a
+  // stray _backup/ left over under symbols/fr by an older version of this
+  // script, back when the backup directory lived inside the SVG tree.
   const allFiles = [];
   for await (const f of walkFiles(targetDir, { ext: '.svg', skipDirs: [BACKUP_DIR_NAME] })) {
     allFiles.push(f);
   }
 
+  let tidyResult = { tidied: 0 };
   let textResult = { converted: 0, failed: 0 };
   let svgoResult = { optimized: 0, failed: 0, savedBytes: 0 };
+
+  // --- Phase 0 ---
+  console.log();
+  console.log(color.cyan('Phase 0: Tidy pass'));
+  if (allFiles.length === 0) {
+    console.log(color.green('  No SVG files found.'));
+  } else {
+    tidyResult = await runTidyBatch(allFiles, targetDir, backupDir);
+    console.log(color.green(`  Tidied: ${tidyResult.tidied} / ${allFiles.length}`));
+  }
 
   // --- Phase 1 ---
   console.log();
@@ -218,6 +323,8 @@ async function main() {
     console.log(color.yellow('  Install : winget install --id Inkscape.Inkscape -e --force'));
   } else {
     console.log(color.cyan(`  Inkscape: ${inkscapePath}`));
+    // Pre-check: only files that actually still have text are ever handed to
+    // Inkscape, which is slow and not worth invoking on files already done.
     const textFiles = [];
     for (const f of allFiles) {
       if (await hasNonEmptyText(f)) textFiles.push(f);
@@ -226,7 +333,7 @@ async function main() {
       console.log(color.green('  No SVG files with non-empty text elements found.'));
     } else {
       console.log(color.cyan(`  Found ${textFiles.length} file(s) to convert.`));
-      textResult = await runTextConversionBatch(textFiles, inkscapePath, targetDir, backupDir);
+      textResult = await runTextConversionUntilStable(textFiles, inkscapePath, targetDir, backupDir);
     }
   }
 
@@ -243,6 +350,9 @@ async function main() {
   // --- Summary ---
   console.log();
   console.log(color.cyan('===== Summary ====='));
+  console.log();
+  console.log(color.cyan('Phase 0 - Tidy pass:'));
+  console.log(color.green(`  Tidied : ${tidyResult.tidied}`));
   console.log();
   console.log(color.cyan('Phase 1 - Text to paths:'));
   console.log(color.green(`  Converted : ${textResult.converted}`));

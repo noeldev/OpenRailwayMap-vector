@@ -8,7 +8,7 @@ import { dirname, join, relative, sep } from 'node:path';
 import { readdir, access } from 'node:fs/promises';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname  = dirname(__filename);
+const __dirname = dirname(__filename);
 
 /** Absolute path to tools/. */
 export const TOOLS_DIR = dirname(__dirname);
@@ -21,6 +21,17 @@ export const DEFAULT_SVG_ROOT = join(PROJECT_ROOT, 'symbols', 'fr');
 
 /** Default YAML file: <project>/features/signals_railway_signals.yaml */
 export const DEFAULT_YAML_FILE = join(PROJECT_ROOT, 'features', 'signals_railway_signals.yaml');
+
+/**
+ * Minimum safe viewBox dimension (smallest of width/height), shared by:
+ *   - audit-svg.mjs, as the default --min size-warning threshold;
+ *   - svg-tidy.mjs, as the cutoff below which the 2.5-unit design-grid
+ *     coordinate snap is skipped entirely, since on a small viewBox that
+ *     step is large enough relative to the icon to visibly distort it.
+ * Below this size an icon is already flagged by the audit for manual
+ * review, so the tidy pass leaves its coordinates exactly as drawn.
+ */
+export const DEFAULT_MIN_VIEWBOX_DIM = 100;
 
 /** Convert a filesystem path to forward-slash form for display. */
 export const toPosix = (p) => p.split(sep).join('/');

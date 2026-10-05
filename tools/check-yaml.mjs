@@ -1,21 +1,43 @@
 #!/usr/bin/env node
 // check-yaml.mjs
 // Static analysis of signals_railway_signals.yaml.
+//
+// Sections 1-4 are correctness checks: every line they print is worth a
+// look. Sections 5-6 are cross-reference listings that are "informative"
+// even when nothing is wrong - a small accessory icon (a plate, a caisson
+// shape) is legitimately reused by dozens of unrelated features, and the
+// tag list legitimately declares more of the OSM railway:signal:* schema
+// than this file's features currently exercise. Printed in full by
+// default, those two sections used to bury the four checks that actually
+// matter under hundreds of expected, unactionable lines - so by default
+// they only print a count; pass --verbose to see the full listing.
 
 import fs from 'fs';
 import yaml from 'yaml';
 import { resolve } from 'node:path';
 
-import { DEFAULT_YAML_FILE } from './lib/shared.mjs';
+import { DEFAULT_YAML_FILE, color } from './lib/shared.mjs';
 
-// First CLI arg overrides the file (resolved against cwd); otherwise the default.
-const YAML_FILE = process.argv[2]
-  ? resolve(process.argv[2])
-  : DEFAULT_YAML_FILE;
+const HELP = `
+Usage: node tools/check-yaml.mjs [file] [options]
 
-if (!fs.existsSync(YAML_FILE)) {
-  console.error(`✗ YAML file not found: ${YAML_FILE}`);
-  process.exit(1);
+  file          YAML file to check (default: ${DEFAULT_YAML_FILE})
+
+Options:
+  --verbose, -v  Also list sections 5 and 6 in full (shared icon paths,
+                 unused tag declarations) instead of just their count
+  -h, --help     Show this help
+`;
+
+function parseArgs(argv) {
+  const opts = { file: null, verbose: false, help: false };
+  for (const a of argv) {
+    if (a === '--verbose' || a === '-v') opts.verbose = true;
+    else if (a === '-h' || a === '--help') opts.help = true;
+    else if (!opts.file) opts.file = a;
+    else throw new Error(`Unknown option: ${a}`);
+  }
+  return opts;
 }
 
 // ---------------------------------------------------------------------------
@@ -23,7 +45,14 @@ if (!fs.existsSync(YAML_FILE)) {
 // ---------------------------------------------------------------------------
 
 const countryOf = feature => feature.country ?? 'GLOBAL';
-const featureId = feature => `${ countryOf(feature) }::${ feature.description }`;
+const featureId = feature => `${countryOf(feature)}::${feature.description}`;
+
+// A feature's full tag signature (tag + value, order-independent). Two
+// features only count as true duplicates when this matches too - sharing a
+// description alone is normal (e.g. the same label used for a sign and its
+// board variant).
+const tagSignature = feature =>
+  JSON.stringify((feature.tags ?? []).map(t => [t.tag, t.value ?? null]).sort());
 
 const groupBy = (items, keyFn) =>
   items.reduce((acc, item) => {
@@ -89,12 +118,20 @@ const findDuplicatedDeclarations = signals =>
     count: items.length,
   }));
 
-// 4. Features sharing the same country + description.
-const findDuplicatedFeatures = signals =>
-  duplicatesOf(groupBy(signals.features, featureId)).map(([id, items]) => ({
-    id,
-    count: items.length,
-  }));
+// 4. Features that are true duplicates: same country + description AND the
+//    exact same tag set. (Sharing just the description is routine - sign
+//    and board variants of the same plate are named identically on purpose.)
+const findDuplicatedFeatures = signals => {
+  const byId = groupBy(signals.features, featureId);
+  const issues = [];
+  for (const [id, items] of Object.entries(byId)) {
+    if (items.length < 2) continue;
+    for (const [, sameSignature] of duplicatesOf(groupBy(items, tagSignature))) {
+      issues.push({ id, count: sameSignature.length });
+    }
+  }
+  return issues;
+};
 
 // 5. Tags repeated within a single feature.
 const findTagsRepeatedInFeature = signals => {
@@ -111,20 +148,23 @@ const findTagsRepeatedInFeature = signals => {
   return issues;
 };
 
-// 6. Static icon paths used by two features of the same country.
-//    Different countries may legitimately reuse the same path (e.g. "fr/none").
-const findDuplicatedIconPaths = signals => {
+// 6. Static icon paths used by two or more features of the same country.
+//    Informative, not an error: a shared accessory icon (a plate, a
+//    caisson shape) is meant to be reused by many unrelated features.
+//    Each feature counts once per path even if it references it from
+//    several icon layers.
+const findSharedIconPaths = signals => {
   const ownersByPath = {};
   for (const feature of signals.features) {
     for (const path of collectStaticIconPaths(feature)) {
-      (ownersByPath[path] ??= []).push(feature);
+      ((ownersByPath[path] ??= new Map()).set(featureId(feature), feature));
     }
   }
 
   return Object.entries(ownersByPath)
-    .filter(([, owners]) => owners.length > 1)
-    .filter(([, owners]) => new Set(owners.map(countryOf)).size === 1)
-    .map(([path, owners]) => ({ path, owners }));
+    .map(([path, ownerMap]) => ({ path, owners: [...ownerMap.values()] }))
+    .filter(({ owners }) => owners.length > 1)
+    .filter(({ owners }) => new Set(owners.map(countryOf)).size === 1);
 };
 
 // ---------------------------------------------------------------------------
@@ -132,7 +172,7 @@ const findDuplicatedIconPaths = signals => {
 // ---------------------------------------------------------------------------
 
 const printSection = (title, lines) => {
-  console.log(`\n === ${ title } ===`);
+  console.log(`\n === ${title} ===`);
   if (lines.length === 0) {
     console.log('OK');
   } else {
@@ -140,7 +180,20 @@ const printSection = (title, lines) => {
   }
 };
 
-const report = signals => {
+// For sections 5-6: just the count by default, full detail with --verbose.
+const printInformativeSection = (title, items, toLines, note, verbose) => {
+  console.log(`\n === ${title} ===`);
+  if (items.length === 0) {
+    console.log('OK');
+  } else if (verbose) {
+    for (const line of toLines(items)) console.log(line);
+  } else {
+    console.log(color.cyan(`${items.length} item(s) - ${note}`));
+    console.log(color.cyan('  Run with --verbose to list them.'));
+  }
+};
+
+const report = (signals, opts) => {
   printSection(
     '1. Tags used but not declared',
     findUndeclaredTags(signals).map(t => `  - { tag: '${t}', title: '...' }`),
@@ -148,32 +201,38 @@ const report = signals => {
 
   printSection(
     '2. Tags declared more than once',
-    findDuplicatedDeclarations(signals).map(({ tag, count }) => `  - ${ tag } (${ count } times)`),
+    findDuplicatedDeclarations(signals).map(({ tag, count }) => `  - ${tag} (${count} times)`),
   );
 
   printSection(
-    '3. Duplicated features (country + description)',
-    findDuplicatedFeatures(signals).map(({ id, count }) => `  - ${ id } (${ count } times)`),
+    '3. Duplicated features (same country, description AND tags)',
+    findDuplicatedFeatures(signals).map(({ id, count }) => `  - ${id} (${count} times)`),
   );
 
   printSection(
     '4. Duplicated tags within the same feature',
     findTagsRepeatedInFeature(signals).map(
-      ({ feature, tag }) => `  - [${ countryOf(feature) }] ${ feature.description }: '${tag}' appears multiple times`,
+      ({ feature, tag }) => `  - [${countryOf(feature)}] ${feature.description}: '${tag}' appears multiple times`,
     ),
   );
 
-  printSection(
-    '5. Duplicated static icon paths (same country)',
-    findDuplicatedIconPaths(signals).flatMap(({ path, owners }) => [
-      `  - ${ path }`,
-      ...owners.map(o => `      ${ featureId(o) }`),
+  printInformativeSection(
+    '5. Static icon paths shared by several features (same country)',
+    findSharedIconPaths(signals),
+    items => items.flatMap(({ path, owners }) => [
+      `  - ${path}`,
+      ...owners.map(o => `      ${featureId(o)}`),
     ]),
+    'normal for shared accessory icons (plates, caisson shapes, etc.)',
+    opts.verbose,
   );
 
-  printSection(
-    '6. Tags declared but never used (informative)',
-    findUnusedTags(signals).map(t => `  - ${ t }`),
+  printInformativeSection(
+    '6. Tags declared but never used',
+    findUnusedTags(signals),
+    items => items.map(t => `  - ${t}`),
+    'often legitimate: declares more of the OSM schema than this file currently uses',
+    opts.verbose,
   );
 };
 
@@ -181,5 +240,19 @@ const report = signals => {
 // Entry point
 // ---------------------------------------------------------------------------
 
-const signals = yaml.parse(fs.readFileSync(YAML_FILE, 'utf8'));
-report(signals);
+async function main() {
+  const opts = parseArgs(process.argv.slice(2));
+  if (opts.help) { console.log(HELP); return 0; }
+
+  const yamlFile = opts.file ? resolve(opts.file) : DEFAULT_YAML_FILE;
+  if (!fs.existsSync(yamlFile)) {
+    console.error(color.red(`ERROR: YAML file not found: ${yamlFile}`));
+    return 1;
+  }
+
+  const signals = yaml.parse(fs.readFileSync(yamlFile, 'utf8'));
+  report(signals, opts);
+  return 0;
+}
+
+process.exitCode = await main();

@@ -1,16 +1,17 @@
 #!/usr/bin/env node
-// cli.mjs
+// orm.mjs
 // Single entry point for all tools.
 //
 // Usage:
-//   node tools/cli.mjs <command> [args...]
-//   node tools/cli.mjs --help
+//   node tools/orm.mjs <command> [args...]
+//   node tools/orm.mjs --help
 //
 // Commands:
 //   audit      Run audit-svg.mjs
 //   check      Run check-yaml.mjs
 //   optimize   Run optimize-svg.mjs
 //   resize     Run resize-svg.mjs
+//   aspects    Run generate-aspects.mjs
 //
 // Implementation note:
 //   spawnSync is used instead of spawn() or import(). It blocks until the
@@ -30,16 +31,18 @@ const COMMANDS = {
   'check': { file: 'check-yaml.mjs', desc: 'Static analysis of the YAML' },
   'optimize': { file: 'optimize-svg.mjs', desc: 'Text-to-path + SVGO on symbols/fr' },
   'resize': { file: 'resize-svg.mjs', desc: 'Set width/height from viewBox' },
+  'aspects': { file: 'generate-aspects.mjs', desc: 'Generate digit/number overlay SVGs from templates' },
+  'clean-templates': { file: 'clean-templates.mjs', desc: 'Resolve leftover transforms on the aspect templates' },
 };
 
 function printHelp() {
-  console.log('Usage: node tools/cli.mjs <command> [args...]\n');
+  console.log('Usage: node tools/orm.mjs <command> [args...]\n');
   console.log('Commands:');
   for (const [name, { desc }] of Object.entries(COMMANDS)) {
     console.log(`  ${name.padEnd(12)} ${desc}`);
   }
   console.log('\nRun a command with --help for its specific options:');
-  console.log('  node tools/cli.mjs audit --help');
+  console.log('  node tools/orm.mjs audit --help');
 }
 
 const [cmd, ...rest] = process.argv.slice(2);
