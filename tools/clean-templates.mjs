@@ -49,8 +49,9 @@
 // file for the exact rules). optimize-svg.mjs runs the same pass on
 // symbols/fr for the same reason.
 //
-// Templates keep the project's existing plain-LF convention for this
-// folder (distinct from the CRLF used for symbols/fr). Only files that
+// Templates are written with CRLF line endings and a final CRLF, like every
+// other file in the project (the XML parser normalizes line breaks inside
+// the document to LF, so they are converted back). Only files that
 // actually changed are rewritten, with a pristine backup under
 // tools/_backup/aspects-templates/.
 //
@@ -352,7 +353,7 @@ function cleanOne(filePath) {
   tidySvgDocument(doc.documentElement);
 
   const cleaned = new XMLSerializer().serializeToString(doc.documentElement);
-  const content = '<?xml version="1.0" encoding="UTF-8"?>\n' + cleaned + '\n';
+  const content = ('<?xml version="1.0" encoding="UTF-8"?>\n' + cleaned + '\n').replace(/\r?\n/g, '\r\n');
   const changed = content !== original;
 
   return { content, changed, remaining, original };

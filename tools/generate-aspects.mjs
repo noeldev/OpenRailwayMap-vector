@@ -2,11 +2,11 @@
 // generate-aspects.mjs
 //
 // Generates digit/number overlay (or, for a fused-icon family, whole-plate)
-// SVG files from hand-authored template SVGs, driven entirely by a JSON job
-// list (see aspects/spec.json). No per-family script needed: add a job to
-// the JSON and re-run.
+// SVG files and light signal aspect overlays from hand-authored template
+// SVGs, driven entirely by a JSON job list (see aspects/spec.json). No
+// per-family script needed: add a job to the JSON and re-run.
 //
-// Each job runs in one of three modes (job.mode, default "split"):
+// Each job runs in one of five modes (job.mode, default "split"):
 //   split   - the usual case: a shape-only base plus one text-only overlay
 //             file per slot per value, composited together by the renderer.
 //             Handles both a single centered number and several stacked
@@ -26,6 +26,18 @@
 //             element, left-to-right, e.g. a box's per-glyph digit display -
 //             same per-element assignment as "digits" mode, just without
 //             stripping the shape away first).
+//   lights  - for a light signal target (C, F, H, A, K, R, dwarf...):
+//             instead of <text> elements, the template tags each lamp with
+//             class tokens naming the aspects that light it (class="S C"),
+//             and the equipment only some signal types have (class="cache").
+//             Produces an all-unlit base, one layer per aspect, per part
+//             and for the deactivated cross, plus flattened examples for
+//             the YAML exampleIcon. Every signal type drawn on the same
+//             target shares the same files. See runLightsJob().
+//   compose - flattens existing icons from the symbols tree (e.g. a box
+//             and its lettering overlays) into one example file, for the
+//             YAML exampleIcon of a feature whose icon is only a stack of
+//             layers. See runComposeJob().
 //
 // A template's <text> elements are found anywhere in the tree (not just as
 // direct children of <svg>), and a split job assigns them to slots by
@@ -45,11 +57,17 @@
 // identically on its own (see inlineInheritedPresentation()).
 //
 // Usage:
-//   node generate-aspects.mjs [options]
+//   node generate-aspects.mjs (--group <names> | --all) [options]
+//
+// Job selection (one is required):
+//   --group <names>     Comma-separated template groups (first folder of a
+//                        job's template path: signs, boards, boxes, signals)
+//   --all               Every job
 //
 // Options:
 //   --spec <file>       JSON job spec (default: tools/aspects/spec.json)
 //   --templates <dir>   Template root directory (default: tools/aspects/templates)
+//   --symbols <dir>     Icon tree read by "compose" jobs (default: symbols/fr)
 //   --out <dir>         Output root directory
 //                        (default: a fresh folder under the OS temp directory -
 //                        a real symbols/fr tree is only ever touched if --out
@@ -62,7 +80,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { DOMParser, XMLSerializer } from '@xmldom/xmldom';
 
-import { TOOLS_DIR, color } from './lib/shared.mjs';
+import { TOOLS_DIR, DEFAULT_SVG_ROOT, color } from './lib/shared.mjs';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
@@ -70,11 +88,18 @@ const DEFAULT_SPEC = path.join(TOOLS_DIR, 'aspects', 'spec.json');
 const DEFAULT_TEMPLATES_DIR = path.join(TOOLS_DIR, 'aspects', 'templates');
 
 const HELP = `
-Usage: node tools/generate-aspects.mjs [options]
+Usage: node tools/generate-aspects.mjs (--group <names> | --all) [options]
+
+Job selection (one is required):
+  --group <names>     Comma-separated template groups to process, i.e. the
+                      first folder of each job's template path
+                      (signs, boards, boxes, signals)
+  --all               Process every job
 
 Options:
   --spec <file>       JSON job spec (default: ${path.relative(TOOLS_DIR, DEFAULT_SPEC)})
   --templates <dir>   Template root directory (default: ${path.relative(TOOLS_DIR, DEFAULT_TEMPLATES_DIR)})
+  --symbols <dir>     Icon tree read by "compose" jobs (default: ${path.relative(TOOLS_DIR, DEFAULT_SVG_ROOT)})
   --out <dir>         Output root directory (default: a fresh temp folder -
                       pass this explicitly to write into the real symbols/fr tree)
   -h, --help          Show this help
@@ -264,6 +289,15 @@ function inlineInheritedPresentation(textElement, clone, template) {
 // (e.g. "TIV-D_B_{100}", "TIV-D_diamond_{50}_bottom"), but some put the
 // value first instead (e.g. the V vehicle-count signs: "{5}V"), hence this
 // being configurable per job via `job.fileName` rather than hardcoded.
+// Examples (flattened composites used by the YAML exampleIcon) of every
+// mode go to an "examples" folder at the root of the job's output group,
+// e.g. "signs/examples" for base "signs/V_split".
+const exampleDirOf = (job) => path.join((job.base ?? job.layers[0]).split(/[\\/]/)[0], 'examples');
+
+// A job's group is the first folder of its template path (or, for a
+// "compose" job, of its first layer), e.g. "signals" for "signals/C.svg".
+const groupOf = (job) => (job.template ?? job.layers[0]).split(/[\\/]/)[0];
+
 function renderFileName(fileNameTemplate, name, value, slot) {
   return fileNameTemplate
     .replace(/\{name\}/g, name)
@@ -363,7 +397,8 @@ function runSplitJob(job, outRoot) {
   });
 
   // Optional composite example: the base shape plus one overlay per slot,
-  // flattened into a single standalone file - meant for a YAML `example:` /
+  // flattened into a single standalone file, written to the group's
+  // examples folder under the base's own name - meant for a YAML `example:` /
   // `exampleIcon:` reference, which otherwise has no choice but to point at
   // a bare overlay fragment (just the number, no shape) since the live
   // renderer is what normally does the compositing. job.example is a single
@@ -380,7 +415,7 @@ function runSplitJob(job, outRoot) {
       }
       exampleRoot.appendChild(buildOverlayNode(textElement, value));
     });
-    writeSvgFile(path.join(outRoot, `${job.base}_example.svg`), exampleRoot);
+    writeSvgFile(path.join(outRoot, exampleDirOf(job), `${path.basename(job.base)}.svg`), exampleRoot);
     exampleCount = 1;
   }
 
@@ -525,23 +560,291 @@ function runFusedJob(job, outRoot) {
   return count;
 }
 
-function runJob(job, outRoot) {
+// Collects every element under `node` for which `predicate` is true.
+function findElements(node, predicate, out = []) {
+  for (let i = 0; i < node.childNodes.length; i++) {
+    const child = node.childNodes[i];
+    if (child.nodeType !== 1) continue;
+    if (predicate(child)) out.push(child);
+    findElements(child, predicate, out);
+  }
+  return out;
+}
+
+// Removes the class tokens (and comments) from `node`'s whole subtree:
+// they only drive the generator and mean nothing to the renderer.
+function stripTokens(node) {
+  for (let i = node.childNodes.length - 1; i >= 0; i--) {
+    const child = node.childNodes[i];
+    if (child.nodeType === 8) node.removeChild(child);
+    else if (child.nodeType === 1) stripTokens(child);
+  }
+  if (node.nodeType === 1) node.removeAttribute('class');
+}
+
+// Class tokens of an element.
+const tokensOf = (el) => (el.getAttribute('class') || '').split(/\s+/).filter(Boolean);
+
+// Parses "x y w h" into numbers.
+function readViewBox(template) {
+  const parts = (template.getAttribute('viewBox') || '').trim().split(/[\s,]+/).map(Number);
+  if (parts.length !== 4 || parts.some(Number.isNaN)) {
+    throw new Error('template has no valid viewBox');
+  }
+  return { x: parts[0], y: parts[1], w: parts[2], h: parts[3] };
+}
+
+const round = (n) => Math.round(n * 1000) / 1000;
+
+// Creates an <svg> root with an explicit viewBox. Like every other mode,
+// width/height are left to resize-svg.mjs, which derives them from the
+// viewBox, so all layers of a target keep the same scale.
+function createViewBoxRoot(doc, viewBox) {
+  const root = doc.createElementNS(SVG_NS, 'svg');
+  root.setAttribute('viewBox', [viewBox.x, viewBox.y, viewBox.w, viewBox.h].map(round).join(' '));
+  return root;
+}
+
+// Clones `element` (optionally refilled) without its tokens, wrapped in
+// whatever ancestor transforms it had in the template.
+function buildLayerNode(element, template, fill) {
+  const clone = element.cloneNode(true);
+  if (fill) clone.setAttribute('fill', fill);
+  stripTokens(clone);
+  return inlineInheritedPresentation(element, clone, template);
+}
+
+// Builds the deactivated cross (St Andrew's cross): two bars of the given
+// thickness joining the opposite corners of a width x height box centered
+// on (cx, cy) - a square box on the tall targets, a flat one on the dwarf
+// targets, as on the hand-drawn icons.
+function buildCrossPath(doc, { cx, cy, width, height, thickness }) {
+  const w = width / 2;
+  const h = height / 2;
+  const half = (thickness * Math.hypot(w, h)) / 2;
+  const a = half / h;
+  const b = half / w;
+  const points = [
+    [-(w - a), -h], [-w, -(h - b)], [-a, 0], [-w, h - b], [-(w - a), h], [0, b],
+    [w - a, h], [w, h - b], [a, 0], [w, -(h - b)], [w - a, -h], [0, -b],
+  ];
+  const path = doc.createElementNS(SVG_NS, 'path');
+  path.setAttribute('fill', '#fff');
+  path.setAttribute('stroke', '#000');
+  path.setAttribute('stroke-width', '2.5');
+  path.setAttribute('d', 'M' + points.map(([x, y]) => `${round(cx + x)} ${round(cy + y)}`).join('L') + 'Z');
+  return path;
+}
+
+// Smallest viewBox centered on the base's own center that still contains
+// the cross: the renderer composites layers center-on-center, so a layer
+// whose viewBox is not centered like the base would be drawn shifted. Half
+// sizes are snapped up to 5 units so the full size stays on the 10-unit
+// grid shared by every icon (0.25 px at the usual 40 units per pixel).
+function centeredViewBoxContaining(base, { cx, cy, width, height }) {
+  const stroke = 1.25;
+  const snap = (n) => Math.ceil(n / 5) * 5;
+  const centerX = base.x + base.w / 2;
+  const centerY = base.y + base.h / 2;
+  const halfW = Math.max(base.w / 2, snap(Math.abs(cx - centerX) + width / 2 + stroke));
+  const halfH = Math.max(base.h / 2, snap(Math.abs(cy - centerY) + height / 2 + stroke));
+  return { x: centerX - halfW, y: centerY - halfH, w: halfW * 2, h: halfH * 2 };
+}
+
+/**
+ * Runs one "lights" job: splits a light signal target into an unlit base
+ * and stackable layers (see the "lights" mode header comment).
+ *
+ * The template only uses class tokens:
+ *   - a lamp (or a lit-only figure such as the white cross of the
+ *     intermediate signal) lists the aspects that light it, e.g.
+ *     class="S C"; it is drawn unlit in the base and refilled with the
+ *     token color in each aspect layer that uses one of its tokens. The
+ *     sighting light is a lamp like any other (class="O"), so an aspect
+ *     lights it by listing O.
+ *   - equipment only some signal types of the target have (the square
+ *     mask of the white lamp: class="cache") is named in job.parts: it is
+ *     left out of the base and written as its own layer, as drawn.
+ *
+ * @param {object} job
+ * @param {string} job.name          Target name, prefix of every layer file.
+ * @param {string} job.template      Path to the template SVG.
+ * @param {string} job.base          Output path (no extension) of the base.
+ * @param {string} job.overlayDir    Directory the layers are written into.
+ * @param {string[]} [job.parts]     Tokens written as "<name>-<token>"
+ *                                   layers instead of being in the base.
+ * @param {Record<string, string>} job.aspects
+ *                                   Aspect name -> "+"-joined tokens it
+ *                                   lights, e.g. { "R-A": "R+A+O" }; one
+ *                                   layer "<name>-<aspect>" each.
+ * @param {{cx: number, cy: number, width: number, height: number, thickness: number}} [job.deactivated]
+ *                                   Optional "<name>-deactivated" cross
+ *                                   layer, in base coordinates.
+ * @param {string[][]} [job.examples]
+ *                                   Layer lists (part, aspect or
+ *                                   "deactivated") each flattened onto the
+ *                                   base into one standalone file named
+ *                                   "<name>-<layer>..." (parts left out of
+ *                                   the name), in the
+ *                                   group's examples folder, for the YAML
+ *                                   exampleIcon (taginfo, JOSM presets).
+ * @param {Record<string, string>} colors
+ *                                   Spec-wide color of each token.
+ * @param {string} outRoot           Root directory job paths are relative to.
+ */
+function runLightsJob(job, colors, outRoot) {
+  const xml = fs.readFileSync(job.template, 'utf8');
+  const doc = new DOMParser().parseFromString(xml, 'text/xml');
+  const template = doc.documentElement;
+  const viewBox = readViewBox(template);
+
+  const partTokens = job.parts || [];
+  const tokenElements = findElements(template, (el) => tokensOf(el).length > 0);
+  const isPart = (el) => tokensOf(el).some((token) => partTokens.includes(token));
+  const withToken = (token) => tokenElements.filter((el) => tokensOf(el).includes(token));
+
+  const requireToken = (token, usedBy) => {
+    if (withToken(token).length === 0) throw new Error(`${job.template}: ${usedBy} uses token "${token}" but no element has that class`);
+  };
+
+  // Every layer, by name: its nodes (built on demand, since a node can only
+  // be inserted once) and its viewBox.
+  const layers = new Map();
+
+  for (const token of partTokens) {
+    requireToken(token, `part "${token}"`);
+    layers.set(token, { viewBox, build: () => withToken(token).map((el) => buildLayerNode(el, template)) });
+  }
+
+  for (const [name, expression] of Object.entries(job.aspects)) {
+    const tokens = expression.split('+');
+    for (const token of tokens) {
+      if (!colors[token]) throw new Error(`${job.template}: aspect "${name}" uses token "${token}" with no color`);
+      requireToken(token, `aspect "${name}"`);
+    }
+    const litBy = (el) => tokensOf(el).find((token) => tokens.includes(token));
+    layers.set(name, {
+      viewBox,
+      build: () => tokenElements
+        .filter((el) => !isPart(el) && litBy(el))
+        .map((el) => buildLayerNode(el, template, colors[litBy(el)])),
+    });
+  }
+
+  if (job.deactivated) {
+    layers.set('deactivated', {
+      viewBox: centeredViewBoxContaining(viewBox, job.deactivated),
+      build: () => [buildCrossPath(doc, job.deactivated)],
+    });
+  }
+
+  // Base: everything unlit, without the parts.
+  const baseRoot = template.cloneNode(true);
+  findElements(baseRoot, isPart).forEach((el) => el.parentNode.removeChild(el));
+  stripTokens(baseRoot);
+  writeSvgFile(path.join(outRoot, `${job.base}.svg`), baseRoot);
+
+  for (const [name, layer] of layers) {
+    const root = createViewBoxRoot(doc, layer.viewBox);
+    layer.build().forEach((node) => root.appendChild(node));
+    writeSvgFile(path.join(outRoot, job.overlayDir, `${job.name}-${name}.svg`), root);
+  }
+
+  // Examples: every layer shares the base coordinate system (only the
+  // cross layer has a larger, still centered viewBox), so flattening is a
+  // plain concatenation inside the largest viewBox.
+  // An example is named after its aspect (or "deactivated") only: the
+  // parts it shows do not change what it illustrates.
+  const examples = job.examples || [];
+  const names = new Set();
+  for (const layerNames of examples) {
+    const name = [job.name, ...layerNames.filter((layerName) => !partTokens.includes(layerName))].join('-');
+    if (names.has(name)) throw new Error(`${job.template}: two examples are both named "${name}"`);
+    names.add(name);
+    const selected = layerNames.map((layerName) => {
+      const layer = layers.get(layerName);
+      if (!layer) throw new Error(`${job.template}: example "${name}" uses unknown layer "${layerName}"`);
+      return layer;
+    });
+    const largest = selected.reduce((max, layer) => (layer.viewBox.w > max.w ? layer.viewBox : max), viewBox);
+    const root = createViewBoxRoot(doc, largest);
+    const unlit = baseRoot.cloneNode(true);
+    while (unlit.firstChild) root.appendChild(unlit.firstChild);
+    selected.forEach((layer) => layer.build().forEach((node) => root.appendChild(node)));
+    writeSvgFile(path.join(outRoot, exampleDirOf(job), `${name}.svg`), root);
+  }
+
+  console.log(`${job.name} (${path.basename(job.template)}): base + ${layers.size} layer(s) + ${examples.length} example(s)`);
+  return 1 + layers.size + examples.length;
+}
+
+/**
+ * Runs one "compose" job: flattens existing icons into one example file,
+ * each layer centered on the first one, the way the renderer composites
+ * "center" layers.
+ *
+ * @param {object} job
+ * @param {string} job.name          Example file name (no extension), in
+ *                                   the group's examples folder.
+ * @param {string[]} job.layers      Icon paths relative to the symbols
+ *                                   tree, without extension, bottom first.
+ * @param {string} symbolsRoot       Icon tree the layers are read from.
+ * @param {string} outRoot           Root directory job paths are relative to.
+ */
+function runComposeJob(job, symbolsRoot, outRoot) {
+  const layers = job.layers.map((layer) => {
+    const file = path.join(symbolsRoot, `${layer}.svg`);
+    if (!fs.existsSync(file)) throw new Error(`compose "${job.name}": layer not found: ${file}`);
+    const svg = new DOMParser().parseFromString(fs.readFileSync(file, 'utf8'), 'text/xml').documentElement;
+    return { svg, viewBox: readViewBox(svg) };
+  });
+
+  const width = Math.max(...layers.map((layer) => layer.viewBox.w));
+  const height = Math.max(...layers.map((layer) => layer.viewBox.h));
+  const doc = layers[0].svg.ownerDocument;
+  const root = createViewBoxRoot(doc, { x: 0, y: 0, w: width, h: height });
+
+  for (const { svg, viewBox } of layers) {
+    const g = doc.createElementNS(SVG_NS, 'g');
+    const dx = (width - viewBox.w) / 2 - viewBox.x;
+    const dy = (height - viewBox.h) / 2 - viewBox.y;
+    if (dx || dy) g.setAttribute('transform', `translate(${round(dx)} ${round(dy)})`);
+    while (svg.firstChild) g.appendChild(svg.firstChild);
+    root.appendChild(g);
+  }
+
+  writeSvgFile(path.join(outRoot, exampleDirOf(job), `${job.name}.svg`), root);
+  console.log(`${job.name} (compose): ${job.layers.length} layer(s)`);
+  return 1;
+}
+
+function runJob(job, spec, outRoot, symbolsRoot) {
   const mode = job.mode || 'split';
   if (mode === 'split') return runSplitJob(job, outRoot);
   if (mode === 'digits') return runDigitsJob(job, outRoot);
   if (mode === 'fused') return runFusedJob(job, outRoot);
+  if (mode === 'lights') return runLightsJob(job, spec.lightColors, outRoot);
+  if (mode === 'compose') return runComposeJob(job, symbolsRoot, outRoot);
   throw new Error(`Unknown job mode: ${mode}`);
 }
 
 function parseArgs(argv) {
-  const opts = { spec: DEFAULT_SPEC, templates: DEFAULT_TEMPLATES_DIR, out: null };
+  const opts = { spec: DEFAULT_SPEC, templates: DEFAULT_TEMPLATES_DIR, symbols: DEFAULT_SVG_ROOT, out: null, groups: null, all: false };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--spec') opts.spec = argv[++i];
     else if (a === '--templates') opts.templates = argv[++i];
+    else if (a === '--symbols') opts.symbols = argv[++i];
     else if (a === '--out') opts.out = argv[++i];
+    else if (a === '--group') opts.groups = (argv[++i] || '').split(',').map((g) => g.trim()).filter(Boolean);
+    else if (a === '--all') opts.all = true;
     else if (a === '-h' || a === '--help') { console.log(HELP); process.exit(0); }
     else { console.error(color.red(`Unknown option: ${a}`)); console.log(HELP); process.exit(1); }
+  }
+  if (!opts.all && !opts.groups?.length) {
+    console.error(color.red('Specify --group <names> or --all'));
+    console.log(HELP);
+    process.exit(1);
   }
   return opts;
 }
@@ -566,15 +869,26 @@ function main() {
 
   console.log(color.cyan(`Spec      : ${opts.spec}`));
   console.log(color.cyan(`Templates : ${opts.templates}`));
+  console.log(color.cyan(`Symbols   : ${opts.symbols}`));
+  console.log(color.cyan(`Groups    : ${opts.all ? 'all' : opts.groups.join(', ')}`));
   console.log(usingTempOut
     ? color.yellow(`Output    : ${outDir}  (temporary - pass --out <dir> to write elsewhere)`)
     : color.cyan(`Output    : ${outDir}`));
   console.log();
 
   const spec = JSON.parse(fs.readFileSync(opts.spec, 'utf8'));
+  const known = new Set(spec.jobs.map(groupOf));
+  const unknown = (opts.groups || []).filter((g) => !known.has(g));
+  if (unknown.length) {
+    console.error(color.red(`Unknown group(s): ${unknown.join(', ')} (known: ${[...known].join(', ')})`));
+    process.exit(1);
+  }
+  const jobs = opts.all ? spec.jobs : spec.jobs.filter((job) => opts.groups.includes(groupOf(job)));
+
   let total = 0;
-  for (const job of spec.jobs) {
-    total += runJob({ ...job, template: path.join(opts.templates, job.template) }, outDir);
+  for (const job of jobs) {
+    const resolved = job.template ? { ...job, template: path.join(opts.templates, job.template) } : job;
+    total += runJob(resolved, spec, outDir, opts.symbols);
   }
   console.log();
   console.log(color.green(`Total files generated: ${total}`));

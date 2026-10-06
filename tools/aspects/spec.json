@@ -1,6 +1,9 @@
 {
   "_comment": "Each job's 'values' come straight from the matching regex in signals_railway_signals.yaml (see the regex quoted in each job's own _source comment) - this file is the single list of 'which aspects to generate', kept next to the YAML regex it mirrors so the two can be checked against each other by eye. _source comments give only the tag/regex and whatever is specific to that job; the job mode (split/digits/fused) and its base+overlay-vs-fused wiring are already explained once in generate-aspects.mjs.",
 
+  "_lightColors": "Color each class token lights its elements with, shared by every 'lights' job. O is the sighting light (oeilleton) and XF the background of the intermediate signal center lamp: an aspect lights them by listing them.",
+  "lightColors": { "C": "red", "Cv": "#f0f", "S": "red", "M": "#fff", "A": "#ff0", "R": "#ff0", "RR": "#ff0", "VL": "#0f0", "DJ": "#ff0", "DR": "red", "X": "#fff", "XF": "#484c63", "O": "#fff" },
+
   "jobs": [
     {
       "name": "TIV-D_B",
@@ -254,6 +257,267 @@
         "top": [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18 ],
         "bottom": [ 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 ]
       }
+    },
+    {
+      "name": "C",
+      "_source": "Carre, Carre violet and Semaphore on target C - the white lamp mask (cache) is absent on a Carre violet",
+      "mode": "lights",
+      "template": "signals/C.svg",
+      "base": "signals/C",
+      "overlayDir": "signals/aspects",
+      "parts": ["cache"],
+      "aspects": {
+        "C": "C",
+        "Cv": "Cv",
+        "M": "M+O",
+        "S": "S+O",
+        "A": "A+O",
+        "VL": "VL+O"
+      },
+      "deactivated": { "cx": 650, "cy": 750, "width": 1001.29, "height": 1001.29, "thickness": 118.02 },
+      "examples": [ ["cache", "C"], ["Cv"], ["cache", "S"], ["deactivated"] ]
+    },
+    {
+      "name": "F",
+      "_source": "Carre, Carre violet and Semaphore on target F - the white lamp mask (cache) is absent on a Carre violet",
+      "mode": "lights",
+      "template": "signals/F.svg",
+      "base": "signals/F",
+      "overlayDir": "signals/aspects",
+      "parts": ["cache"],
+      "aspects": {
+        "C": "C",
+        "Cv": "Cv",
+        "M": "M+O",
+        "S": "S+O",
+        "A": "A+O",
+        "VL": "VL+O",
+        "R": "R+O",
+        "R-A": "R+A+O"
+      },
+      "deactivated": { "cx": 650, "cy": 740, "width": 1001.29, "height": 1001.29, "thickness": 118.02 },
+      "examples": [ ["cache", "C"], ["Cv"], ["cache", "S"], ["deactivated"] ]
+    },
+    {
+      "name": "H",
+      "_source": "Carre, Carre violet and Semaphore on target H - the white lamp mask (cache) is absent on a Carre violet",
+      "mode": "lights",
+      "template": "signals/H.svg",
+      "base": "signals/H",
+      "overlayDir": "signals/aspects",
+      "parts": ["cache"],
+      "aspects": {
+        "C": "C",
+        "Cv": "Cv",
+        "M": "M+O",
+        "S": "S+O",
+        "A": "A+O",
+        "VL": "VL+O",
+        "R": "R+O",
+        "R-A": "R+A+O",
+        "RR": "RR+O",
+        "RR-A": "RR+A+O"
+      },
+      "deactivated": { "cx": 949.797, "cy": 675.852, "width": 1001.29, "height": 1001.29, "thickness": 118.02 },
+      "examples": [ ["cache", "C"], ["Cv"], ["cache", "S"], ["deactivated"] ]
+    },
+    {
+      "name": "A",
+      "_source": "Carre violet and Semaphore on target A (middle position always masked)",
+      "mode": "lights",
+      "template": "signals/A.svg",
+      "base": "signals/A",
+      "overlayDir": "signals/aspects",
+      "aspects": {
+        "Cv": "Cv",
+        "M": "M",
+        "S": "S",
+        "VL": "VL"
+      },
+      "deactivated": { "cx": 300, "cy": 520, "width": 1001.29, "height": 1001.29, "thickness": 118.02 },
+      "examples": [ ["Cv"], ["deactivated"], ["S"] ]
+    },
+    {
+      "name": "A_BAL",
+      "_source": "Semaphore BAL on target A (states FR:A)",
+      "mode": "lights",
+      "template": "signals/A_BAL.svg",
+      "base": "signals/A_BAL",
+      "overlayDir": "signals/aspects",
+      "aspects": {
+        "S": "S",
+        "A": "A",
+        "VL": "VL"
+      },
+      "examples": [ ["S"] ]
+    },
+    {
+      "name": "K",
+      "_source": "Carre violet and Semaphore on target K",
+      "mode": "lights",
+      "template": "signals/K.svg",
+      "base": "signals/K",
+      "overlayDir": "signals/aspects",
+      "aspects": {
+        "Cv": "Cv",
+        "M": "M",
+        "S": "S",
+        "VL": "VL"
+      },
+      "deactivated": { "cx": 230, "cy": 350, "width": 700.9, "height": 700.9, "thickness": 82.61 },
+      "examples": [ ["Cv"], ["deactivated"], ["S"] ]
+    },
+    {
+      "name": "R",
+      "_source": "Disque and Avertissement (railway:signal:distant)",
+      "mode": "lights",
+      "template": "signals/R.svg",
+      "base": "signals/R",
+      "overlayDir": "signals/aspects",
+      "aspects": {
+        "D": "DJ+DR",
+        "A": "A",
+        "VL": "VL",
+        "R": "R",
+        "R-A": "R+A"
+      },
+      "deactivated": { "cx": 610, "cy": 767.046, "width": 1001.29, "height": 1001.29, "thickness": 118.02 },
+      "examples": [ ["D"], ["deactivated"], ["A"] ]
+    },
+    {
+      "name": "Cn_H",
+      "_source": "Carre nain (horizontal)",
+      "mode": "lights",
+      "template": "signals/Cn_H.svg",
+      "base": "signals/Cn_H",
+      "overlayDir": "signals/aspects",
+      "aspects": {
+        "C": "C",
+        "S": "S+O",
+        "A": "A+O",
+        "VL": "VL+O"
+      },
+      "deactivated": { "cx": 699.5, "cy": 273, "width": 763.3, "height": 474.2, "thickness": 61 },
+      "examples": [ ["C"], ["deactivated"] ]
+    },
+    {
+      "name": "X",
+      "_source": "Signal intermediaire: Cn_H target plus the center lamp, whose white cross is lit by X",
+      "mode": "lights",
+      "template": "signals/X.svg",
+      "base": "signals/X",
+      "overlayDir": "signals/aspects",
+      "aspects": {
+        "X": "X+XF",
+        "C": "C",
+        "S": "S+O",
+        "A": "A+O",
+        "VL": "VL+O"
+      },
+      "deactivated": { "cx": 699.5, "cy": 273, "width": 763.3, "height": 474.2, "thickness": 61 },
+      "examples": [ ["X"], ["deactivated"] ]
+    },
+    {
+      "name": "Cn_V",
+      "_source": "Carre nain (vertical)",
+      "mode": "lights",
+      "template": "signals/Cn_V.svg",
+      "base": "signals/Cn_V",
+      "overlayDir": "signals/aspects",
+      "aspects": {
+        "C": "C",
+        "S": "S+O",
+        "A": "A+O",
+        "VL": "VL+O"
+      },
+      "deactivated": { "cx": 622.5, "cy": 350, "width": 700.14, "height": 420.8, "thickness": 62.6 },
+      "examples": [ ["C"], ["deactivated"] ]
+    },
+    {
+      "name": "Low_H",
+      "_source": "Cv de type bas (horizontal)",
+      "mode": "lights",
+      "template": "signals/Low_H.svg",
+      "base": "signals/Low_H",
+      "overlayDir": "signals/aspects",
+      "aspects": {
+        "Cv": "Cv",
+        "M": "M"
+      },
+      "examples": [ ["Cv"] ]
+    },
+    {
+      "name": "Low_V",
+      "_source": "Cv de type bas (vertical)",
+      "mode": "lights",
+      "template": "signals/Low_V.svg",
+      "base": "signals/Low_V",
+      "overlayDir": "signals/aspects",
+      "aspects": {
+        "Cv": "Cv",
+        "M": "M"
+      },
+      "examples": [ ["Cv"] ]
+    },
+    {
+      "name": "TIP",
+      "_source": "exampleIcon of a lightbox feature whose icon is a stack of layers",
+      "mode": "compose",
+      "layers": ["boxes/double", "boxes/double/TIP_{1}_left", "boxes/double/TIP_{6}_right"]
+    },
+    {
+      "name": "TIDD",
+      "_source": "exampleIcon of a lightbox feature whose icon is a stack of layers",
+      "mode": "compose",
+      "layers": ["boxes/double", "boxes/double/TIDD_left"]
+    },
+    {
+      "name": "TLD",
+      "_source": "exampleIcon of a lightbox feature whose icon is a stack of layers",
+      "mode": "compose",
+      "layers": ["boxes/double", "boxes/double/TLD_{2}_right"]
+    },
+    {
+      "name": "D_G",
+      "_source": "exampleIcon of a lightbox feature whose icon is a stack of layers",
+      "mode": "compose",
+      "layers": ["boxes/double", "boxes/double/D_left", "boxes/double/G_right"]
+    },
+    {
+      "name": "D",
+      "_source": "exampleIcon of a lightbox feature whose icon is a stack of layers",
+      "mode": "compose",
+      "layers": ["boxes/single", "boxes/single/D"]
+    },
+    {
+      "name": "G",
+      "_source": "exampleIcon of a lightbox feature whose icon is a stack of layers",
+      "mode": "compose",
+      "layers": ["boxes/single", "boxes/single/G"]
+    },
+    {
+      "name": "TECS",
+      "_source": "exampleIcon of a lightbox feature whose icon is a stack of layers",
+      "mode": "compose",
+      "layers": ["boxes/single", "boxes/single/TECS"]
+    },
+    {
+      "name": "TSCS",
+      "_source": "exampleIcon of a lightbox feature whose icon is a stack of layers",
+      "mode": "compose",
+      "layers": ["boxes/single", "boxes/single/TSCS"]
+    },
+    {
+      "name": "SAS",
+      "_source": "exampleIcon of a lightbox feature whose icon is a stack of layers",
+      "mode": "compose",
+      "layers": ["boxes/medium", "boxes/medium/SAS"]
+    },
+    {
+      "name": "Imp",
+      "_source": "exampleIcon of a lightbox feature whose icon is a stack of layers",
+      "mode": "compose",
+      "layers": ["boxes/medium", "boxes/medium/Imp"]
     }
   ]
 }

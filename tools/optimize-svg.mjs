@@ -26,6 +26,15 @@
 // tree; see .gitignore in this folder.
 //
 // Run from anywhere: the project root is derived from the script location.
+//
+// Usage:
+//   node tools/optimize-svg.mjs --subdir signals   # one family, recursively
+//   node tools/optimize-svg.mjs --all              # the whole symbols/fr tree
+//
+// One of --subdir or --all is required: the tool rewrites files in place,
+// so it never runs on a default target. Backups follow the same layout as
+// resize-svg.mjs: tools/_backup/<subdir>/ for a --subdir run, plain
+// tools/_backup/ (mirroring the full symbols/fr layout) for --all.
 
 import { spawn } from 'node:child_process';
 import { mkdir, copyFile, readFile, stat, writeFile } from 'node:fs/promises';
@@ -44,6 +53,31 @@ import {
 import { tidySvgDocument } from './lib/svg-tidy.mjs';
 
 const BACKUP_DIR_NAME = '_backup';
+
+const HELP = `
+Usage: node tools/optimize-svg.mjs (--subdir <name> | --all)
+
+Options:
+  --subdir <name>    Subfolder under symbols/fr to process, recursively
+  --all              Process the whole symbols/fr tree
+  -h, --help         Show this help
+
+One of --subdir or --all is required: files are rewritten in place.
+`;
+
+function parseArgs(argv) {
+  const opts = { subdir: null, all: false, help: false };
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (a === '--all') opts.all = true;
+    else if (a === '--subdir') opts.subdir = argv[++i];
+    else if (a === '-h' || a === '--help') opts.help = true;
+    else throw new Error(`Unknown option: ${a}`);
+  }
+  if (opts.all && opts.subdir) throw new Error('--all and --subdir are mutually exclusive');
+  if (!opts.help && !opts.all && !opts.subdir) throw new Error('one of --subdir <name> or --all is required');
+  return opts;
+}
 
 // Safety cap on Phase 1 retry passes: Inkscape's crashes are transient, but a
 // file that still has text after this many attempts is failing for a real
@@ -273,8 +307,18 @@ async function runSvgoBatch(files, targetDir, backupDir) {
 // ---------- main ----------
 
 async function main() {
-  const targetDir = DEFAULT_SVG_ROOT;
-  const backupDir = join(TOOLS_DIR, BACKUP_DIR_NAME);
+  let opts;
+  try {
+    opts = parseArgs(process.argv.slice(2));
+  } catch (err) {
+    console.error(color.red(`ERROR: ${err.message}`));
+    console.log(HELP);
+    return 1;
+  }
+  if (opts.help) { console.log(HELP); return 0; }
+
+  const targetDir = opts.all ? DEFAULT_SVG_ROOT : join(DEFAULT_SVG_ROOT, opts.subdir);
+  const backupDir = opts.all ? join(TOOLS_DIR, BACKUP_DIR_NAME) : join(TOOLS_DIR, BACKUP_DIR_NAME, opts.subdir);
 
   if (!existsSync(targetDir)) {
     console.error(color.red(`ERROR: target directory not found: ${targetDir}`));
@@ -282,7 +326,7 @@ async function main() {
   }
 
   console.log(color.cyan(`Project root  : ${PROJECT_ROOT}`));
-  console.log(color.cyan(`Target folder : ${targetDir}`));
+  console.log(color.cyan(`Target folder : ${targetDir}${opts.all ? ' (--all, recursive)' : ''}`));
   console.log();
 
   if (!existsSync(backupDir)) {

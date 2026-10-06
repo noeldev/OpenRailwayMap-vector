@@ -3,7 +3,8 @@
 Command-line tools supporting the ORM-vector icon set: auditing generated
 SVGs, static-checking the YAML, preparing icons for the sprite build,
 setting width/height from each icon's viewBox, and generating the
-digit/number overlay SVGs used by the speed/length/vehicle-count plates.
+digit/number overlay SVGs used by the speed/length/vehicle-count plates and
+the layered light signal icons.
 
 ## Requirements
 
@@ -27,7 +28,7 @@ node tools/orm.mjs --help
 | `check`    | `check-yaml.mjs`      | Static analysis of `signals_railway_signals.yaml`     |
 | `optimize` | `optimize-svg.mjs`    | Text-to-path (Inkscape) + SVGO on `symbols/fr`        |
 | `resize`   | `resize-svg.mjs`      | Set width/height from viewBox                         |
-| `aspects`  | `generate-aspects.mjs`| Generate digit/number overlay SVGs from templates     |
+| `aspects`  | `generate-aspects.mjs`| Generate overlay SVGs (numbers, signal aspects) from templates |
 | `clean-templates` | `clean-templates.mjs` | Resolve leftover transforms on the aspect templates   |
 
 Each command can also be run directly (`node tools/audit-svg.mjs ...`);
@@ -63,13 +64,17 @@ pass `--verbose` to see the full listing.
 ### optimize
 
 ```
-node tools/orm.mjs optimize
+node tools/orm.mjs optimize --subdir signals     # one family, recursively
+node tools/orm.mjs optimize --all                # the whole symbols/fr tree
+node tools/orm.mjs optimize --help
 ```
 
-Always targets `symbols/fr`. Runs the same tidy pass as `clean-templates`
-(see below), then Inkscape text-to-path conversion (retried up to 5 passes
-on files that still contain text), then SVGO. A pristine copy of every file
-it touches is saved once to `tools/_backup/` before the first modification.
+One of `--subdir` or `--all` is required, since files are rewritten in
+place. Runs the same tidy pass as `clean-templates` (see below), then
+Inkscape text-to-path conversion (retried up to 5 passes on files that
+still contain text), then SVGO. A pristine copy of every file it touches is
+saved once before the first modification, with the same layout as `resize`:
+`tools/_backup/<subdir>/` for a `--subdir` run, `tools/_backup/` for `--all`.
 
 ### resize
 
@@ -119,7 +124,12 @@ tools/aspects/
   templates/
     signs/*.svg        # hand-drawn templates, one per plate/board family
     boards/*.svg
+    boxes/*.svg
+    signals/*.svg      # light signal targets (C, F, H, A, K, R, dwarf...)
 ```
+
+The first folder of a job's template path is its *group* (`signs`,
+`boards`, `boxes`, `signals`), used to select which jobs to run.
 
 A template is a normal SVG containing the plate's shape plus one or more
 placeholder `<text>` elements (whatever value they currently show is
@@ -128,13 +138,15 @@ irrelevant - it's replaced for every generated file).
 #### What a job does
 
 `spec.json` is `{ "jobs": [...] }`. Each job names one template and the set
-of values to render it with. A job runs in one of three modes:
+of values to render it with. A job runs in one of five modes:
 
 | Mode (`job.mode`) | Produces | Used for |
 |---|---|---|
 | `split` (default) | one shape-only base file, plus one text-only overlay file per value (per slot, if more than one) | the usual case: speed/length plates whose shape and number are separate, composited layers |
 | `digits` | one shape-only base, plus one overlay per value with *all* its digits set at once | a template that spells a number out as several separately-positioned `<text>` elements instead of one multi-character tspan, for a family that still needs the shape/number split (base+overlay) |
 | `fused` | one self-contained file per value (shape + number together), plus an optional shape-only "empty"/placeholder base | a family whose YAML icon has only one state, so a separate base+overlay pair would be pointless (e.g. the `L...` train-length plates, `TIV-D_B`, the pentagonal TIV signs). Works with a single `<text>` element (whole value as one string) or several (one digit per element, left-to-right by x position, same per-element assignment as `digits` mode - e.g. the SNCF-Lightbox box digit displays) - the difference from `digits` is that the shape is never stripped out, so each value's file is complete and self-contained |
+| `lights` | one all-unlit base, one layer per aspect, per optional part and for the deactivated cross, plus flattened examples | light signal targets: every signal type drawn on the same target (Carre, Carre violet, Semaphore...) shares the same base and layers. See "Light signal targets" below |
+| `compose` | one example file flattening existing icons of the symbols tree (`--symbols`, default `symbols/fr`), each layer centered on the first | the `exampleIcon` of a feature whose icon is only a stack of layers (e.g. a lightbox and its lettering): `{ "name", "mode": "compose", "layers": [ "boxes/double", "boxes/double/D_left", ... ] }` |
 
 Job fields:
 
@@ -149,7 +161,7 @@ Job fields:
 | `slots` | split only, optional | Slot names, **top-to-bottom** (text elements are matched to slots by vertical position in the template, not document order). Defaults to `["centered"]` for a single `<text>`, or `["slot0", "slot1", ...]` |
 | `fileName` | optional | Filename template; see below. Defaults to `"{name}_{v}"` (centered) or `"{name}_{v}_{slot}"` (slotted) |
 | `displayDivisor` | split/fused, optional | When set, the text shows `floor(value / displayDivisor)` while the filename still uses the raw value (e.g. a pentagonal sign named `..._{30}.svg` that only ever displays the tens digit, "3") |
-| `example` | split only, optional | Generates one extra composite file, `${base}_example.svg`: the base shape with each slot's overlay baked in, for use as a YAML `exampleIcon:`. A single value for a one-slot job, or `{ slotName: value, ... }` for a multi-slot job (see below) |
+| `example` | split only, optional | Generates one extra composite file, `<group>/examples/<base name>.svg`: the base shape with each slot's overlay baked in, for use as a YAML `exampleIcon:`. A single value for a one-slot job, or `{ slotName: value, ... }` for a multi-slot job (see below) |
 
 A `fused` job's `base` and a `split`/`digits` job's `example` are both
 optional convenience outputs, not required by the mode itself - most jobs in
@@ -165,12 +177,53 @@ convention the renderer expects), `{slot}` (slot name). Most families use
 the value-last default (`TIV-D_B_{100}`), but some put it first instead
 (`fileName: "{v}{name}"` for the V signs: `{5}V`).
 
-#### Composite examples (`job.example`)
+#### Light signal targets (`mode: "lights"`)
+
+A `lights` template has no `<text>`; its elements carry class tokens
+instead, and nothing else:
+
+| Class | Meaning |
+|---|---|
+| aspect tokens, e.g. `class="S C"` | a lamp (or a lit-only figure such as the white cross of the intermediate signal), drawn unlit in the base; the tokens are the aspects that light it, and each aspect layer redraws it in that token's color. The sighting light is a lamp like any other: `class="O"` |
+| a token listed in the job's `parts`, e.g. `class="cache"` | equipment only some signal types of the target have (the mask on the white lamp of a Carre or Semaphore, absent on a Carre violet): left out of the base and written as its own `<target>-<token>` layer, as drawn |
+
+The spec-wide `lightColors` object gives the color of each token.
+
+Job fields (besides `name`, `template`, `base`, `overlayDir`):
+
+| Field | Required | Meaning |
+|---|---|---|
+| `aspects` | yes | `{ "<aspect>": "<token>+<token>" }`, one layer `<name>-<aspect>.svg` each, e.g. `"R-A": "R+A+O"`, `"D": "DJ+DR"`. List `O` in every aspect that lights the sighting light |
+| `parts` | optional | Tokens written as separate layers instead of being in the base |
+| `deactivated` | optional | `{ cx, cy, width, height, thickness }`: layer `<name>-deactivated.svg` holding the St Andrew's cross, in base coordinates (square box on the tall targets, flat on the dwarf ones). Its viewBox is grown symmetrically around the base center, since the renderer composites layers center-on-center |
+| `examples` | optional | `[ [ "<layer>", ... ], ... ]`: each list of layers (parts, aspects, `deactivated`) is flattened onto the base into one standalone file `<group>/examples/<name>-<aspect>.svg` (parts are drawn but left out of the name, e.g. `[ "cache", "C" ]` gives `C-C`), used as the YAML `exampleIcon` (taginfo and the JOSM presets need a single SVG). Features illustrated the same way share one example |
+
+Like the other modes, no width/height is written: `resize` sets them from
+the viewBox, so every layer keeps the same scale. The YAML stacks the
+layers, base first:
+
+```yaml
+exampleIcon: 'fr/signals/examples/C-C'
+icon:
+  - default: 'fr/signals/C'                    # unlit base, always first
+  - default: 'fr/signals/aspects/C-cache'      # Carre and Semaphore only
+  - match: 'railway:signal:main:states'
+    cases:
+      - { any: [ 'FR:A', 'FR:(A)' ], value: 'fr/signals/aspects/C-A' }
+    default: 'fr/signals/aspects/C-C'
+```
+
+#### Composite examples
+
+Every flattened example, whatever the mode, is written to an `examples`
+folder at the root of its group (`signs/examples`, `boards/examples`,
+`signals/examples`...), so examples never mix with the icons the renderer
+composites.
 
 A plate built from a separate base + overlay pair has no single file that
 shows "what does this whole thing look like" - which is what a YAML
 `exampleIcon:` needs. Setting `job.example` on a `split` job generates one
-extra file, `${base}_example.svg`, with the chosen value's overlay(s)
+extra file, `<group>/examples/<base name>.svg`, with the chosen value's overlay(s)
 already composited onto the base:
 
 ```json
@@ -193,28 +246,34 @@ configuration needed.
 #### Running it
 
 ```
-node tools/orm.mjs aspects
+node tools/orm.mjs aspects --all
+node tools/orm.mjs aspects --group signals
+node tools/orm.mjs aspects --group signs,boards
 ```
+
+One of `--group` or `--all` is required, so a commit touching one family
+only regenerates that family.
 
 With no `--out`, nothing in the project is touched: output goes to a fresh
 temp folder (printed at the top of the run) so you can review the result
 before it goes anywhere near `symbols/fr`. Once you're happy with it:
 
 ```
-node tools/orm.mjs aspects --out symbols/fr
+node tools/orm.mjs aspects --group signals --out symbols/fr
 ```
 
 This writes straight into the real icon tree, overwriting any existing file
 at the same path. Useful options:
 
 ```
-node tools/orm.mjs aspects --spec tools/aspects/spec.json      # default
-node tools/orm.mjs aspects --templates tools/aspects/templates # default
-node tools/orm.mjs aspects --out symbols/fr
+node tools/orm.mjs aspects --all --spec tools/aspects/spec.json      # default spec
+node tools/orm.mjs aspects --all --templates tools/aspects/templates # default templates
+node tools/orm.mjs aspects --all --symbols symbols/fr                # default icon tree (compose jobs)
+node tools/orm.mjs aspects --all --out symbols/fr
 node tools/orm.mjs aspects -h
 ```
 
-Re-running regenerates *every* job's files from the current templates - it's
+Re-running regenerates every selected job's files from the current templates - it's
 meant to be re-run as a whole after touching a template, not patched by
 hand. If a template changed shape but not text layout, this is also the
 simplest way to propagate that change to all its generated values at once.
@@ -241,9 +300,8 @@ drawn and are meant to be checked by hand, the same ones `audit` flags.
 
 Run this once after drawing or editing a template, before `aspects`.
 Backs up each file it changes to `tools/_backup/aspects-templates/` first,
-same convention as `optimize`; pass `--no-backup` to skip it. Unlike
-generated output, templates keep the project's existing plain-LF
-convention - they are a tool input, not a delivered icon.
+same convention as `optimize`; pass `--no-backup` to skip it. Templates
+are written with CRLF line endings, like every other file.
 
 #### Adding a new family
 
@@ -254,7 +312,7 @@ convention - they are a tool input, not a delivered icon.
    to the job documenting which YAML regex/tag it corresponds to is not
    required by the script but keeps the two in sync by eye - every existing
    job has one.
-3. Run `node tools/orm.mjs aspects` (no `--out`) and check the files in the
+3. Run `node tools/orm.mjs aspects --group <group>` (no `--out`) and check the files in the
    temp folder.
 4. Re-run with `--out symbols/fr` once satisfied.
 

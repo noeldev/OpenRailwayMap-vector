@@ -31,7 +31,7 @@ const COMMANDS = {
   'check': { file: 'check-yaml.mjs', desc: 'Static analysis of the YAML' },
   'optimize': { file: 'optimize-svg.mjs', desc: 'Text-to-path + SVGO on symbols/fr' },
   'resize': { file: 'resize-svg.mjs', desc: 'Set width/height from viewBox' },
-  'aspects': { file: 'generate-aspects.mjs', desc: 'Generate digit/number overlay SVGs from templates' },
+  'aspects': { file: 'generate-aspects.mjs', desc: 'Generate overlay SVGs (numbers, signal aspects) from templates' },
   'clean-templates': { file: 'clean-templates.mjs', desc: 'Resolve leftover transforms on the aspect templates' },
 };
 
