@@ -5110,7 +5110,7 @@ features:
 
   # Bande Jaune
 
-  - description: Illuminated Yellow Band
+  - description: Yellow Light Band
     country: FR
     icon: [ default: 'fr/signals/yellow_light_band' ]
     tags:
@@ -6535,7 +6535,7 @@ features:
       - match: 'railway:signal:speed_limit_distant:switchable:speed'
         cases:
           - { regex: '^([6-9]|1[0-6])0$', value: 'fr/signs/TIV/TIV-D_diamond_{}', example: 'fr/signs/TIV/TIV-D_diamond_{80}' }
-        default: 'fr/signs/TIV-D_diamond'
+        default: 'fr/signs/TIV-D_diamond_switchable'
     tags:
       - { tag: 'railway:signal:speed_limit_distant', value: 'FR:speed_indicator' }
       - { tag: 'railway:signal:speed_limit_distant:switchable', value: 'FR:TIV-D' }
