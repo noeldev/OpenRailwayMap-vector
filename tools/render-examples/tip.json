@@ -1,0 +1,5 @@
+{
+  "TIP sans voie": { "railway:signal:minor": "FR:TIP", "railway:signal:minor:form": "light" },
+  "TIP 5": { "railway:signal:minor": "FR:TIP", "railway:signal:minor:form": "light", "railway:signal:minor:caption": "5" },
+  "TIP 16": { "railway:signal:minor": "FR:TIP", "railway:signal:minor:form": "light", "railway:signal:minor:caption": "16" }
+}

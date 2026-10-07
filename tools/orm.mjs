@@ -12,6 +12,7 @@
 //   optimize   Run optimize-svg.mjs
 //   resize     Run resize-svg.mjs
 //   aspects    Run generate-aspects.mjs
+//   render     Run render-node.mjs
 //
 // Implementation note:
 //   spawnSync is used instead of spawn() or import(). It blocks until the
@@ -33,6 +34,7 @@ const COMMANDS = {
   'resize': { file: 'resize-svg.mjs', desc: 'Set width/height from viewBox' },
   'aspects': { file: 'generate-aspects.mjs', desc: 'Generate overlay SVGs (numbers, signal aspects) from templates' },
   'clean-templates': { file: 'clean-templates.mjs', desc: 'Resolve leftover transforms on the aspect templates' },
+  'render': { file: 'render-node.mjs', desc: 'Render OSM nodes or tag sets as SVG/PNG (map layout)' },
 };
 
 function printHelp() {

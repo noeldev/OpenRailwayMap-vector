@@ -26,14 +26,10 @@
 //             element, left-to-right, e.g. a box's per-glyph digit display -
 //             same per-element assignment as "digits" mode, just without
 //             stripping the shape away first).
-//   lights  - for a light signal target (C, F, H, A, K, R, dwarf...):
-//             instead of <text> elements, the template tags each lamp with
-//             class tokens naming the aspects that light it (class="S C"),
-//             and the equipment only some signal types have (class="cache").
-//             Produces an all-unlit base, one layer per aspect, per part
-//             and for the deactivated cross, plus flattened examples for
-//             the YAML exampleIcon. Every signal type drawn on the same
-//             target shares the same files. See runLightsJob().
+//   lights  - light signal target: the template tags its lamps with class
+//             tokens (the aspects lighting them); produces an unlit base,
+//             one layer per aspect and part, plus flattened examples
+//             (optionally with a deactivated cross). See runLightsJob().
 //   compose - flattens existing icons from the symbols tree (e.g. a box
 //             and its lettering overlays) into one example file, for the
 //             YAML exampleIcon of a feature whose icon is only a stack of
@@ -614,16 +610,15 @@ function buildLayerNode(element, template, fill) {
   return inlineInheritedPresentation(element, clone, template);
 }
 
-// Builds the deactivated cross (St Andrew's cross): two bars of the given
-// thickness joining the opposite corners of a width x height box centered
-// on (cx, cy) - a square box on the tall targets, a flat one on the dwarf
-// targets, as on the hand-drawn icons.
+// St Andrew's cross of a deactivated signal: two bars joining the corners of
+// a width x height box centered on (cx, cy). Offsets are rounded to whole
+// units, so the points stay on integer (or half, for a .5 center) values.
 function buildCrossPath(doc, { cx, cy, width, height, thickness }) {
-  const w = width / 2;
-  const h = height / 2;
+  const w = Math.round(width / 2);
+  const h = Math.round(height / 2);
   const half = (thickness * Math.hypot(w, h)) / 2;
-  const a = half / h;
-  const b = half / w;
+  const a = Math.round(half / h);
+  const b = Math.round(half / w);
   const points = [
     [-(w - a), -h], [-w, -(h - b)], [-a, 0], [-w, h - b], [-(w - a), h], [0, b],
     [w - a, h], [w, h - b], [a, 0], [w, -(h - b)], [w - a, -h], [0, -b],
@@ -632,15 +627,13 @@ function buildCrossPath(doc, { cx, cy, width, height, thickness }) {
   path.setAttribute('fill', '#fff');
   path.setAttribute('stroke', '#000');
   path.setAttribute('stroke-width', '2.5');
-  path.setAttribute('d', 'M' + points.map(([x, y]) => `${round(cx + x)} ${round(cy + y)}`).join('L') + 'Z');
+  path.setAttribute('d', 'M' + points.map(([x, y]) => `${cx + x} ${cy + y}`).join('L') + 'Z');
   return path;
 }
 
-// Smallest viewBox centered on the base's own center that still contains
-// the cross: the renderer composites layers center-on-center, so a layer
-// whose viewBox is not centered like the base would be drawn shifted. Half
-// sizes are snapped up to 5 units so the full size stays on the 10-unit
-// grid shared by every icon (0.25 px at the usual 40 units per pixel).
+// Smallest viewBox containing the cross and centered like the base, since
+// the renderer composites layers center-on-center. Half sizes snap up to 5
+// units, keeping the size on the 10-unit icon grid.
 function centeredViewBoxContaining(base, { cx, cy, width, height }) {
   const stroke = 1.25;
   const snap = (n) => Math.ceil(n / 5) * 5;
@@ -651,48 +644,44 @@ function centeredViewBoxContaining(base, { cx, cy, width, height }) {
   return { x: centerX - halfW, y: centerY - halfH, w: halfW * 2, h: halfH * 2 };
 }
 
+// Lit color of a token for one element: either a plain color, or a color
+// per element name when one token lights several shapes differently.
+function litColor(colors, token, el) {
+  const color = colors[token];
+  return typeof color === 'string' ? color : color?.[el.localName];
+}
+
+// Example-only layer name drawing the job's deactivated cross.
+const DEACTIVATED_LAYER = 'deactivated';
+
 /**
- * Runs one "lights" job: splits a light signal target into an unlit base
- * and stackable layers (see the "lights" mode header comment).
+ * Runs one "lights" job: an unlit base plus stackable layers.
  *
- * The template only uses class tokens:
- *   - a lamp (or a lit-only figure such as the white cross of the
- *     intermediate signal) lists the aspects that light it, e.g.
- *     class="S C"; it is drawn unlit in the base and refilled with the
- *     token color in each aspect layer that uses one of its tokens. The
- *     sighting light is a lamp like any other (class="O"), so an aspect
- *     lights it by listing O.
- *   - equipment only some signal types of the target have (the square
- *     mask of the white lamp: class="cache") is named in job.parts: it is
- *     left out of the base and written as its own layer, as drawn.
+ * Template elements carry class tokens: the aspects that light them
+ * (class="S C"), the clearing light token, or a part token (job.parts)
+ * for equipment only some signal types have, written as its own layer.
  *
  * @param {object} job
  * @param {string} job.name          Target name, prefix of every layer file.
- * @param {string} job.template      Path to the template SVG.
- * @param {string} job.base          Output path (no extension) of the base.
- * @param {string} job.overlayDir    Directory the layers are written into.
- * @param {string[]} [job.parts]     Tokens written as "<name>-<token>"
- *                                   layers instead of being in the base.
+ * @param {string} job.template      Template SVG path.
+ * @param {string} job.base          Base output path (no extension).
+ * @param {string} job.overlayDir    Layer output directory.
+ * @param {string[]} [job.parts]     Tokens written as "<name>-<token>" layers.
  * @param {Record<string, string>} job.aspects
- *                                   Aspect name -> "+"-joined tokens it
- *                                   lights, e.g. { "R-A": "R+A+O" }; one
- *                                   layer "<name>-<aspect>" each.
+ *                                   Aspect name -> "+"-joined tokens.
  * @param {{cx: number, cy: number, width: number, height: number, thickness: number}} [job.deactivated]
- *                                   Optional "<name>-deactivated" cross
- *                                   layer, in base coordinates.
+ *                                   Cross drawn by the "deactivated" example
+ *                                   layer (no file: the map overlays its own
+ *                                   cross, the example is for exampleIcon).
  * @param {string[][]} [job.examples]
- *                                   Layer lists (part, aspect or
- *                                   "deactivated") each flattened onto the
- *                                   base into one standalone file named
- *                                   "<name>-<layer>..." (parts left out of
- *                                   the name), in the
- *                                   group's examples folder, for the YAML
- *                                   exampleIcon (taginfo, JOSM presets).
- * @param {Record<string, string>} colors
- *                                   Spec-wide color of each token.
- * @param {string} outRoot           Root directory job paths are relative to.
+ *                                   Layer lists flattened onto the base, named
+ *                                   "<name>-<layer>..." (parts not named).
+ * @param {object} spec              Spec root: lightColors, clearingLight.
+ * @param {string} outRoot           Output root directory.
  */
-function runLightsJob(job, colors, outRoot) {
+function runLightsJob(job, spec, outRoot) {
+  const colors = spec.lightColors;
+  const clearing = spec.clearingLight;
   const xml = fs.readFileSync(job.template, 'utf8');
   const doc = new DOMParser().parseFromString(xml, 'text/xml');
   const template = doc.documentElement;
@@ -702,40 +691,37 @@ function runLightsJob(job, colors, outRoot) {
   const tokenElements = findElements(template, (el) => tokensOf(el).length > 0);
   const isPart = (el) => tokensOf(el).some((token) => partTokens.includes(token));
   const withToken = (token) => tokenElements.filter((el) => tokensOf(el).includes(token));
+  const clearingElements = withToken(clearing.token);
 
   const requireToken = (token, usedBy) => {
     if (withToken(token).length === 0) throw new Error(`${job.template}: ${usedBy} uses token "${token}" but no element has that class`);
   };
 
-  // Every layer, by name: its nodes (built on demand, since a node can only
-  // be inserted once) and its viewBox.
+  // Layer builders by name: nodes are built on demand, since a node can
+  // only be inserted once. Every layer shares the template viewBox.
   const layers = new Map();
 
   for (const token of partTokens) {
     requireToken(token, `part "${token}"`);
-    layers.set(token, { viewBox, build: () => withToken(token).map((el) => buildLayerNode(el, template)) });
+    layers.set(token, () => withToken(token).map((el) => buildLayerNode(el, template)));
   }
 
   for (const [name, expression] of Object.entries(job.aspects)) {
     const tokens = expression.split('+');
     for (const token of tokens) {
-      if (!colors[token]) throw new Error(`${job.template}: aspect "${name}" uses token "${token}" with no color`);
       requireToken(token, `aspect "${name}"`);
+      for (const el of withToken(token)) {
+        if (!litColor(colors, token, el)) throw new Error(`${job.template}: no color for token "${token}" on <${el.localName}>`);
+      }
     }
     const litBy = (el) => tokensOf(el).find((token) => tokens.includes(token));
-    layers.set(name, {
-      viewBox,
-      build: () => tokenElements
+    const clearingLit = !tokens.some((token) => clearing.offWith.includes(token));
+    layers.set(name, () => [
+      ...tokenElements
         .filter((el) => !isPart(el) && litBy(el))
-        .map((el) => buildLayerNode(el, template, colors[litBy(el)])),
-    });
-  }
-
-  if (job.deactivated) {
-    layers.set('deactivated', {
-      viewBox: centeredViewBoxContaining(viewBox, job.deactivated),
-      build: () => [buildCrossPath(doc, job.deactivated)],
-    });
+        .map((el) => buildLayerNode(el, template, litColor(colors, litBy(el), el))),
+      ...(clearingLit ? clearingElements.map((el) => buildLayerNode(el, template, clearing.color)) : []),
+    ]);
   }
 
   // Base: everything unlit, without the parts.
@@ -744,33 +730,32 @@ function runLightsJob(job, colors, outRoot) {
   stripTokens(baseRoot);
   writeSvgFile(path.join(outRoot, `${job.base}.svg`), baseRoot);
 
-  for (const [name, layer] of layers) {
-    const root = createViewBoxRoot(doc, layer.viewBox);
-    layer.build().forEach((node) => root.appendChild(node));
+  for (const [name, build] of layers) {
+    const root = createViewBoxRoot(doc, viewBox);
+    build().forEach((node) => root.appendChild(node));
     writeSvgFile(path.join(outRoot, job.overlayDir, `${job.name}-${name}.svg`), root);
   }
 
-  // Examples: every layer shares the base coordinate system (only the
-  // cross layer has a larger, still centered viewBox), so flattening is a
-  // plain concatenation inside the largest viewBox.
-  // An example is named after its aspect (or "deactivated") only: the
-  // parts it shows do not change what it illustrates.
+  // Examples: all layers share the base coordinates, so flattening is a
+  // concatenation.
   const examples = job.examples || [];
   const names = new Set();
   for (const layerNames of examples) {
     const name = [job.name, ...layerNames.filter((layerName) => !partTokens.includes(layerName))].join('-');
     if (names.has(name)) throw new Error(`${job.template}: two examples are both named "${name}"`);
     names.add(name);
-    const selected = layerNames.map((layerName) => {
+    const withCross = layerNames.includes(DEACTIVATED_LAYER);
+    if (withCross && !job.deactivated) throw new Error(`${job.template}: example "${name}" needs job.deactivated`);
+    const selected = layerNames.filter((layerName) => layerName !== DEACTIVATED_LAYER).map((layerName) => {
       const layer = layers.get(layerName);
       if (!layer) throw new Error(`${job.template}: example "${name}" uses unknown layer "${layerName}"`);
       return layer;
     });
-    const largest = selected.reduce((max, layer) => (layer.viewBox.w > max.w ? layer.viewBox : max), viewBox);
-    const root = createViewBoxRoot(doc, largest);
+    if (withCross) selected.push(() => [buildCrossPath(doc, job.deactivated)]);
+    const root = createViewBoxRoot(doc, withCross ? centeredViewBoxContaining(viewBox, job.deactivated) : viewBox);
     const unlit = baseRoot.cloneNode(true);
     while (unlit.firstChild) root.appendChild(unlit.firstChild);
-    selected.forEach((layer) => layer.build().forEach((node) => root.appendChild(node)));
+    selected.forEach((build) => build().forEach((node) => root.appendChild(node)));
     writeSvgFile(path.join(outRoot, exampleDirOf(job), `${name}.svg`), root);
   }
 
@@ -823,7 +808,7 @@ function runJob(job, spec, outRoot, symbolsRoot) {
   if (mode === 'split') return runSplitJob(job, outRoot);
   if (mode === 'digits') return runDigitsJob(job, outRoot);
   if (mode === 'fused') return runFusedJob(job, outRoot);
-  if (mode === 'lights') return runLightsJob(job, spec.lightColors, outRoot);
+  if (mode === 'lights') return runLightsJob(job, spec, outRoot);
   if (mode === 'compose') return runComposeJob(job, symbolsRoot, outRoot);
   throw new Error(`Unknown job mode: ${mode}`);
 }

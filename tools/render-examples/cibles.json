@@ -1,0 +1,9 @@
+{
+  "C + bande jaune": { "railway:signal:main": "FR:C", "railway:signal:main:form": "light", "railway:signal:main:shape": "FR:C", "railway:signal:main:states": "FR:C;FR:(A);FR:VL", "railway:signal:short_route": "FR:yellow_band", "railway:signal:short_route:form": "light" },
+  "F BM": { "railway:signal:main": "FR:C", "railway:signal:main:form": "light", "railway:signal:main:shape": "FR:F", "railway:signal:main:type": "FR:BM", "railway:signal:main:states": "FR:VL" },
+  "H": { "railway:signal:main": "FR:C", "railway:signal:main:form": "light", "railway:signal:main:shape": "FR:H", "railway:signal:main:states": "FR:C" },
+  "Cn": { "railway:signal:main": "FR:C", "railway:signal:main:form": "light", "railway:signal:main:height": "dwarf", "railway:signal:main:states": "FR:(S)" },
+  "Cn_V": { "railway:signal:main": "FR:C", "railway:signal:main:form": "light", "railway:signal:main:height": "dwarf", "railway:signal:main:arrangement": "vertical", "railway:signal:main:states": "FR:VL" },
+  "X": { "railway:signal:main": "FR:C", "railway:signal:main:form": "light", "railway:signal:main:function": "intermediate", "railway:signal:main:states": "FR:X" },
+  "C annule (croix ORM)": { "railway:signal:main": "FR:C", "railway:signal:main:form": "light", "railway:signal:main:shape": "FR:C", "railway:signal:main:deactivated": "yes" }
+}

@@ -112,6 +112,9 @@ async function resizeOne(filePath, svgDir, backupDir, opts) {
   const newW = roundQuarter(viewBox.w * (opts.scale / 100));
   const newH = roundQuarter(viewBox.h * (opts.scale / 100));
 
+  // Already right: leave the file untouched, so a rerun never rewrites it.
+  if (Number(attrs.width) === newW && Number(attrs.height) === newH) return 'unchanged';
+
   const openTagMatch = raw.match(/<svg\b[^>]*>/s);
   if (!openTagMatch) {
     console.warn(color.yellow(`WARN: could not parse <svg> tag: ${rel}`));
@@ -156,18 +159,21 @@ async function main() {
   if (opts.apply && opts.backup) await mkdir(backupDir, { recursive: true });
 
   let resized = 0;
+  let unchanged = 0;
   let warned = 0;
 
   for await (const filePath of walkFiles(svgDir, { ext: '.svg', skipDirs: [BACKUP_DIR_NAME] })) {
     const outcome = await resizeOne(filePath, svgDir, backupDir, opts);
     if (outcome === 'resized') resized++;
+    else if (outcome === 'unchanged') unchanged++;
     else warned++;
   }
 
   console.log();
   console.log(color.cyan('===== Summary ====='));
-  console.log(color.green(`  Resized : ${resized}`));
-  console.log(warned ? color.yellow(`  Skipped : ${warned} (no viewBox / unparsable tag)`) : '  Skipped : 0');
+  console.log(color.green(`  Resized   : ${resized}`));
+  console.log(`  Unchanged : ${unchanged}`);
+  console.log(warned ? color.yellow(`  Skipped   : ${warned} (no viewBox / unparsable tag)`) : '  Skipped   : 0');
   if (!opts.apply) console.log(color.yellow('\nDry-run only - pass --apply to write changes.'));
 
   return 0;

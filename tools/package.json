@@ -10,9 +10,11 @@
     "optimize": "node optimize-svg.mjs",
     "resize": "node resize-svg.mjs",
     "resize:apply": "node resize-svg.mjs --apply",
-    "aspects": "node generate-aspects.mjs"
+    "aspects": "node generate-aspects.mjs",
+    "render": "node render-node.mjs"
   },
   "dependencies": {
+    "@resvg/resvg-js": "^2.6.0",
     "svgo": "^3.0.0",
     "yaml": "^2.4.0",
     "@xmldom/xmldom": "^0.9.12"

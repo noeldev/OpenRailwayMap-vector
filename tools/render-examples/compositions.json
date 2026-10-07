@@ -1,0 +1,55 @@
+{
+  "H RR+A + bande jaune": {
+    "railway:signal:main": "FR:C",
+    "railway:signal:main:form": "light",
+    "railway:signal:main:shape": "FR:H",
+    "railway:signal:main:states": "FR:RR+A",
+    "railway:signal:short_route": "FR:yellow_band",
+    "railway:signal:short_route:form": "light"
+  },
+  "Avertissement + TIV-D 130 + TIDD": {
+    "railway:signal:distant": "FR:A",
+    "railway:signal:distant:form": "light",
+    "railway:signal:distant:states": "FR:A",
+    "railway:signal:speed_limit_distant": "FR:speed_indicator",
+    "railway:signal:speed_limit_distant:fixed": "FR:TIV-D",
+    "railway:signal:speed_limit_distant:fixed:form": "board",
+    "railway:signal:speed_limit_distant:fixed:speed": "130",
+    "railway:signal:switch": "FR:TIDD",
+    "railway:signal:switch:form": "light"
+  },
+  "Carre PR + reconnaissance VAT": {
+    "railway:signal:main": "FR:C",
+    "railway:signal:main:form": "light",
+    "railway:signal:main:shape": "FR:C",
+    "railway:signal:main:states": "FR:C",
+    "railway:signal:main:type": "FR:PR",
+    "railway:signal:departure": "FR:reporting",
+    "railway:signal:departure:form": "sign",
+    "railway:signal:departure:phone:indicator": "yes",
+    "railway:signal:departure:phone:direction": "left"
+  },
+  "Baissez Panto distance + Bimode": {
+    "railway:signal:electricity": "FR:pantograph_down_advance",
+    "railway:signal:electricity:type": "pantograph_down_advance",
+    "railway:signal:electricity:form": "board",
+    "railway:signal:bimode": "FR:BIMODE",
+    "railway:signal:bimode:function": "entry",
+    "railway:signal:bimode:form": "sign"
+  },
+  "TIV-D B 150 + C 160 + Km + R": {
+    "railway:signal:speed_limit_distant": "FR:speed_indicator",
+    "railway:signal:speed_limit_distant:fast": "FR:TIV-D",
+    "railway:signal:speed_limit_distant:fast:form": "sign",
+    "railway:signal:speed_limit_distant:fast:speed": "150",
+    "railway:signal:speed_limit_distant:railcar": "FR:TIV-D",
+    "railway:signal:speed_limit_distant:railcar:form": "sign",
+    "railway:signal:speed_limit_distant:railcar:speed": "160",
+    "railway:signal:speed_limit": "FR:marker",
+    "railway:signal:speed_limit:main": "FR:R",
+    "railway:signal:speed_limit:main:function": "exit",
+    "railway:signal:speed_limit:main:form": "sign",
+    "railway:signal:speed_limit:transition": "FR:Km",
+    "railway:signal:speed_limit:transition:form": "sign"
+  }
+}

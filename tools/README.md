@@ -9,7 +9,8 @@ the layered light signal icons.
 ## Requirements
 
 - Node.js 18+
-- `npm install` in this folder (installs `@xmldom/xmldom`, `svgo`, `yaml`)
+- `npm install` in this folder (installs `@xmldom/xmldom`, `svgo`, `yaml`,
+  and `@resvg/resvg-js` for the PNG output of `render`)
 - Inkscape on `PATH` (only needed by `optimize`, for text-to-path conversion)
 
 ## Running a tool
@@ -30,6 +31,7 @@ node tools/orm.mjs --help
 | `resize`   | `resize-svg.mjs`      | Set width/height from viewBox                         |
 | `aspects`  | `generate-aspects.mjs`| Generate overlay SVGs (numbers, signal aspects) from templates |
 | `clean-templates` | `clean-templates.mjs` | Resolve leftover transforms on the aspect templates   |
+| `render`   | `render-node.mjs`     | Render OSM nodes or tag sets as SVG/PNG, laid out like the map |
 
 Each command can also be run directly (`node tools/audit-svg.mjs ...`);
 `orm.mjs` just saves having to remember which file does what.
@@ -76,6 +78,64 @@ still contain text), then SVGO. A pristine copy of every file it touches is
 saved once before the first modification, with the same layout as `resize`:
 `tools/_backup/<subdir>/` for a `--subdir` run, `tools/_backup/` for `--all`.
 
+### render
+
+```
+node tools/orm.mjs render 123456789                      # node id, tags from the OSM API
+node tools/orm.mjs render 123456789 987654321            # several nodes side by side
+node tools/orm.mjs render 123456789 --png                # PNG instead of SVG
+node tools/orm.mjs render --tags-file tools/render-examples/compositions.json
+node tools/orm.mjs render 123456789 --tag railway:signal:main:states=FR:VL
+node tools/orm.mjs render --tag railway:signal:main=FR:C --tag railway:signal:main:form=light
+node tools/orm.mjs render 123456789 --layer signals --scale 20 --background none
+```
+
+Resolves the signals like the ORM import (per signal type, the first
+matching YAML feature wins; features ordered by their YAML position,
+lowest at the bottom) and lays them out like the map: icons composited by
+position as in `proxy/js/ui.js`, features stacked with a 2 px gap, ORM's
+generic cross over deactivated features, one column per layer.
+
+Scenes: every node id, every tag set of a `--tags-file`, is drawn side by
+side with its name below, which makes before/after or variant comparisons
+easy. `--tag key=value` adds or overrides a tag in every scene, or builds a
+single scene on its own. A tags file is either a JSON object of tags (one
+scene), an array of `{ "name": ..., "tags": {...} }`, an object of
+`name -> tags`, or plain `key=value` lines as copied from an editor's text
+view (one scene, `#` comments allowed):
+
+```json
+{
+  "Carre": { "railway:signal:main": "FR:C", "railway:signal:main:form": "light", "railway:signal:main:shape": "FR:C" },
+  "Carre VL": { "railway:signal:main": "FR:C", "railway:signal:main:form": "light", "railway:signal:main:shape": "FR:C", "railway:signal:main:states": "FR:VL" }
+}
+```
+
+The YAML and `symbols/` are read in place (uncommitted work included);
+the output embeds a copy of every icon it uses, so it can be opened or
+shared on its own. Every scene, layer and feature is its own `<g>` (the
+feature description as `<title>`), every icon a nested `<svg>`.
+
+`--scale` multiplies the map pixel size (an icon is about 20 px wide on
+the map): it sets the SVG width/height, i.e. the size it opens at, and
+the resolution of a PNG. The default background is a neutral grey with a
+soft shadow under each signal, since many icons have white edges;
+`--background none` makes it transparent, without shadow. A missing icon
+is reported and drawn as `general/signal-unknown`.
+
+Ready-made tag files are in `tools/render-examples/`: `cibles.json` (every
+light signal target), `compositions.json` (signals combined on one node),
+`tvm.json`, `tip.json` and `carre.txt` (the `key=value` form).
+
+Like the map, a node shows one feature per signal type
+(`railway:signal:<type>` keys listed under `types`), the first matching
+section winning, and at most 6 features in the `signals` layer, 2 in
+`speed` and 1 in `electrification` (lowest YAML position first). The
+console lists what is not shown and why. Signals sharing a type, or
+exceeding a layer's limit, need one section drawing them together, as the
+TVM stop marker does with the transition marker. Layers are separate map
+styles: they are drawn side by side here, never together on the map.
+
 ### resize
 
 ```
@@ -89,7 +149,8 @@ node tools/orm.mjs resize --apply --no-backup
 
 Computes `width`/`height` from each file's existing `viewBox` (scaled by
 `--scale` percent, rounded to the nearest 0.25) and writes them onto the
-`<svg>` tag. The `viewBox` itself is never modified - only the two
+`<svg>` tag, leaving files whose width/height are already right untouched
+(so reruns never pollute a commit). The `viewBox` itself is never modified - only the two
 presentation attributes change, so the icon's internal coordinate system
 stays stable while its rendered size does not. Walks the target folder
 recursively, so nested families (e.g. `boxes/single/`, `boxes/TIV/`) are
@@ -145,7 +206,7 @@ of values to render it with. A job runs in one of five modes:
 | `split` (default) | one shape-only base file, plus one text-only overlay file per value (per slot, if more than one) | the usual case: speed/length plates whose shape and number are separate, composited layers |
 | `digits` | one shape-only base, plus one overlay per value with *all* its digits set at once | a template that spells a number out as several separately-positioned `<text>` elements instead of one multi-character tspan, for a family that still needs the shape/number split (base+overlay) |
 | `fused` | one self-contained file per value (shape + number together), plus an optional shape-only "empty"/placeholder base | a family whose YAML icon has only one state, so a separate base+overlay pair would be pointless (e.g. the `L...` train-length plates, `TIV-D_B`, the pentagonal TIV signs). Works with a single `<text>` element (whole value as one string) or several (one digit per element, left-to-right by x position, same per-element assignment as `digits` mode - e.g. the SNCF-Lightbox box digit displays) - the difference from `digits` is that the shape is never stripped out, so each value's file is complete and self-contained |
-| `lights` | one all-unlit base, one layer per aspect, per optional part and for the deactivated cross, plus flattened examples | light signal targets: every signal type drawn on the same target (Carre, Carre violet, Semaphore...) shares the same base and layers. See "Light signal targets" below |
+| `lights` | one all-unlit base, one layer per aspect and per optional part, plus flattened examples | light signal targets: every signal type drawn on the same target (Carre, Carre violet, Semaphore...) shares the same base and layers. See "Light signal targets" below |
 | `compose` | one example file flattening existing icons of the symbols tree (`--symbols`, default `symbols/fr`), each layer centered on the first | the `exampleIcon` of a feature whose icon is only a stack of layers (e.g. a lightbox and its lettering): `{ "name", "mode": "compose", "layers": [ "boxes/double", "boxes/double/D_left", ... ] }` |
 
 Job fields:
@@ -179,28 +240,48 @@ the value-last default (`TIV-D_B_{100}`), but some put it first instead
 
 #### Light signal targets (`mode: "lights"`)
 
-A `lights` template has no `<text>`; its elements carry class tokens
-instead, and nothing else:
+Template elements carry class tokens, nothing else:
 
 | Class | Meaning |
 |---|---|
-| aspect tokens, e.g. `class="S C"` | a lamp (or a lit-only figure such as the white cross of the intermediate signal), drawn unlit in the base; the tokens are the aspects that light it, and each aspect layer redraws it in that token's color. The sighting light is a lamp like any other: `class="O"` |
-| a token listed in the job's `parts`, e.g. `class="cache"` | equipment only some signal types of the target have (the mask on the white lamp of a Carre or Semaphore, absent on a Carre violet): left out of the base and written as its own `<target>-<token>` layer, as drawn |
+| aspect tokens, e.g. `class="S C"` | a light, drawn unlit in the base and lit in each aspect layer using one of its tokens |
+| the clearing light token (`class="O"`) | the clearing light (oeilleton), lit by every aspect except those listed in `clearingLight.offWith` |
+| a token listed in `parts`, e.g. `class="cache"` | equipment only some signal types have (the white light mask, absent on a Carre violet): left out of the base, written as its own `<target>-<token>` layer |
 
-The spec-wide `lightColors` object gives the color of each token.
+Spec-wide settings:
+
+| Field | Meaning |
+|---|---|
+| `lightColors` | lit color per token; an object gives one color per element name, e.g. `"X": { "circle": "#484c63", "path": "#fff" }` for the background and cross of the intermediate signal |
+| `clearingLight` | `{ token, color, offWith }` |
 
 Job fields (besides `name`, `template`, `base`, `overlayDir`):
 
 | Field | Required | Meaning |
 |---|---|---|
-| `aspects` | yes | `{ "<aspect>": "<token>+<token>" }`, one layer `<name>-<aspect>.svg` each, e.g. `"R-A": "R+A+O"`, `"D": "DJ+DR"`. List `O` in every aspect that lights the sighting light |
-| `parts` | optional | Tokens written as separate layers instead of being in the base |
-| `deactivated` | optional | `{ cx, cy, width, height, thickness }`: layer `<name>-deactivated.svg` holding the St Andrew's cross, in base coordinates (square box on the tall targets, flat on the dwarf ones). Its viewBox is grown symmetrically around the base center, since the renderer composites layers center-on-center |
-| `examples` | optional | `[ [ "<layer>", ... ], ... ]`: each list of layers (parts, aspects, `deactivated`) is flattened onto the base into one standalone file `<group>/examples/<name>-<aspect>.svg` (parts are drawn but left out of the name, e.g. `[ "cache", "C" ]` gives `C-C`), used as the YAML `exampleIcon` (taginfo and the JOSM presets need a single SVG). Features illustrated the same way share one example |
+| `aspects` | yes | `{ "<aspect>": "<token>+<token>" }`, one layer `<name>-<aspect>.svg` each, e.g. `"R-A": "R+A"`, `"D": "DJ+DR"` |
+| `parts` | optional | tokens written as separate layers instead of being in the base |
+| `deactivated` | optional | `{ cx, cy, width, height, thickness }`: St Andrew's cross drawn by the example-only layer `deactivated`, in base coordinates; the example viewBox is grown around the base center |
+| `examples` | optional | `[ [ "<layer>", ... ], ... ]`: layers flattened onto the base into `<group>/examples/<name>-<aspect>.svg` (parts are drawn but not named), used as the YAML `exampleIcon` |
 
-Like the other modes, no width/height is written: `resize` sets them from
-the viewBox, so every layer keeps the same scale. The YAML stacks the
-layers, base first:
+The map draws its own cross (`general/signal-deactivated`) over any
+feature whose `railway:signal:<type>:deactivated` is set; the "(Annule)"
+YAML sections only draw the target unlit. The `deactivated` job field
+adds a cross to the `deactivated` examples (used as their `exampleIcon`),
+without writing a layer file.
+
+Template coordinates are whole numbers (or .5 to center a stroke or a
+light), and curves are plain arcs. No width/height is written: `resize`
+sets them from the viewBox.
+
+The viewBox of a target with a clearing light is widened symmetrically
+around the mast (empty space on the right, or a negative x on F/H), so
+the renderer, which composites every icon center on center, centers the
+plates below, and the band or boxes above, on the mast rather than on the
+mast plus the clearing light.
+
+Target names: `C`, `F`, `H` (tall), `A`, `A_BAL`, `K`, `R`, `Cn` / `Cn_V`
+(dwarf Carre), `X` (intermediate), `Cv_bas` / `Cv_bas_V` (low Carre violet).
 
 ```yaml
 exampleIcon: 'fr/signals/examples/C-C'
@@ -334,12 +415,19 @@ against, unlike the others. Treat those filenames as not yet final.
     optimize-svg.mjs
     resize-svg.mjs
     generate-aspects.mjs
+    clean-templates.mjs
+    render-node.mjs
+    render-examples/               # tag files for render
     lib/
       shared.mjs                   # PROJECT_ROOT / DEFAULT_* / shared helpers
+      svg-tidy.mjs                 # tidy pass shared by optimize and clean-templates
       audit-template.{mjs,html,css,js}
+      signal-matcher.mjs           # render: YAML feature matching
+      icon-composer.mjs            # render: map-like icon layout
+      osm-api.mjs                  # render: node tags from the OSM API
     aspects/
       spec.json
-      templates/{signs,boards}/*.svg
+      templates/{signs,boards,boxes,signals}/*.svg
     _backup/                       # created by `optimize`, gitignored
 ```
 
