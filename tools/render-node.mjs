@@ -5,6 +5,8 @@
 // project YAML and symbols are read in place; the output embeds the icons
 // it uses so it stays viewable on its own. Scenes (nodes or tag sets) are
 // drawn side by side, each signal (feature) of a scene is its own <g>.
+// Like the map, a node shows one pile of at most MAX_FEATURES features,
+// filtered by the selected signal categories.
 //
 // Usage:
 //   node tools/render-node.mjs <node id>... [options]
@@ -14,17 +16,15 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { PROJECT_ROOT, DEFAULT_YAML_FILE, color } from './lib/shared.mjs';
-import { loadSignalConfig, matchSignals } from './lib/signal-matcher.mjs';
+import { PROJECT_ROOT, TOOLS_DIR, DEFAULT_YAML_FILE, color } from './lib/shared.mjs';
+import { MAX_FEATURES, loadSignalConfig, matchSignals } from './lib/signal-matcher.mjs';
 import { composeSvg } from './lib/icon-composer.mjs';
 import { fetchNodeTags } from './lib/osm-api.mjs';
 
 const DEFAULT_SYMBOLS = path.join(PROJECT_ROOT, 'symbols');
 const DEFAULT_BACKGROUND = '#e0e0e0';
-
-// Features drawn per layer on the map (tile functions of signal_features.sql):
-// the lowest ranks win, the others are not shown.
-const LAYER_SLOTS = { signals: 6, speed: 2, electrification: 1 };
+// Template fonts, so that icons still holding <text> render in a PNG.
+const FONTS_DIR = path.join(TOOLS_DIR, 'aspects', 'fonts');
 
 const HELP = `
 Usage: node tools/render-node.mjs [<node id>...] [options]
@@ -38,12 +38,16 @@ Scenes (at least one source is required; scenes are drawn side by side):
                       builds a single scene. Repeatable
 
 Options:
-  --layer <name>      Only render one layer (signals, speed, electrification)
+  --category <names>  Comma-separated signal categories to show, like the map
+                      filter (main, distant, speed, ...; default: all)
   --scale <n>         Display size multiplier of the map pixel size (default: 10)
   --background <c>    Background color, drawn with a soft shadow under each
                       signal, or "none" for transparent (default: ${DEFAULT_BACKGROUND})
   --png               Write a PNG instead of an SVG (also implied by --out *.png)
-  --out <file>        Output file (default: <first scene name>.svg|.png)
+  --out <file>        Output file (default: the tags file name, or the first
+                      scene name, with .svg|.png)
+  --verbose           Also list the fallback sections that match but are not
+                      used (a more general section behind the one drawn)
   --yaml <file>       Signal YAML (default: features/signals_railway_signals.yaml)
   --symbols <dir>     Icon tree (default: symbols)
   -h, --help          Show this help
@@ -57,17 +61,18 @@ function parseTagAssignment(text) {
 
 function parseArgs(argv) {
   const opts = {
-    nodeIds: [], tagsFiles: [], tags: {}, layer: null, scale: 10, background: DEFAULT_BACKGROUND,
-    png: false, out: null, yaml: DEFAULT_YAML_FILE, symbols: DEFAULT_SYMBOLS,
+    nodeIds: [], tagsFiles: [], tags: {}, categories: null, scale: 10, background: DEFAULT_BACKGROUND,
+    png: false, verbose: false, out: null, yaml: DEFAULT_YAML_FILE, symbols: DEFAULT_SYMBOLS,
   };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--tags-file') opts.tagsFiles.push(argv[++i]);
     else if (a === '--tag') { const [k, v] = parseTagAssignment(argv[++i] ?? ''); opts.tags[k] = v; }
-    else if (a === '--layer') opts.layer = argv[++i];
+    else if (a === '--category') opts.categories = (argv[++i] ?? '').split(',').map((c) => c.trim()).filter(Boolean);
     else if (a === '--scale') opts.scale = Number(argv[++i]);
     else if (a === '--background') { const c = argv[++i]; opts.background = c === 'none' ? null : c; }
     else if (a === '--png') opts.png = true;
+    else if (a === '--verbose') opts.verbose = true;
     else if (a === '--out') opts.out = argv[++i];
     else if (a === '--yaml') opts.yaml = argv[++i];
     else if (a === '--symbols') opts.symbols = argv[++i];
@@ -115,7 +120,8 @@ async function writePng(file, svg) {
   } catch {
     throw new Error('PNG output needs @resvg/resvg-js (run npm install in tools/)');
   }
-  fs.writeFileSync(file, new Resvg(svg, { font: { loadSystemFonts: true } }).render().asPng());
+  const fontFiles = fs.existsSync(FONTS_DIR) ? fs.readdirSync(FONTS_DIR).map((f) => path.join(FONTS_DIR, f)) : [];
+  fs.writeFileSync(file, new Resvg(svg, { font: { loadSystemFonts: true, fontFiles } }).render().asPng());
 }
 
 async function main() {
@@ -129,35 +135,48 @@ async function main() {
   }
 
   const config = loadSignalConfig(opts.yaml);
+  const unknown = (opts.categories ?? []).filter((c) => !config.categories.includes(c));
+  if (unknown.length) {
+    console.error(color.red(`ERROR: unknown categories: ${unknown.join(', ')} (known: ${config.categories.join(', ')})`));
+    return 1;
+  }
+  const selected = (f) => !opts.categories || opts.categories.includes(f.category);
+
   const scenes = [];
   for (const { name, tags } of await loadScenes(opts)) {
-    const layers = matchSignals(config, tags);
-    if (opts.layer) {
-      for (const layer of [...layers.keys()]) if (layer !== opts.layer) layers.delete(layer);
-    }
+    const pile = matchSignals(config, tags);
     console.log(color.cyan(`${name}:`));
-    if (layers.size === 0) {
+    // Bottom first: the map draws the first MAX_FEATURES of the pile, then
+    // hides the features of unselected categories.
+    pile.forEach((f, index) => {
+      const line = `  ${f.description} [${f.category}]${f.deactivated ? ' (deactivated)' : ''}: ${f.icons.map((i) => i.position === 'center' ? i.id : `${i.id}@${i.position}`).join(' | ')}`;
+      if (index >= MAX_FEATURES) console.log(color.yellow(`${line}  [not shown: ${MAX_FEATURES} features per node]`));
+      else if (!selected(f)) console.log(color.yellow(`${line}  [not shown: category filtered out]`));
+      else console.log(line);
+      for (const shadowed of f.shadowed ?? []) {
+        if (!shadowed.fallback) {
+          console.log(color.yellow(`  ${shadowed.description}  [not shown: same signal type (${f.type}) as ${f.description}]`));
+        } else if (opts.verbose) {
+          console.log(`  ${shadowed.description}  [fallback section, not used]`);
+        }
+      }
+    });
+    const features = pile.slice(0, MAX_FEATURES).filter(selected);
+    if (features.length === 0) {
       console.log(color.yellow('  no signal feature, skipped'));
       continue;
     }
-    for (const [layer, features] of layers) {
-      const slots = LAYER_SLOTS[layer] ?? features.length;
-      console.log(`  ${layer}:`);
-      features.forEach((f, index) => {
-        const line = `    ${f.description}${f.deactivated ? ' (deactivated)' : ''}: ${f.icons.map((i) => i.position === 'center' ? i.id : `${i.id}@${i.position}`).join(' | ')}`;
-        console.log(index < slots ? line : color.yellow(`${line}  [not shown: ${slots} feature(s) per node in this layer]`));
-        (f.shadowed ?? []).forEach((d) => console.log(color.yellow(`    ${d}  [not shown: same signal type (${f.type}) as ${f.description}]`)));
-      });
-      layers.set(layer, features.slice(0, slots));
-    }
-    scenes.push({ name, layers });
+    scenes.push({ name, features });
   }
   if (scenes.length === 0) {
     console.error(color.yellow('Nothing to render.'));
     return 1;
   }
 
-  const out = opts.out ?? `${scenes[0].name}.${opts.png ? 'png' : 'svg'}`;
+  // One tags file and nothing else: the image is named after the file.
+  const single = opts.tagsFiles.length === 1 && opts.nodeIds.length === 0;
+  const baseName = single ? path.basename(opts.tagsFiles[0], path.extname(opts.tagsFiles[0])) : scenes[0].name;
+  const out = opts.out ?? `${baseName}.${opts.png ? 'png' : 'svg'}`;
   const svg = composeSvg(scenes, opts.symbols, {
     scale: opts.scale, title: scenes.map((s) => s.name).join(', '), background: opts.background, labels: scenes.length > 1,
   });

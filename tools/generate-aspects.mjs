@@ -41,6 +41,15 @@
 // since templates don't always declare their text elements top-to-bottom. A
 // job's "slots" array must therefore list slot names top-to-bottom too.
 //
+// A split job may set "textByLength": attributes applied to its text for
+// values of a given number of characters, e.g. { "3": { "y": 820,
+// "font-size": 400 } } for 3-digit speeds. One template then covers every
+// value of a family (base and overlays share the same drawing).
+//
+// Split and digits jobs may set "example": a value (or, for a multi-slot
+// split job, { slot: value }) flattened onto the base into the group's
+// examples folder, under the base's own name, for a YAML exampleIcon.
+//
 // Generated filenames always wrap the numeric value in literal braces, e.g.
 // "TIV-D_diamond_{50}_bottom.svg", matching the project's on-disk naming
 // convention - without the braces the renderer will not find the file.
@@ -276,15 +285,6 @@ function inlineInheritedPresentation(textElement, clone, template) {
   return wrapped;
 }
 
-// Renders a job's filename template. Recognized tokens:
-//   {name}  - job.name
-//   {v}     - the numeric value, wrapped in the literal braces the renderer
-//             expects on disk (e.g. 50 -> "{50}")
-//   {slot}  - the slot name (only meaningful for a non-centered slot)
-// Most families use the default "{name}_{v}" / "{name}_{v}_{slot}" shape
-// (e.g. "TIV-D_B_{100}", "TIV-D_diamond_{50}_bottom"), but some put the
-// value first instead (e.g. the V vehicle-count signs: "{5}V"), hence this
-// being configurable per job via `job.fileName` rather than hardcoded.
 // Examples (flattened composites used by the YAML exampleIcon) of every
 // mode go to an "examples" folder at the root of the job's output group,
 // e.g. "signs/examples" for base "signs/V_split".
@@ -294,11 +294,46 @@ const exampleDirOf = (job) => path.join((job.base ?? job.layers[0]).split(/[\\/]
 // "compose" job, of its first layer), e.g. "signals" for "signals/C.svg".
 const groupOf = (job) => (job.template ?? job.layers[0]).split(/[\\/]/)[0];
 
+// Renders a job's filename template. Recognized tokens:
+//   {name}  - job.name
+//   {v}     - the numeric value, wrapped in the literal braces the renderer
+//             expects on disk (e.g. 50 -> "{50}")
+//   {slot}  - the slot name (only meaningful for a non-centered slot)
+// Most families use the default "{name}_{v}" / "{name}_{v}_{slot}" shape
+// (e.g. "TIV-D_B_{100}", "TIV-D_diamond_{50}_bottom"), but some put the
+// value first instead (e.g. the V vehicle-count signs: "{5}V"), hence this
+// being configurable per job via `job.fileName` rather than hardcoded.
 function renderFileName(fileNameTemplate, name, value, slot) {
   return fileNameTemplate
     .replace(/\{name\}/g, name)
     .replace(/\{v\}/g, `{${value}}`)
     .replace(/\{slot\}/g, slot || '');
+}
+
+// Shape-only root of a template: the template with every <text> element
+// stripped, wherever nested.
+function buildBaseRoot(doc, template) {
+  const baseRoot = createSvgRoot(doc, template);
+  const strippedChildren = cloneWithoutText(doc, template).childNodes;
+  for (let i = 0; i < strippedChildren.length; i++) {
+    baseRoot.appendChild(strippedChildren[i].cloneNode(true));
+  }
+  return baseRoot;
+}
+
+// Writes the job's example: the base with the given text nodes flattened
+// onto it, in the group's examples folder under the base's own name.
+function writeExample(job, baseRoot, nodes, outRoot) {
+  const exampleRoot = baseRoot.cloneNode(true);
+  nodes.forEach((node) => exampleRoot.appendChild(node));
+  writeSvgFile(path.join(outRoot, exampleDirOf(job), `${path.basename(job.base)}.svg`), exampleRoot);
+}
+
+// Applies job.textByLength to a text clone, for the length of the value it
+// displays (e.g. the smaller font of a 3-digit speed).
+function applyTextByLength(job, textClone, displayValue) {
+  const attrs = job.textByLength?.[String(displayValue).length];
+  for (const [name, value] of Object.entries(attrs ?? {})) textClone.setAttribute(name, String(value));
 }
 
 /**
@@ -329,10 +364,19 @@ function renderFileName(fileNameTemplate, name, value, slot) {
  *                                   TIV pentagonal signs: a 30 km/h sign is
  *                                   named ..._{30}.svg but only ever shows
  *                                   the tens digit, "3").
+ * @param {Record<string, object>} [job.textByLength]
+ *                                   Text attributes per value length (see
+ *                                   applyTextByLength).
  * @param {string} [job.fileName]    Overlay filename template (see
  *                                   renderFileName). Defaults to
  *                                   "{name}_{v}" for a centered slot or
  *                                   "{name}_{v}_{slot}" otherwise.
+ * @param {number|Record<string, number>} [job.example]
+ *                                   Example value(s), see writeExample. An
+ *                                   empty `values` list with an example
+ *                                   writes a second base of the same drawing
+ *                                   (e.g. a mobile TIV sharing the overlays
+ *                                   of the fixed one).
  * @param {string} outRoot           Root directory job paths are relative to.
  */
 function runSplitJob(job, outRoot) {
@@ -352,14 +396,8 @@ function runSplitJob(job, outRoot) {
     );
   }
 
-  // Base: the template with every <text> element stripped, wherever nested.
-  const baseRoot = createSvgRoot(doc, template);
-  const strippedChildren = cloneWithoutText(doc, template).childNodes;
-  for (let i = 0; i < strippedChildren.length; i++) {
-    baseRoot.appendChild(strippedChildren[i].cloneNode(true));
-  }
-  const basePath = path.join(outRoot, `${job.base}.svg`);
-  writeSvgFile(basePath, baseRoot);
+  const baseRoot = buildBaseRoot(doc, template);
+  writeSvgFile(path.join(outRoot, `${job.base}.svg`), baseRoot);
 
   // Builds the node to insert for one slot's text element at one value:
   // a clone with its display value set and its inherited presentation/
@@ -371,6 +409,7 @@ function runSplitJob(job, outRoot) {
       ? Math.floor(value / job.displayDivisor)
       : value;
     setDisplayValue(textClone, displayValue);
+    applyTextByLength(job, textClone, displayValue);
     return inlineInheritedPresentation(textElement, textClone, template);
   }
 
@@ -392,26 +431,19 @@ function runSplitJob(job, outRoot) {
     }
   });
 
-  // Optional composite example: the base shape plus one overlay per slot,
-  // flattened into a single standalone file, written to the group's
-  // examples folder under the base's own name - meant for a YAML `example:` /
-  // `exampleIcon:` reference, which otherwise has no choice but to point at
-  // a bare overlay fragment (just the number, no shape) since the live
-  // renderer is what normally does the compositing. job.example is a single
-  // value for a one-slot ("centered") job, or { slotName: value, ... } for a
-  // multi-slot one.
+  // Optional example: job.example is a single value for a one-slot
+  // ("centered") job, or { slotName: value, ... } for a multi-slot one.
   let exampleCount = 0;
   if (job.example !== undefined) {
-    const exampleRoot = baseRoot.cloneNode(true);
-    textElements.forEach((textElement, index) => {
+    const nodes = textElements.map((textElement, index) => {
       const slot = slotNames[index];
       const value = typeof job.example === 'object' ? job.example[slot] : job.example;
       if (value === undefined) {
         throw new Error(`${job.template}: job.example has no value for slot "${slot}"`);
       }
-      exampleRoot.appendChild(buildOverlayNode(textElement, value));
+      return buildOverlayNode(textElement, value);
     });
-    writeSvgFile(path.join(outRoot, exampleDirOf(job), `${path.basename(job.base)}.svg`), exampleRoot);
+    writeExample(job, baseRoot, nodes, outRoot);
     exampleCount = 1;
   }
 
@@ -430,9 +462,9 @@ function runSplitJob(job, outRoot) {
  * overlay file carrying all the digit elements at once, left-to-right,
  * rather than one file per slot.
  *
- * Takes the same options as a split job except `slots`/`valuesBySlot`,
- * which do not apply: all text elements of a given overlay always show
- * different digits of the very same value.
+ * Takes the same options as a split job except `slots`/`valuesBySlot` and
+ * `textByLength`, which do not apply: all text elements of a given overlay
+ * always show different digits of the very same value.
  */
 function runDigitsJob(job, outRoot) {
   const xml = fs.readFileSync(job.template, 'utf8');
@@ -450,36 +482,36 @@ function runDigitsJob(job, outRoot) {
     throw new Error(`${job.template}: "digits" mode expects 2+ <text> elements, found ${textElements.length}`);
   }
 
-  const baseRoot = createSvgRoot(doc, template);
-  const strippedChildren = cloneWithoutText(doc, template).childNodes;
-  for (let i = 0; i < strippedChildren.length; i++) {
-    baseRoot.appendChild(strippedChildren[i].cloneNode(true));
-  }
+  const baseRoot = buildBaseRoot(doc, template);
   writeSvgFile(path.join(outRoot, `${job.base}.svg`), baseRoot);
 
-  let overlayCount = 0;
-  for (const value of job.values) {
+  // Digit nodes of one value, left-to-right.
+  const buildDigitNodes = (value) => {
     const digits = String(value).split('');
     if (digits.length !== textElements.length) {
       throw new Error(
         `${job.template}: value ${value} has ${digits.length} digit(s) but the template has ${textElements.length} digit slot(s)`
       );
     }
-
-    const root = createSvgRoot(doc, template);
-    textElements.forEach((textElement, index) => {
+    return textElements.map((textElement, index) => {
       const textClone = textElement.cloneNode(true);
       setDisplayValue(textClone, digits[index]);
-      root.appendChild(inlineInheritedPresentation(textElement, textClone, template));
+      return inlineInheritedPresentation(textElement, textClone, template);
     });
+  };
 
+  for (const value of job.values) {
+    const root = createSvgRoot(doc, template);
+    buildDigitNodes(value).forEach((node) => root.appendChild(node));
     const name = renderFileName(job.fileName || '{name}_{v}', job.name, value);
     writeSvgFile(path.join(outRoot, job.overlayDir, `${name}.svg`), root);
-    overlayCount += 1;
   }
 
-  console.log(`${job.name} (${path.basename(job.template)}): base + ${overlayCount} overlay(s)`);
-  return 1 + overlayCount;
+  const exampleCount = job.example !== undefined ? 1 : 0;
+  if (exampleCount) writeExample(job, baseRoot, buildDigitNodes(job.example), outRoot);
+
+  console.log(`${job.name} (${path.basename(job.template)}): base + ${job.values.length} overlay(s)` + (exampleCount ? ' + example' : ''));
+  return 1 + job.values.length + exampleCount;
 }
 
 /**
@@ -512,13 +544,7 @@ function runFusedJob(job, outRoot) {
   let count = 0;
   if (job.base) {
     const doc = new DOMParser().parseFromString(xml, 'text/xml');
-    const template = doc.documentElement;
-    const baseRoot = createSvgRoot(doc, template);
-    const strippedChildren = cloneWithoutText(doc, template).childNodes;
-    for (let i = 0; i < strippedChildren.length; i++) {
-      baseRoot.appendChild(strippedChildren[i].cloneNode(true));
-    }
-    writeSvgFile(path.join(outRoot, `${job.base}.svg`), baseRoot);
+    writeSvgFile(path.join(outRoot, `${job.base}.svg`), buildBaseRoot(doc, doc.documentElement));
     count += 1;
   }
 

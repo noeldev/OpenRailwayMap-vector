@@ -1,5 +1,5 @@
 [
-  { "name": "TVM arret seul", "tags": {
+  { "name": "TVM arrêt seul", "tags": {
     "railway:signal:train_protection": "FR:marker",
     "railway:signal:train_protection:main": "stop_marker", "railway:signal:train_protection:main:form": "sign",
     "railway:signal:train_protection:main:type": "FR:Nf", "railway:signal:train_protection:main:passing_light": "yes" } },
@@ -7,7 +7,7 @@
     "railway:signal:train_protection": "FR:marker",
     "railway:signal:train_protection:system_change": "FR:type_transition", "railway:signal:train_protection:system_change:form": "sign",
     "railway:signal:train_protection:system_change:type": "430" } },
-  { "name": "TVM arret + transition", "tags": {
+  { "name": "TVM arrêt + transition", "tags": {
     "railway:signal:train_protection": "FR:marker",
     "railway:signal:train_protection:main": "stop_marker", "railway:signal:train_protection:main:form": "sign",
     "railway:signal:train_protection:main:type": "FR:Nf", "railway:signal:train_protection:main:passing_light": "yes",

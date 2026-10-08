@@ -30,73 +30,73 @@
     {
       "name": "TIV-D_B",
       "_source": "railway:signal:speed_limit_distant:fast:speed, regex ^([67]0|[89][05]|1[0-5][05]|1[6-9]0)$",
-      "mode": "fused",
       "template": "signs/TIV-D_B.svg",
+      "base": "signs/TIV-D_B",
       "overlayDir": "signs/TIV",
-      "values": [ 60, 70, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150, 155, 160, 170, 180, 190 ]
+      "values": [ 60, 70, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150, 155, 160, 170, 180, 190 ],
+      "example": 80
     },
     {
       "name": "TIV-D_C",
       "_source": "railway:signal:speed_limit_distant:railcar:speed, regex ^([4-7]0|[89][05]|1[0-5][05]|160)$",
-      "mode": "fused",
       "template": "signs/TIV-D_C.svg",
+      "base": "signs/TIV-D_C",
       "overlayDir": "signs/TIV",
-      "values": [ 40, 50, 60, 70, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150, 155, 160 ]
-    },
-    {
-      "name": "TIV-R",
-      "_source": "railway:signal:speed_limit:switchable:speed, regex ^([2-4]|[6-9]|1[0-6])0$ (also covers the narrower :speed_limit_reminder:speed legacy regex) - 2-digit values, font-size matches the non-suffixed template",
-      "mode": "fused",
-      "template": "signs/TIV-R.svg",
-      "overlayDir": "signs/TIV",
-      "values": [ 20, 30, 40, 60, 70, 80, 90 ]
-    },
-    {
-      "name": "TIV-R",
-      "_source": "railway:signal:speed_limit:switchable:speed - 3-digit values, font-size matches the _fast template (same base icon as the 2-digit job above: only font-size/position differ)",
-      "mode": "fused",
-      "template": "signs/TIV-R_fast.svg",
-      "overlayDir": "signs/TIV",
-      "values": [ 100, 110, 120, 130, 140, 150, 160 ]
+      "values": [ 40, 50, 60, 70, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150, 155, 160 ],
+      "example": 80
     },
     {
       "name": "TIV-D_pentagonal",
-      "_source": "railway:signal:speed_limit_distant:freight:speed, regex ^[1-9]0$ - the plate only ever shows the tens digit (displayDivisor: 10), filename keeps the full value",
-      "mode": "fused",
+      "_source": "railway:signal:speed_limit_distant:freight:speed, regex ^[1-9]0$ - the plate only shows the tens digit (displayDivisor: 10), the filename keeps the full value",
       "template": "signs/TIV-D_pentagonal.svg",
+      "base": "signs/TIV-D_pentagonal",
       "overlayDir": "signs/TIV",
       "values": [ 10, 20, 30, 40, 50, 60, 70, 80, 90 ],
-      "displayDivisor": 10
+      "displayDivisor": 10,
+      "example": 30
     },
     {
       "name": "TIV-E_pentagonal",
-      "_source": "railway:signal:speed_limit:freight:speed, regex ^[1-9]0$ - the plate only ever shows the tens digit (displayDivisor: 10), filename keeps the full value",
-      "mode": "fused",
+      "_source": "railway:signal:speed_limit:freight:speed, regex ^[1-9]0$ - the plate only shows the tens digit (displayDivisor: 10), the filename keeps the full value",
       "template": "signs/TIV-E_pentagonal.svg",
+      "base": "signs/TIV-E_pentagonal",
       "overlayDir": "signs/TIV",
       "values": [ 10, 20, 30, 40, 50, 60, 70, 80, 90 ],
-      "displayDivisor": 10
+      "displayDivisor": 10,
+      "example": 30
+    },
+    {
+      "name": "TIV-R",
+      "_source": "sign, railway:signal:speed_limit:switchable:speed, regex ^([2-46-9]0|1[0-6]0)$",
+      "template": "signs/TIV-R.svg",
+      "base": "signs/TIV-R",
+      "overlayDir": "signs/TIV",
+      "textByLength": { "3": { "y": 565, "font-size": 380 } },
+      "values": [ 20, 30, 40, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160 ],
+      "example": 80
     },
 
     {
       "name": "TIV-D_diamond",
-      "_source": "railway:signal:speed_limit:permanent:speed + :switchable:speed (union) - 2-digit values, font-size matches the non-suffixed template",
-      "mode": "fused",
+      "_source": "sign, fixed TIV-D (:speed_limit_distant:fixed:speed, regex ^([1-7]0|[89][05]|1[01][05]|120)$) and mobile TIV-D (:speed_limit_distant:switchable:speed, regex ^([6-9]0|1[0-6]0)$): shared overlays, 130 to 160 are mobile only",
       "template": "signs/TIV-D_diamond.svg",
+      "base": "signs/TIV-D_diamond",
       "overlayDir": "signs/TIV",
-      "values": [ 10, 20, 30, 40, 50, 60, 70, 80, 85, 90, 95 ]
+      "textByLength": { "3": { "y": 795, "font-size": 400 } },
+      "values": [ 10, 20, 30, 40, 50, 60, 70, 80, 85, 90, 95, 100, 105, 110, 115, 120, 130, 140, 150, 160 ]
+    },
+    {
+      "name": "TIV-D_diamond_switchable",
+      "_source": "sign, mobile TIV-D base only: same drawing as the fixed sign, a distinct file so that both features keep distinct icon combinations",
+      "template": "signs/TIV-D_diamond.svg",
+      "base": "signs/TIV-D_diamond_switchable",
+      "overlayDir": "signs/TIV",
+      "values": [],
+      "example": 80
     },
     {
       "name": "TIV-D_diamond",
-      "_source": "railway:signal:speed_limit:permanent:speed + :switchable:speed (union) - 3-digit values, font-size matches the _fast template (same base icon as the 2-digit job above: only font-size/position differ)",
-      "mode": "fused",
-      "template": "signs/TIV-D_diamond_fast.svg",
-      "overlayDir": "signs/TIV",
-      "values": [ 100, 105, 110, 115, 120, 130, 140, 150, 160 ]
-    },
-    {
-      "name": "TIV-D_diamond",
-      "_source": "railway:signal:speed_limit:permanent:speed only - top AND bottom share the same value list",
+      "_source": "sign, railway:signal:speed_limit_distant:fixed:speed, 2 values - top and bottom share the same value list",
       "template": "signs/TIV-D_diamond_split.svg",
       "base": "signs/TIV-D_diamond_split",
       "overlayDir": "signs/TIV",
@@ -105,23 +105,16 @@
     },
     {
       "name": "TIV-D_square",
-      "_source": "railway:signal:speed_limit:permanent:speed only - 2-digit values, font-size matches the non-suffixed template",
-      "mode": "fused",
+      "_source": "sign, railway:signal:speed_limit_distant:fixed:speed, regex ^([1-7]0|[89][05]|1[0-3][05]|140)$",
       "template": "signs/TIV-D_square.svg",
+      "base": "signs/TIV-D_square",
       "overlayDir": "signs/TIV",
-      "values": [ 10, 20, 30, 40, 50, 60, 70, 80, 85, 90, 95 ]
+      "textByLength": { "3": { "y": 565, "font-size": 380 } },
+      "values": [ 10, 20, 30, 40, 50, 60, 70, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140 ]
     },
     {
       "name": "TIV-D_square",
-      "_source": "railway:signal:speed_limit:permanent:speed only - 3-digit values, font-size matches the _fast template (same base icon as the 2-digit job above: only font-size/position differ)",
-      "mode": "fused",
-      "template": "signs/TIV-D_square_fast.svg",
-      "overlayDir": "signs/TIV",
-      "values": [ 100, 105, 110, 115, 120, 125, 130, 135, 140 ]
-    },
-    {
-      "name": "TIV-D_square",
-      "_source": "railway:signal:speed_limit:permanent:speed only - top AND bottom share the same value list",
+      "_source": "sign, railway:signal:speed_limit_distant:fixed:speed, 2 values - top and bottom share the same value list",
       "template": "signs/TIV-D_square_split.svg",
       "base": "signs/TIV-D_square_split",
       "overlayDir": "signs/TIV",
@@ -131,23 +124,25 @@
 
     {
       "name": "TIV-D_diamond",
-      "_source": "illuminated board, railway:signal:speed_limit:permanent:speed only (switchable has no board form) - 2-digit values, font-size matches the non-suffixed template",
-      "mode": "fused",
+      "_source": "illuminated board, fixed and mobile TIV-D (same regexes as the signs): shared overlays, 130 to 160 are mobile only",
       "template": "boards/TIV-D_diamond.svg",
+      "base": "boards/TIV-D_diamond",
       "overlayDir": "boards/TIV",
-      "values": [ 10, 20, 30, 40, 50, 60, 70, 80, 85, 90, 95 ]
+      "textByLength": { "3": { "x": 612.5, "y": 820, "font-size": 400 } },
+      "values": [ 10, 20, 30, 40, 50, 60, 70, 80, 85, 90, 95, 100, 105, 110, 115, 120, 130, 140, 150, 160 ]
+    },
+    {
+      "name": "TIV-D_diamond_switchable",
+      "_source": "illuminated board, mobile TIV-D base only: same drawing as the fixed board, a distinct file so that both features keep distinct icon combinations",
+      "template": "boards/TIV-D_diamond.svg",
+      "base": "boards/TIV-D_diamond_switchable",
+      "overlayDir": "boards/TIV",
+      "values": [],
+      "example": 80
     },
     {
       "name": "TIV-D_diamond",
-      "_source": "illuminated board, railway:signal:speed_limit:permanent:speed only - 3-digit values, font-size matches the _fast template (same base icon as the 2-digit job above: only font-size/position differ)",
-      "mode": "fused",
-      "template": "boards/TIV-D_diamond_fast.svg",
-      "overlayDir": "boards/TIV",
-      "values": [ 100, 105, 110, 115, 120 ]
-    },
-    {
-      "name": "TIV-D_diamond",
-      "_source": "illuminated board, railway:signal:speed_limit:permanent:speed only - top AND bottom share the same value list",
+      "_source": "illuminated board, railway:signal:speed_limit_distant:fixed:speed, 2 values - top and bottom share the same value list",
       "template": "boards/TIV-D_diamond_split.svg",
       "base": "boards/TIV-D_diamond_split",
       "overlayDir": "boards/TIV",
@@ -156,59 +151,59 @@
     },
     {
       "name": "TIV-D_square",
-      "_source": "illuminated board, railway:signal:speed_limit:permanent:speed only - 2-digit values, font-size matches the non-suffixed template",
-      "mode": "fused",
+      "_source": "illuminated board, railway:signal:speed_limit_distant:fixed:speed, regex ^([1-7]0|[89][05]|1[0-3][05]|140)$",
       "template": "boards/TIV-D_square.svg",
+      "base": "boards/TIV-D_square",
       "overlayDir": "boards/TIV",
-      "values": [ 10, 20, 30, 40, 50, 60, 70, 80, 85, 90, 95 ]
+      "textByLength": { "3": { "x": 392.5, "y": 600, "font-size": 400 } },
+      "values": [ 10, 20, 30, 40, 50, 60, 70, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140 ]
     },
     {
       "name": "TIV-D_square",
-      "_source": "illuminated board, railway:signal:speed_limit:permanent:speed only - 3-digit values, font-size matches the _fast template (same base icon as the 2-digit job above: only font-size/position differ)",
-      "mode": "fused",
-      "template": "boards/TIV-D_square_fast.svg",
-      "overlayDir": "boards/TIV",
-      "values": [ 100, 105, 110, 115, 120, 125, 130, 135, 140 ]
-    },
-    {
-      "name": "TIV-D_square",
-      "_source": "illuminated board, railway:signal:speed_limit:permanent:speed only - top AND bottom share the same value list",
+      "_source": "illuminated board, railway:signal:speed_limit_distant:fixed:speed, 2 values - top and bottom share the same value list",
       "template": "boards/TIV-D_square_split.svg",
       "base": "boards/TIV-D_square_split",
       "overlayDir": "boards/TIV",
       "slots": [ "top", "bottom" ],
       "values": [ 10, 20, 30, 40, 50, 60, 70, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140 ]
     },
+    {
+      "name": "TIV-R",
+      "_source": "TIV-R Mobile, illuminated board, railway:signal:speed_limit:switchable:speed, regex ^([2-46-9]0|1[0-6]0)$",
+      "template": "boards/TIV-R.svg",
+      "base": "boards/TIV-R",
+      "overlayDir": "boards/TIV",
+      "textByLength": { "3": { "y": 600, "font-size": 400 } },
+      "values": [ 20, 30, 40, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160 ],
+      "example": 80
+    },
 
     {
       "name": "TIV-D",
-      "_source": "TIV-D Mobile, illuminated box form - 2-digit values, font-size matches the non-suffixed template; no separate base layer in the YAML",
-      "mode": "fused",
+      "_source": "TIV-D Mobile, illuminated box, railway:signal:speed_limit_distant:switchable:speed, regex ^([6-9]0|1[0-6]0)$ - the base is the box with its lit diamond (closed), 'fr/boxes/TIV-D_open' stays the no-value icon",
       "template": "boxes/TIV-D.svg",
+      "base": "boxes/TIV-D_closed",
       "overlayDir": "boxes/TIV",
-      "values": [ 60, 70, 80, 90 ]
-    },
-    {
-      "name": "TIV-D",
-      "_source": "TIV-D Mobile, illuminated box form - 3-digit values, font-size matches the _fast template (same base icon as the 2-digit job above: only font-size/position differ)",
-      "mode": "fused",
-      "template": "boxes/TIV-D_fast.svg",
-      "overlayDir": "boxes/TIV",
-      "values": [ 100, 110, 120, 130, 140, 150, 160 ]
+      "textByLength": { "3": { "x": 435, "y": 570, "font-size": 260 } },
+      "values": [ 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160 ],
+      "example": 80
     },
     {
       "name": "TIV-R",
-      "_source": "TIV-R Mobile, illuminated box form, regular (non-wide) width - 2-digit values. Each digit is its own <text> element in the SNCF-Lightbox glyph font. No separate base layer in the YAML: 'fr/boxes/TIV-R_open' remains the no-match fallback; 'fr/boxes/TIV-R' off icon confirmed unused.",
-      "mode": "fused",
+      "_source": "TIV-R Mobile, illuminated box, railway:signal:speed_limit:switchable:speed, 2-digit values - one SNCF Lightbox glyph per <text> element",
+      "mode": "digits",
       "template": "boxes/TIV-R.svg",
+      "base": "boxes/TIV-R",
       "overlayDir": "boxes/TIV",
-      "values": [ 20, 30, 40, 60, 70, 80, 90 ]
+      "values": [ 20, 30, 40, 60, 70, 80, 90 ],
+      "example": 80
     },
     {
       "name": "TIV-R",
-      "_source": "TIV-R Mobile, illuminated box form, wide variant for 3-digit values - genuinely different (wider) shape, not just a font-size tweak. Overlay filenames are shared with the regular-width job above ('fr/boxes/TIV/TIV-R_{}' covers both digit counts in the YAML), hence the same job.name; no `base` since each file already carries its own shape.",
-      "mode": "fused",
+      "_source": "TIV-R Mobile, illuminated box, 3-digit values - wider box, same overlay names as the 2-digit job",
+      "mode": "digits",
       "template": "boxes/TIV-R_wide.svg",
+      "base": "boxes/TIV-R_wide",
       "overlayDir": "boxes/TIV",
       "values": [ 100, 110, 120, 130, 140, 150, 160 ]
     },

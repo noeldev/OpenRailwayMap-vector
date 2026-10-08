@@ -87,14 +87,15 @@ node tools/orm.mjs render 123456789 --png                # PNG instead of SVG
 node tools/orm.mjs render --tags-file tools/render-examples/compositions.json
 node tools/orm.mjs render 123456789 --tag railway:signal:main:states=FR:VL
 node tools/orm.mjs render --tag railway:signal:main=FR:C --tag railway:signal:main:form=light
-node tools/orm.mjs render 123456789 --layer signals --scale 20 --background none
+node tools/orm.mjs render 123456789 --category main,distant --scale 20 --background none
 ```
 
-Resolves the signals like the ORM import (per signal type, the first
-matching YAML feature wins; features ordered by their YAML position,
-lowest at the bottom) and lays them out like the map: icons composited by
-position as in `proxy/js/ui.js`, features stacked with a 2 px gap, ORM's
-generic cross over deactivated features, one column per layer.
+Resolves the signals like the ORM import (`signal_features.sql.mjs`: per
+signal type, the first matching YAML feature wins; features ordered by
+their YAML position, lowest at the bottom) and lays them out like the map:
+icons composited by position as in `proxy/js/ui.js`, features stacked in
+one centered pile with a 2 px gap, ORM's generic cross over deactivated
+features.
 
 Scenes: every node id, every tag set of a `--tags-file`, is drawn side by
 side with its name below, which makes before/after or variant comparisons
@@ -113,7 +114,7 @@ view (one scene, `#` comments allowed):
 
 The YAML and `symbols/` are read in place (uncommitted work included);
 the output embeds a copy of every icon it uses, so it can be opened or
-shared on its own. Every scene, layer and feature is its own `<g>` (the
+shared on its own. Every scene and feature is its own `<g>` (the
 feature description as `<title>`), every icon a nested `<svg>`.
 
 `--scale` multiplies the map pixel size (an icon is about 20 px wide on
@@ -121,7 +122,9 @@ the map): it sets the SVG width/height, i.e. the size it opens at, and
 the resolution of a PNG. The default background is a neutral grey with a
 soft shadow under each signal, since many icons have white edges;
 `--background none` makes it transparent, without shadow. A missing icon
-is reported and drawn as `general/signal-unknown`.
+is reported and drawn as `general/signal-unknown`. A PNG is rendered with
+the template fonts of `tools/aspects/fonts`, so icons still holding
+`<text>` (not yet optimized) render with the SNCF digits.
 
 Ready-made tag files are in `tools/render-examples/`: `cibles.json` (every
 light signal target), `compositions.json` (signals combined on one node),
@@ -129,12 +132,18 @@ light signal target), `compositions.json` (signals combined on one node),
 
 Like the map, a node shows one feature per signal type
 (`railway:signal:<type>` keys listed under `types`), the first matching
-section winning, and at most 6 features in the `signals` layer, 2 in
-`speed` and 1 in `electrification` (lowest YAML position first). The
-console lists what is not shown and why. Signals sharing a type, or
-exceeding a layer's limit, need one section drawing them together, as the
-TVM stop marker does with the transition marker. Layers are separate map
-styles: they are drawn side by side here, never together on the map.
+section winning, a feature being drawn only for the first type it carries.
+All features of a node form a single pile of at most 12 (lowest YAML
+position first, unknown signals last); `--category` hides the features of
+the other categories (`types[].category`), like the signal filter of the
+map. The console lists the category of every feature, and what is not
+shown and why. A section that also matches but only checks tags the drawn
+section checks too (e.g. the reporting plate without arrow, behind the one
+with arrow) is a fallback: it is listed only with `--verbose`. The image is
+named after the tags file when it is the only source, otherwise after the
+first scene (`--out` overrides both). Signals sharing a type (e.g. a B and a C TIV-D, both
+`speed_limit_distant`, or the R and Km signs) need one section drawing
+them together, as the TVM stop marker does with the transition marker.
 
 ### resize
 
@@ -203,9 +212,9 @@ of values to render it with. A job runs in one of five modes:
 
 | Mode (`job.mode`) | Produces | Used for |
 |---|---|---|
-| `split` (default) | one shape-only base file, plus one text-only overlay file per value (per slot, if more than one) | the usual case: speed/length plates whose shape and number are separate, composited layers |
+| `split` (default) | one shape-only base file, plus one text-only overlay file per value (per slot, if more than one) | the usual case: speed/length plates whose shape and number are separate, composited layers (every TIV) |
 | `digits` | one shape-only base, plus one overlay per value with *all* its digits set at once | a template that spells a number out as several separately-positioned `<text>` elements instead of one multi-character tspan, for a family that still needs the shape/number split (base+overlay) |
-| `fused` | one self-contained file per value (shape + number together), plus an optional shape-only "empty"/placeholder base | a family whose YAML icon has only one state, so a separate base+overlay pair would be pointless (e.g. the `L...` train-length plates, `TIV-D_B`, the pentagonal TIV signs). Works with a single `<text>` element (whole value as one string) or several (one digit per element, left-to-right by x position, same per-element assignment as `digits` mode - e.g. the SNCF-Lightbox box digit displays) - the difference from `digits` is that the shape is never stripped out, so each value's file is complete and self-contained |
+| `fused` | one self-contained file per value (shape + number together), plus an optional shape-only "empty"/placeholder base | a family whose YAML icon has only one state, so a separate base+overlay pair would be pointless (e.g. the `L...` train-length plates). Works with a single `<text>` element (whole value as one string) or several (one digit per element, left-to-right by x position, same per-element assignment as `digits` mode - e.g. the SNCF-Lightbox box digit displays) - the difference from `digits` is that the shape is never stripped out, so each value's file is complete and self-contained |
 | `lights` | one all-unlit base, one layer per aspect and per optional part, plus flattened examples | light signal targets: every signal type drawn on the same target (Carre, Carre violet, Semaphore...) shares the same base and layers. See "Light signal targets" below |
 | `compose` | one example file flattening existing icons of the symbols tree (`--symbols`, default `symbols/fr`), each layer centered on the first | the `exampleIcon` of a feature whose icon is only a stack of layers (e.g. a lightbox and its lettering): `{ "name", "mode": "compose", "layers": [ "boxes/double", "boxes/double/D_left", ... ] }` |
 
@@ -221,8 +230,9 @@ Job fields:
 | `valuesBySlot` | split only, optional | `{ slotName: [values] }`, when slots don't share the same range (overrides `values`) |
 | `slots` | split only, optional | Slot names, **top-to-bottom** (text elements are matched to slots by vertical position in the template, not document order). Defaults to `["centered"]` for a single `<text>`, or `["slot0", "slot1", ...]` |
 | `fileName` | optional | Filename template; see below. Defaults to `"{name}_{v}"` (centered) or `"{name}_{v}_{slot}"` (slotted) |
+| `textByLength` | split only, optional | Text attributes per value length, e.g. `{ "3": { "y": 820, "font-size": 400 } }`: a smaller font for 3-digit speeds, so one template covers the whole family |
 | `displayDivisor` | split/fused, optional | When set, the text shows `floor(value / displayDivisor)` while the filename still uses the raw value (e.g. a pentagonal sign named `..._{30}.svg` that only ever displays the tens digit, "3") |
-| `example` | split only, optional | Generates one extra composite file, `<group>/examples/<base name>.svg`: the base shape with each slot's overlay baked in, for use as a YAML `exampleIcon:`. A single value for a one-slot job, or `{ slotName: value, ... }` for a multi-slot job (see below) |
+| `example` | split/digits, optional | Generates one extra composite file, `<group>/examples/<base name>.svg`: the base shape with each slot's overlay baked in, for use as a YAML `exampleIcon:`. A single value for a one-slot job, or `{ slotName: value, ... }` for a multi-slot job (see below) |
 
 A `fused` job's `base` and a `split`/`digits` job's `example` are both
 optional convenience outputs, not required by the mode itself - most jobs in
@@ -312,6 +322,10 @@ already composited onto the base:
 ```
 
 For a single-slot job, `example` is just the value itself (`"example": 90`).
+A split job with an empty `values` list and an `example` writes a second
+base of the same drawing and its example only: the mobile TIV-D
+(`TIV-D_diamond_switchable`) uses it to share the overlays of the fixed
+TIV-D while keeping its own base, hence distinct icon combinations.
 This only covers jobs you opt into - it does not run for every job, so a
 family with no `example` field keeps producing base + overlays only, same
 as before.

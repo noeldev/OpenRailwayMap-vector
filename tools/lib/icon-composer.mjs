@@ -1,23 +1,24 @@
 // icon-composer.mjs
 // Builds one SVG from resolved signal features, laid out like the ORM map:
 // the icons of a feature are composited like proxy/js/ui.js layoutImages()
-// (center/top/bottom/left/right), features of a layer are stacked bottom
-// first with a 2 px gap, and layers are placed side by side. Several
-// scenes (nodes or tag sets) can be drawn next to each other, each with
-// its name below. Every feature is its own <g>, every icon a nested <svg>
-// keeping its own viewBox.
+// (center/top/bottom/left/right), and the features of a node are stacked in
+// one pile, bottom first, centered, with a 2 px gap (proxy/js/styles.mjs
+// icon-offset). Several scenes (nodes or tag sets) can be drawn next to
+// each other, each with its name below. Every feature is its own <g>, every
+// icon a nested <svg> keeping its own viewBox.
 
 import fs from 'node:fs';
 import path from 'node:path';
 import { DOMParser, XMLSerializer } from '@xmldom/xmldom';
 
 const FEATURE_GAP = 2;
-const LAYER_GAP = 10;
 const SCENE_GAP = 20;
 const MARGIN = 5;
 const LABEL_SIZE = 4;
 const LABEL_HEIGHT = 8;
 const LABEL_CHAR_WIDTH = 2.4;
+// Common fonts first: a bare sans-serif may resolve to a symbol font.
+const LABEL_FONT = 'Arial, Helvetica, DejaVu Sans, sans-serif';
 const DEACTIVATED_ICON = 'general/signal-deactivated';
 
 // Soft shadow under each feature, so white edges stand out on a background.
@@ -111,42 +112,30 @@ function iconMarkup(icon, x, y) {
   return new XMLSerializer().serializeToString(svg).replace(/ xmlns="http:\/\/www\.w3\.org\/2000\/svg"/, '');
 }
 
-// Lays out the layers of one scene: returns its size and a function
-// drawing it at a given origin.
-function layoutScene(layers, symbolsRoot, deactivatedIcon) {
-  const columns = [...layers].map(([layer, features]) => {
-    const blocks = features.map((feature) => {
-      const loaded = feature.icons.map((icon) => ({ ...loadIcon(symbolsRoot, icon.id), position: icon.position }));
-      return { feature, ...layoutIcons(loaded) };
-    });
-    const width = Math.max(...blocks.map((b) => b.width));
-    const height = blocks.reduce((sum, b) => sum + b.height, 0) + FEATURE_GAP * (blocks.length - 1);
-    return { layer, blocks, width, height };
+// Lays out the pile of one scene: returns its size and a function drawing
+// it at a given origin.
+function layoutScene(features, symbolsRoot, deactivatedIcon) {
+  const blocks = features.map((feature) => {
+    const loaded = feature.icons.map((icon) => ({ ...loadIcon(symbolsRoot, icon.id), position: icon.position }));
+    return { feature, ...layoutIcons(loaded) };
   });
-
-  const width = columns.reduce((sum, c) => sum + c.width, 0) + LAYER_GAP * Math.max(0, columns.length - 1);
-  const height = Math.max(0, ...columns.map((c) => c.height));
+  const width = Math.max(0, ...blocks.map((b) => b.width));
+  const height = blocks.reduce((sum, b) => sum + b.height, 0) + FEATURE_GAP * Math.max(0, blocks.length - 1);
 
   const draw = (x, y, prefix, featureAttrs) => {
     const parts = [];
-    let left = x;
-    for (const column of columns) {
-      parts.push(`<g id="${prefix}layer-${escapeXml(column.layer)}">`);
-      let bottom = y + height;
-      column.blocks.forEach(({ feature, icons, width: w, height: h }, index) => {
-        const x0 = left + (column.width - w) / 2;
-        const y0 = bottom - h;
-        parts.push(`<g id="${prefix}feature-${index}-${escapeXml(feature.type)}"${featureAttrs}><title>${escapeXml(feature.description)}</title>`);
-        icons.forEach((icon) => parts.push(iconMarkup(icon, x0 + icon.x, y0 + icon.y)));
-        if (feature.deactivated) {
-          parts.push(iconMarkup(deactivatedIcon, x0 + (w - deactivatedIcon.width) / 2, y0 + (h - deactivatedIcon.height) / 2));
-        }
-        parts.push('</g>');
-        bottom = y0 - FEATURE_GAP;
-      });
+    let bottom = y + height;
+    blocks.forEach(({ feature, icons, width: w, height: h }, index) => {
+      const x0 = x + (width - w) / 2;
+      const y0 = bottom - h;
+      parts.push(`<g id="${prefix}feature-${index}-${escapeXml(feature.type ?? 'unknown')}"${featureAttrs}><title>${escapeXml(feature.description)}</title>`);
+      icons.forEach((icon) => parts.push(iconMarkup(icon, x0 + icon.x, y0 + icon.y)));
+      if (feature.deactivated) {
+        parts.push(iconMarkup(deactivatedIcon, x0 + (w - deactivatedIcon.width) / 2, y0 + (h - deactivatedIcon.height) / 2));
+      }
       parts.push('</g>');
-      left += column.width + LAYER_GAP;
-    }
+      bottom = y0 - FEATURE_GAP;
+    });
     return parts.join('');
   };
 
@@ -155,8 +144,8 @@ function layoutScene(layers, symbolsRoot, deactivatedIcon) {
 
 /**
  * Renders scenes side by side, bottom-aligned, into one SVG document.
- * @param {Array<{name: string, layers: Map<string, Array>}>} scenes
- *                                     Layers come from matchSignals().
+ * @param {Array<{name: string, features: Array}>} scenes
+ *                                     Features (bottom first) come from matchSignals().
  * @param {string} symbolsRoot         The symbols/ folder.
  * @param {{scale: number, title: string, background: string|null, labels: boolean}} options
  *                                     A background also adds a shadow under each feature.
@@ -164,7 +153,7 @@ function layoutScene(layers, symbolsRoot, deactivatedIcon) {
 export function composeSvg(scenes, symbolsRoot, { scale, title, background, labels }) {
   const deactivatedIcon = loadIcon(symbolsRoot, DEACTIVATED_ICON);
   const laidOut = scenes.map((scene) => {
-    const layout = layoutScene(scene.layers, symbolsRoot, deactivatedIcon);
+    const layout = layoutScene(scene.features, symbolsRoot, deactivatedIcon);
     // Each scene gets a slot wide enough for its label.
     const slot = labels ? Math.max(layout.width, scene.name.length * LABEL_CHAR_WIDTH) : layout.width;
     return { ...scene, ...layout, slot };
@@ -185,7 +174,7 @@ export function composeSvg(scenes, symbolsRoot, { scale, title, background, labe
     parts.push(`<g id="scene-${index}"><title>${escapeXml(scene.name)}</title>`);
     parts.push(scene.draw(left + (scene.slot - scene.width) / 2, MARGIN + contentHeight - scene.height, prefix, featureAttrs));
     if (labels) {
-      parts.push(`<text x="${left + scene.slot / 2}" y="${MARGIN + contentHeight + LABEL_HEIGHT - 2}" font-family="sans-serif" font-size="${LABEL_SIZE}" text-anchor="middle" fill="#333">${escapeXml(scene.name)}</text>`);
+      parts.push(`<text x="${left + scene.slot / 2}" y="${MARGIN + contentHeight + LABEL_HEIGHT - 2}" font-family="${LABEL_FONT}" font-size="${LABEL_SIZE}" text-anchor="middle" fill="#333">${escapeXml(scene.name)}</text>`);
     }
     parts.push('</g>');
     left += scene.slot + SCENE_GAP;
