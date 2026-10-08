@@ -16,14 +16,16 @@ async function promiseResultsOrErrors(promises) {
 
 async function parseSvgDimensions(feature) {
   const svg = await fs.promises.readFile(`symbols/${feature}.svg`, 'utf8')
-  // Crude way of parsing SVG width/height. But given that all SVG icons are compressed and similar SVG content, this works fine.
-  const matches = svg.match(/<svg .*width="([^"]+)".*height="([^"]+)".*>/)
-  if (!matches) {
+  // Only the attributes of the root <svg> element: inner elements (rect, image...) can have their own width/height
+  const root = svg.match(/<svg\b[^>]*>/)?.[0]
+  const width = root?.match(/\swidth="([^"]+)"/)
+  const height = root?.match(/\sheight="([^"]+)"/)
+  if (!width || !height) {
     throw new Error(`Could not find <svg> element with width/height for feature ${feature} in SVG content "${svg}"`)
   }
   return {
-    width: parseFloat(matches[1]),
-    height: parseFloat(matches[2]),
+    width: parseFloat(width[1]),
+    height: parseFloat(height[1]),
   }
 }
 
