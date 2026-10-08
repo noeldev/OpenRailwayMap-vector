@@ -301,12 +301,8 @@ tags:
   - { tag: 'railway:signal:route_info:form', title: 'Route info form' }
   - { tag: 'railway:signal:route_info:arrangement', title: 'Route info arrangement' }
   - { tag: 'railway:signal:train_protection:function', title: 'Train protection function' }
-  - { tag: 'railway:signal:train_protection:main', title: 'Train protection main' }
-  - { tag: 'railway:signal:train_protection:main:form', title: 'Train protection main form' }
   - { tag: 'railway:signal:train_protection:main:type', title: 'Train protection main type' }
   - { tag: 'railway:signal:train_protection:main:passing_light', title: 'Train protection passing light', type: boolean }
-  - { tag: 'railway:signal:train_protection:system_change', title: 'Train protection system change' }
-  - { tag: 'railway:signal:train_protection:system_change:form', title: 'Train protection system change form' }
   - { tag: 'railway:signal:train_protection:system_change:type', title: 'Train protection system change type' }
   - { tag: 'railway:signal:train_protection_distant', title: 'Train protection distant' }
   - { tag: 'railway:signal:train_protection_distant:deactivated', title: 'Train protection distant deactivated', type: boolean }
@@ -317,31 +313,31 @@ tags:
   - { tag: 'railway:signal:speed_limit:transition', title: 'Speed limit transition' }
   - { tag: 'railway:signal:speed_limit:transition:form', title: 'Speed limit transition form' }
   - { tag: 'railway:signal:speed_limit:switchable', title: 'Speed limit switchable' }
-  - { tag: 'railway:signal:speed_limit:switchable:speed', title: 'Speed limit switchable speed', type: array }
+  - { tag: 'railway:signal:speed_limit:switchable:speed', title: 'Speed limit switchable speed' }
   - { tag: 'railway:signal:speed_limit:switchable:form', title: 'Speed limit switchable form' }
   - { tag: 'railway:signal:speed_limit:freight', title: 'Speed limit freight' }
-  - { tag: 'railway:signal:speed_limit:freight:speed', title: 'Speed limit freight speed', type: array }
+  - { tag: 'railway:signal:speed_limit:freight:speed', title: 'Speed limit freight speed' }
   - { tag: 'railway:signal:speed_limit:freight:function', title: 'Speed limit freight function' }
   - { tag: 'railway:signal:speed_limit:freight:form', title: 'Speed limit freight form' }
   - { tag: 'railway:signal:speed_limit_reminder', title: 'Speed limit reminder' }
-  - { tag: 'railway:signal:speed_limit_reminder:speed', title: 'Speed limit reminder speed', type: array }
+  - { tag: 'railway:signal:speed_limit_reminder:speed', title: 'Speed limit reminder speed' }
   - { tag: 'railway:signal:speed_limit_reminder:form', title: 'Speed limit reminder form' }
   - { tag: 'railway:signal:speed_limit_distant:switchable', title: 'Speed limit distant switchable' }
-  - { tag: 'railway:signal:speed_limit_distant:switchable:speed', title: 'Speed limit distant switchable speed', type: array }
+  - { tag: 'railway:signal:speed_limit_distant:switchable:speed', title: 'Speed limit distant switchable speed' }
   - { tag: 'railway:signal:speed_limit_distant:switchable:form', title: 'Speed limit distant switchable form' }
   - { tag: 'railway:signal:speed_limit_distant:fixed', title: 'Speed limit distant permanent' }
-  - { tag: 'railway:signal:speed_limit_distant:fixed:speed', title: 'Speed limit distant permanent speed', type: array }
+  - { tag: 'railway:signal:speed_limit_distant:fixed:speed', title: 'Speed limit distant permanent speed' }
   - { tag: 'railway:signal:speed_limit_distant:fixed:form', title: 'Speed limit distant permanent form' }
   - { tag: 'railway:signal:speed_limit_distant:railcar', title: 'Speed limit distant railcar' }
-  - { tag: 'railway:signal:speed_limit_distant:railcar:speed', title: 'Speed limit distant railcar speed', type: array }
+  - { tag: 'railway:signal:speed_limit_distant:railcar:speed', title: 'Speed limit distant railcar speed' }
   - { tag: 'railway:signal:speed_limit_distant:railcar:form', title: 'Speed limit distant railcar form' }
   - { tag: 'railway:signal:speed_limit_distant:fast', title: 'Speed limit distant fast' }
-  - { tag: 'railway:signal:speed_limit_distant:fast:speed', title: 'Speed limit distant fast speed', type: array }
+  - { tag: 'railway:signal:speed_limit_distant:fast:speed', title: 'Speed limit distant fast speed' }
   - { tag: 'railway:signal:speed_limit_distant:fast:form', title: 'Speed limit distant fast form' }
   - { tag: 'railway:signal:speed_limit_distant:restriction', title: 'Speed limit distant restriction' }
   - { tag: 'railway:signal:speed_limit_distant:restriction:form', title: 'Speed limit distant restriction form' }
   - { tag: 'railway:signal:speed_limit_distant:freight', title: 'Speed limit distant freight' }
-  - { tag: 'railway:signal:speed_limit_distant:freight:speed', title: 'Speed limit distant freight speed', type: array }
+  - { tag: 'railway:signal:speed_limit_distant:freight:speed', title: 'Speed limit distant freight speed' }
   - { tag: 'railway:signal:speed_limit_distant:freight:form', title: 'Speed limit distant freight form' }
   - { tag: 'railway:signal:radio:mode', title: 'Radio mode' }
   - { tag: 'railway:signal:radio:mode:type', title: 'Radio mode type' }
@@ -375,8 +371,6 @@ tags:
   
   # FR: properties for existing categories
   - { tag: 'railway:signal:electricity:shape', title: 'Electricity shape' }
-  - { tag: 'railway:signal:main:type', title: 'Main type' }
-  - { tag: 'railway:signal:main:function', title: 'Main function' }
   - { tag: 'railway:signal:main:arrangement', title: 'Main arrangement' }
   - { tag: 'railway:signal:stop:type', title: 'Stop type' }
   - { tag: 'railway:signal:stop_distant:for', title: 'Stop distant for' }
@@ -494,20 +488,20 @@ types:
   - { type: preheating, category: other }
   - { type: slope, category: other }
 
-  # FR
-  - { type: bimode, layer: electrification }
-  - { type: catenary, layer: electrification }
-  - { type: facility, layer: signals }
-  - { type: facility_distant, layer: signals }
-  - { type: lightbox, layer: signals }
-  - { type: servicing, layer: signals }
-  - { type: servicing_distant, layer: signals }
-  - { type: station, layer: signals }
-  - { type: train_protection_distant, layer: signals }
-  - { type: route_info, layer: signals }
-  - { type: structure, layer: signals }
-  - { type: clearance, layer: signals }
-  - { type: coupling, layer: signals }
+  # FR: type mapping
+  - { type: bimode, category: electricity }
+  - { type: catenary, category: electricity }
+  - { type: facility, category: station }
+  - { type: facility_distant, category: station }
+  - { type: lightbox, category: other }
+  - { type: servicing, category: other }
+  - { type: servicing_distant, category: other }
+  - { type: station, category: station }
+  - { type: train_protection_distant, category: train_protection }
+  - { type: route_info, category: other }
+  - { type: structure, category: other }
+  - { type: clearance, category: other }
+  - { type: coupling, category: station }
 
 # The features below define a certain signal.
 # For every type of feature, the feature will be determined.
@@ -1913,7 +1907,6 @@ features:
       - { tag: 'railway:signal:shunting', value: 'AU:NSW:subsidiary' }
       - { tag: 'railway:signal:shunting:form', value: 'light' }
 
-
   - description: Shunt Route Indicator
     country: AU
     icon: [ default: 'au/nsw/signals/stencil' ]
@@ -2015,7 +2008,6 @@ features:
     tags:
       - { tag: 'railway:signal:distant', value: 'AU:NSW:distant' }
       - { tag: 'railway:signal:distant:form', value: 'semaphore' }
-
 
   - description: Main Signal (searchlight)
     country: AU
@@ -3581,7 +3573,6 @@ features:
       - { tag: 'railway:signal:speed_limit_distant', any: [ 'CZ', 'CZ-D1:hlavni_navestidlo', 'CZ-D1:samostatna_predvest', 'Cs-D1' ] }
       - { tag: 'railway:signal:speed_limit_distant:form', value: 'light' }
 
-
   - description: Návěst stůj
     country: CZ
     icon:
@@ -3603,7 +3594,6 @@ features:
     tags:
       - { tag: 'railway:signal:distant', value: 'CZ-D1:vystraha' }
       - { tag: 'railway:signal:distant:form', value: 'sign' }
-
 
   # Distant signals
   # TODO semaphore distant signal (orange disk)
@@ -3812,12 +3802,10 @@ features:
       - { tag: 'railway:signal:combined', any: [ 'CZ', 'CZ-D1:hlavni_navestidlo', 'Cs-D1', 'Cs-D1:', 'Cs-D1:_' ] }
       - { tag: 'railway:signal:combined:form', value: 'light' }
 
-
   # TODO: Skupinové návěstidlo -- Group signal
   # TODO entry / exit signal markers
   # TODO electricity signals, blue and orange
   # TODO route signals: green for track, white for direction
-
 
   - description: Konec nástupiště
     country: CZ
@@ -6562,7 +6550,7 @@ features:
       - { tag: 'railway:signal:snowplow:form', value: 'sign' }
 
   # --- FR --- #
-  
+
   # Light signal icons: fr/signals/<shape>.svg (unlit base) + fr/signals/aspects/<shape>-<layer>.svg,
   # generated by tools/generate-aspects.mjs (examples for exampleIcon in fr/signals/examples)
 
@@ -6672,28 +6660,6 @@ features:
       - { tag: 'railway:signal:main', value: 'FR:C' }
       - { tag: 'railway:signal:main:form', value: 'light' }
       - { tag: 'railway:signal:main:function', value: 'intermediate' }
-
-  - description: Repère d'arrêt pour raccordement
-    country: FR
-    icon: [ default: 'fr/signs/coupling_stop_marker' ]
-    tags:
-      - { tag: 'railway:signal:coupling', value: 'FR:stop_marker' }
-      - { tag: 'railway:signal:coupling:type', value: 'coupling' }
-      - { tag: 'railway:signal:coupling:form', value: 'sign' }
-
-  - description: Repère d'arrêt pour coupe
-    country: FR
-    icon:
-      - default: 'fr/signs/uncoupling_stop_marker'
-      - match: 'railway:signal:coupling:length'
-        cases:
-          - { regex: '^[0-9]+$', value: 'fr/signs/L/L{}_uncoupling', example: 'fr/signs/L/L{170}_uncoupling' }
-        default: 'fr/signs/L_uncoupling_empty'
-        position: bottom
-    tags:
-      - { tag: 'railway:signal:coupling', value: 'FR:stop_marker' }
-      - { tag: 'railway:signal:coupling:type', value: 'uncoupling' }
-      - { tag: 'railway:signal:coupling:form', value: 'sign' }
 
   - description: Carré (Annulé)
     country: FR
@@ -6830,15 +6796,6 @@ features:
       - { tag: 'railway:signal:main', value: 'FR:C' }
       - { tag: 'railway:signal:main:form', value: 'light' }
       - { tag: 'railway:signal:main:shape', value: 'FR:H' }
-
-  # Mechanical signal
-
-  - description: Carré
-    country: FR
-    icon: [ default: 'fr/signals/C-mech' ]
-    tags:
-      - { tag: 'railway:signal:main', value: 'FR:C' }
-      - { tag: 'railway:signal:main:form', value: 'sign' }
 
   # Carré violet
 
@@ -7090,15 +7047,6 @@ features:
       - { tag: 'railway:signal:main:form', value: 'light' }
       - { tag: 'railway:signal:main:shape', value: 'FR:H' }
 
-  # Mechanical signal
-
-  - description: Carré violet
-    country: FR
-    icon: [ default: 'fr/signals/Cv-mech' ]
-    tags:
-      - { tag: 'railway:signal:main', value: 'FR:Cv' }
-      - { tag: 'railway:signal:main:form', value: 'sign' }
-
   # Sémaphore
 
   - description: Sémaphore (Annulé)
@@ -7326,15 +7274,6 @@ features:
       - { tag: 'railway:signal:main:form', value: 'light' }
       - { tag: 'railway:signal:main:shape', value: 'FR:H' }
 
-  # Mechanical signal
-
-  - description: Sémaphore
-    country: FR
-    icon: [ default: 'fr/signals/S-mech' ]
-    tags:
-      - { tag: 'railway:signal:main', value: 'FR:S' }
-      - { tag: 'railway:signal:main:form', value: 'sign' }
-
   # Guidon d'Arrêt
 
   - description: Guidon d'Arrêt
@@ -7376,17 +7315,8 @@ features:
       - { tag: 'railway:signal:distant', value: 'FR:D' }
       - { tag: 'railway:signal:distant:form', value: 'light' }
 
-  # Mechanical signal
-
-  - description: Disque
-    country: FR
-    icon: [ default: 'fr/signals/D-mech' ]
-    tags:
-      - { tag: 'railway:signal:distant', value: 'FR:D' }
-      - { tag: 'railway:signal:distant:form', value: 'sign' }
-
   # Avertissement
-  
+
   - description: Avertissement (Annulé)
     country: FR
     exampleIcon: 'fr/signals/examples/R-deactivated'
@@ -7419,6 +7349,34 @@ features:
 
   # Mechanical signals
 
+  - description: Carré
+    country: FR
+    icon: [ default: 'fr/signals/C-mech' ]
+    tags:
+      - { tag: 'railway:signal:main', value: 'FR:C' }
+      - { tag: 'railway:signal:main:form', value: 'sign' }
+
+  - description: Carré violet
+    country: FR
+    icon: [ default: 'fr/signals/Cv-mech' ]
+    tags:
+      - { tag: 'railway:signal:main', value: 'FR:Cv' }
+      - { tag: 'railway:signal:main:form', value: 'sign' }
+
+  - description: Sémaphore
+    country: FR
+    icon: [ default: 'fr/signals/S-mech' ]
+    tags:
+      - { tag: 'railway:signal:main', value: 'FR:S' }
+      - { tag: 'railway:signal:main:form', value: 'sign' }
+
+  - description: Disque
+    country: FR
+    icon: [ default: 'fr/signals/D-mech' ]
+    tags:
+      - { tag: 'railway:signal:distant', value: 'FR:D' }
+      - { tag: 'railway:signal:distant:form', value: 'sign' }
+
   - description: Avertissement
     country: FR
     icon: [ default: 'fr/signals/A-mech' ]
@@ -7442,128 +7400,451 @@ features:
       - { tag: 'railway:signal:speed_limit', value: 'FR:RR30' }
       - { tag: 'railway:signal:speed_limit:form', value: 'sign' }
 
-  # Plaque d'Autorisation de Mouvement
-
-  - description: Pancarte Mi-Blanche Mi-Verte
-    country: FR
-    icon: 
-      - default: 'fr/plates/departure_marker'
-        position: bottom
-    tags:
-      - { tag: 'railway:signal:departure', value: 'FR:departure_marker' }
-      - { tag: 'railway:signal:departure:form', value: 'sign' }
-
-  # Plaques de Reconnaissance
-
-  - description: Plaque de Reconnaissance (VAT)
-    country: FR
-    exampleIcon: 'fr/plates/examples/reporting_vat_slot'
-    icon:
-      - match: 'railway:signal:departure:type'
-        cases:
-          - { exact: 'delayed', value: 'fr/plates/delayed_reporting_vat_slot' }
-          - { exact: 'exempt',  value: 'fr/plates/reporting_exemption_vat_slot' }
-        default: 'fr/plates/reporting_vat_slot'
-        position: bottom
-      - match: 'railway:signal:departure:phone:direction'
-        cases:
-          - { exact: 'left',  value: 'fr/plates/arrow_left' }
-          - { exact: 'right', value: 'fr/plates/arrow_right' }
-    tags:
-      - { tag: 'railway:signal:departure', value: 'FR:reporting' }
-      - { tag: 'railway:signal:departure:form', value: 'sign' }
-      - { tag: 'railway:signal:departure:phone:indicator' }
-      - { tag: 'railway:signal:departure:phone:direction', any: [ 'left', 'right' ] }
-
-  - description: Plaque de Reconnaissance (VAT)
-    country: FR
-    icon:
-      - match: 'railway:signal:departure:type'
-        cases:
-          - { exact: 'delayed', value: 'fr/plates/delayed_reporting_vat' }
-          - { exact: 'exempt',  value: 'fr/plates/reporting_exemption_vat' }
-        default: 'fr/plates/reporting_vat'
-        position: bottom
-    tags:
-      - { tag: 'railway:signal:departure', value: 'FR:reporting' }
-      - { tag: 'railway:signal:departure:form', value: 'sign' }
-      - { tag: 'railway:signal:departure:phone:indicator' }
-  
-  - description: Plaque de Reconnaissance
-    country: FR
-    exampleIcon: 'fr/plates/examples/reporting_slot'
-    icon:
-      - match: 'railway:signal:departure:type'
-        cases:
-          - { exact: 'delayed', value: 'fr/plates/delayed_reporting_slot' }
-          - { exact: 'exempt',  value: 'fr/plates/reporting_exemption_slot' }
-        default: 'fr/plates/reporting_slot'
-        position: bottom
-      - match: 'railway:signal:departure:phone:direction'
-        cases:
-          - { exact: 'left',  value: 'fr/plates/arrow_left' }
-          - { exact: 'right', value: 'fr/plates/arrow_right' }
-    tags:
-      - { tag: 'railway:signal:departure', value: 'FR:reporting' }
-      - { tag: 'railway:signal:departure:form', value: 'sign' }
-      - { tag: 'railway:signal:departure:phone:direction', any: [ 'left', 'right' ] }
-    
-  - description: Plaque de Reconnaissance
-    country: FR
-    icon:
-      - match: 'railway:signal:departure:type'
-        cases:
-          - { exact: 'delayed', value: 'fr/plates/delayed_reporting' }
-          - { exact: 'exempt',  value: 'fr/plates/reporting_exemption' }
-        default: 'fr/plates/reporting'
-        position: bottom
-    tags:
-      - { tag: 'railway:signal:departure', value: 'FR:reporting' }
-      - { tag: 'railway:signal:departure:form', value: 'sign' }   
-
-  - description: Plaque de Demande de Départ (DD)
-    country: FR
-    icon: [ default: 'fr/plates/DD' ]
-    tags:
-      - { tag: 'railway:signal:departure', value: 'FR:DD' }
-      - { tag: 'railway:signal:departure:form', value: 'sign' }
-
-  - description: Signal Lumineux d'Autorisation de Mouvement (SLD)
-    country: FR
-    icon: [ default: 'fr/boxes/SLD' ]
-    tags:
-      - { tag: 'railway:signal:departure', value: 'FR:SLD' }
-      - { tag: 'railway:signal:departure:form', value: 'light' }
-
-  - description: DAMM
-    country: FR
-    icon: [ default: 'fr/signals/DAMM' ]
-    tags:
-      - { tag: 'railway:signal:departure', value: 'FR:DAMM' }
-      - { tag: 'railway:signal:departure:form', value: 'light' }
-
-  - description: Répétiteur Lumineux d'Initinéraire (RLI)
-    country: FR
-    icon: [ default: 'fr/boxes/RLI' ]
-    tags:
-      - { tag: 'railway:signal:departure', value: 'FR:RLI' }
-      - { tag: 'railway:signal:departure:form', value: 'light' }
-
-  - description: TLC
-    country: FR
-    icon: [ default: 'fr/boxes/TLC' ]
-    tags:
-      - { tag: 'railway:signal:minor', value: 'FR:TLC' }
-      - { tag: 'railway:signal:minor:form', value: 'light' }
-
-  # FR: shunting board and signals
-
+  # SLM
   - description: SLM
     country: FR
     icon: [ default: 'fr/signals/SLM' ]
     tags:
       - { tag: 'railway:signal:shunting', value: 'FR:SLM' }
       - { tag: 'railway:signal:shunting:form', value: 'light' }
+
+  # SACEM
+  - description: Signal d'annulation
+    country: FR
+    icon: [ default: 'fr/boxes/illuminated_cross' ]
+    tags:
+      - { tag: 'railway:signal:train_protection', value: 'FR:X' }
+      - { tag: 'railway:signal:train_protection:form', value: 'light' }
+
+  # Examples (from bottom to top):
+  # - Z > Ordinary-type TIV-D 80 (square) > C-type TIV-D 90
+  # - Z > Lower pantograph
+  # - R > Km 181.4 > C-type TIV-D 160 > B-type TIV-D 150
+  # - R > Km 74.7 > Ordinary-type TIV-D 110 (square)
+  # - Reduced clearance > Z > Pentagonal TIV-E 5
+  # - 2 Tunnels > Reduced clearance
+
+  - description: Pancarte Tunnel
+    country: FR
+    icon: [ default: 'fr/signs/tunnel' ]
+    tags:
+      - { tag: 'railway:signal:structure', value: 'FR:tunnel' }
+      - { tag: 'railway:signal:structure:type', value: 'tunnel' }
+      - { tag: 'railway:signal:structure:form', value: 'sign' }
+
+  - description: Pancarte Gabarit Réduit
+    country: FR
+    icon: [ default: 'fr/signs/reduced_clearance' ]
+    tags:
+      - { tag: 'railway:signal:clearance', value: 'FR:reduced_clearance' }
+      - { tag: 'railway:signal:clearance:form', value: 'sign' }
+
+  - description: Pancarte Z
+    country: FR
+    icon: [ default: 'fr/signs/Z' ]
+    tags:
+      - { tag: 'railway:signal:speed_limit', value: 'FR:marker' }
+      - { tag: 'railway:signal:speed_limit:main', value: 'FR:Z' }
+      - { tag: 'railway:signal:speed_limit:main:function', value: 'entry' }
+      - { tag: 'railway:signal:speed_limit:main:form', value: 'sign' }
+
+  - description: Pancarte R
+    country: FR
+    icon: [ default: 'fr/signs/R' ]
+    tags:
+      - { tag: 'railway:signal:speed_limit', value: 'FR:marker' }
+      - { tag: 'railway:signal:speed_limit:main', value: 'FR:R' }
+      - { tag: 'railway:signal:speed_limit:main:function', value: 'exit' }
+      - { tag: 'railway:signal:speed_limit:main:form', value: 'sign' }
+
+  - description: Pancarte Km
+    country: FR
+    icon: [ default: 'fr/signs/Km' ]
+    tags:
+      - { tag: 'railway:signal:speed_limit', value: 'FR:marker' }
+      - { tag: 'railway:signal:speed_limit:transition', value: 'FR:Km' }
+      - { tag: 'railway:signal:speed_limit:transition:form', value: 'sign' }
+
+  # FR: TIV
+  # Every TIV is a base (the empty board, box or sign) plus a number overlay.
+  # Switchable and fixed TIV-D share their overlays, on distinct bases.
+
+  - description: TIV-D Mobile
+    country: FR
+    exampleIcon: 'fr/boxes/examples/TIV-D_closed'
+    icon:
+      - match: 'railway:signal:speed_limit_distant:switchable:speed'
+        cases:
+          - { regex: '^([6-9]0|1[0-6]0)$', value: 'fr/boxes/TIV-D_closed' }
+        default: 'fr/boxes/TIV-D_open'
+      - match: 'railway:signal:speed_limit_distant:switchable:speed'
+        cases:
+          - { regex: '^([6-9]0|1[0-6]0)$', value: 'fr/boxes/TIV/TIV-D_{}', example: 'fr/boxes/TIV/TIV-D_{80}' }
+    tags:
+      - { tag: 'railway:signal:speed_limit_distant', value: 'FR:speed_indicator' }
+      - { tag: 'railway:signal:speed_limit_distant:switchable', value: 'FR:TIV-D' }
+      - { tag: 'railway:signal:speed_limit_distant:switchable:form', value: 'light' }
+
+  - description: TIV-D Mobile
+    country: FR
+    exampleIcon: 'fr/boards/examples/TIV-D_diamond_switchable'
+    icon:
+      - default: 'fr/boards/TIV-D_diamond_switchable'
+      - match: 'railway:signal:speed_limit_distant:switchable:speed'
+        cases:
+          - { regex: '^([6-9]0|1[0-6]0)$', value: 'fr/boards/TIV/TIV-D_diamond_{}', example: 'fr/boards/TIV/TIV-D_diamond_{80}' }
+    tags:
+      - { tag: 'railway:signal:speed_limit_distant', value: 'FR:speed_indicator' }
+      - { tag: 'railway:signal:speed_limit_distant:switchable', value: 'FR:TIV-D' }
+      - { tag: 'railway:signal:speed_limit_distant:switchable:form', value: 'board' }
+
+  - description: TIV-D Mobile
+    country: FR
+    exampleIcon: 'fr/signs/examples/TIV-D_diamond_switchable'
+    icon:
+      - default: 'fr/signs/TIV-D_diamond_switchable'
+      - match: 'railway:signal:speed_limit_distant:switchable:speed'
+        cases:
+          - { regex: '^([6-9]0|1[0-6]0)$', value: 'fr/signs/TIV/TIV-D_diamond_{}', example: 'fr/signs/TIV/TIV-D_diamond_{80}' }
+    tags:
+      - { tag: 'railway:signal:speed_limit_distant', value: 'FR:speed_indicator' }
+      - { tag: 'railway:signal:speed_limit_distant:switchable', value: 'FR:TIV-D' }
+      - { tag: 'railway:signal:speed_limit_distant:switchable:form', value: 'sign' }
+
+  - description: TIV-R Mobile
+    country: FR
+    exampleIcon: 'fr/boxes/examples/TIV-R'
+    icon:
+      - match: 'railway:signal:speed_limit:switchable:speed'
+        cases:
+          - { regex: '^1[0-6]0$', value: 'fr/boxes/TIV-R_wide' }
+          - { regex: '^[2-46-9]0$', value: 'fr/boxes/TIV-R' }
+        default: 'fr/boxes/TIV-R_open'
+      - match: 'railway:signal:speed_limit:switchable:speed'
+        cases:
+          - { regex: '^([2-46-9]0|1[0-6]0)$', value: 'fr/boxes/TIV/TIV-R_{}', example: 'fr/boxes/TIV/TIV-R_{80}' }
+    tags:
+      - { tag: 'railway:signal:speed_limit', value: 'FR:speed_indicator' }
+      - { tag: 'railway:signal:speed_limit:switchable', value: 'FR:TIV-R' }
+      - { tag: 'railway:signal:speed_limit:switchable:form', value: 'light' }
+
+  - description: TIV-R Mobile
+    country: FR
+    exampleIcon: 'fr/boards/examples/TIV-R'
+    icon:
+      - default: 'fr/boards/TIV-R'
+      - match: 'railway:signal:speed_limit:switchable:speed'
+        cases:
+          - { regex: '^([2-46-9]0|1[0-6]0)$', value: 'fr/boards/TIV/TIV-R_{}', example: 'fr/boards/TIV/TIV-R_{80}' }
+    tags:
+      - { tag: 'railway:signal:speed_limit', value: 'FR:speed_indicator' }
+      - { tag: 'railway:signal:speed_limit:switchable', value: 'FR:TIV-R' }
+      - { tag: 'railway:signal:speed_limit:switchable:form', value: 'board' }
+
+  - description: TIV-R Mobile
+    country: FR
+    exampleIcon: 'fr/signs/examples/TIV-R'
+    icon:
+      - default: 'fr/signs/TIV-R'
+      - match: 'railway:signal:speed_limit:switchable:speed'
+        cases:
+          - { regex: '^([2-46-9]0|1[0-6]0)$', value: 'fr/signs/TIV/TIV-R_{}', example: 'fr/signs/TIV/TIV-R_{80}' }
+    tags:
+      - { tag: 'railway:signal:speed_limit', value: 'FR:speed_indicator' }
+      - { tag: 'railway:signal:speed_limit:switchable', value: 'FR:TIV-R' }
+      - { tag: 'railway:signal:speed_limit:switchable:form', value: 'sign' }
+
+  # TIV-D à 1 ou 2 nombres
+
+  - description: TIV-D du type ordinaire
+    country: FR
+    exampleIcon: 'fr/signs/examples/TIV-D_diamond_split'
+    icon:
+      - match: 'railway:signal:speed_limit_distant:fixed:speed'
+        cases:
+          - { regex: '^[0-9]+;[0-9]+$', value: 'fr/signs/TIV-D_diamond_split' }
+        default: 'fr/signs/TIV-D_diamond'
+      - match: 'railway:signal:speed_limit_distant:fixed:speed'
+        cases:
+          # Centered
+          - { regex: '^([1-7]0|[89][05]|1[01][05]|120)$', value: 'fr/signs/TIV/TIV-D_diamond_{}', example: 'fr/signs/TIV/TIV-D_diamond_{120}' }
+          # Aligned to top
+          - { regex: '^([1-7]0|[89][05]|1[01][05]|120);[^;]+$', value: 'fr/signs/TIV/TIV-D_diamond_{}_top', example: 'fr/signs/TIV/TIV-D_diamond_{120}_top' }
+      - match: 'railway:signal:speed_limit_distant:fixed:speed'
+        cases:
+          # Aligned to bottom
+          - { regex: '^[^;]+;([1-7]0|[89][05]|1[01][05]|120)$', value: 'fr/signs/TIV/TIV-D_diamond_{}_bottom', example: 'fr/signs/TIV/TIV-D_diamond_{100}_bottom' }
+    tags:
+      - { tag: 'railway:signal:speed_limit_distant', value: 'FR:speed_indicator' }
+      - { tag: 'railway:signal:speed_limit_distant:fixed', value: 'FR:TIV-D' }
+      - { tag: 'railway:signal:speed_limit_distant:fixed:form', value: 'sign' }
+      - { tag: 'railway:crocodile' }
+
+  - description: TIV-D du type ordinaire
+    country: FR
+    exampleIcon: 'fr/boards/examples/TIV-D_diamond_split'
+    icon:
+      - match: 'railway:signal:speed_limit_distant:fixed:speed'
+        cases:
+          - { regex: '^[0-9]+;[0-9]+$', value: 'fr/boards/TIV-D_diamond_split' }
+        default: 'fr/boards/TIV-D_diamond'
+      - match: 'railway:signal:speed_limit_distant:fixed:speed'
+        cases:
+          # Centered
+          - { regex: '^([1-7]0|[89][05]|1[01][05]|120)$', value: 'fr/boards/TIV/TIV-D_diamond_{}', example: 'fr/boards/TIV/TIV-D_diamond_{120}' }
+          # Aligned to top
+          - { regex: '^([1-7]0|[89][05]|1[01][05]|120);[^;]+$', value: 'fr/boards/TIV/TIV-D_diamond_{}_top', example: 'fr/boards/TIV/TIV-D_diamond_{120}_top' }
+      - match: 'railway:signal:speed_limit_distant:fixed:speed'
+        cases:
+          # Aligned to bottom
+          - { regex: '^[^;]+;([1-7]0|[89][05]|1[01][05]|120)$', value: 'fr/boards/TIV/TIV-D_diamond_{}_bottom', example: 'fr/boards/TIV/TIV-D_diamond_{100}_bottom' }
+    tags:
+      - { tag: 'railway:signal:speed_limit_distant', value: 'FR:speed_indicator' }
+      - { tag: 'railway:signal:speed_limit_distant:fixed', value: 'FR:TIV-D' }
+      - { tag: 'railway:signal:speed_limit_distant:fixed:form', value: 'board' }
+      - { tag: 'railway:crocodile' }
+
+  - description: TIV-D du type ordinaire
+    country: FR
+    exampleIcon: 'fr/signs/examples/TIV-D_square_split'
+    icon:
+      - match: 'railway:signal:speed_limit_distant:fixed:speed'
+        cases:
+          - { regex: '^[0-9]+;[0-9]+$', value: 'fr/signs/TIV-D_square_split' }
+        default: 'fr/signs/TIV-D_square'
+      - match: 'railway:signal:speed_limit_distant:fixed:speed'
+        cases:
+          # Centered
+          - { regex: '^([1-7]0|[89][05]|1[0-3][05]|140)$', value: 'fr/signs/TIV/TIV-D_square_{}', example: 'fr/signs/TIV/TIV-D_square_{140}' }
+          # Aligned to top
+          - { regex: '^([1-7]0|[89][05]|1[0-3][05]|140);[^;]+$', value: 'fr/signs/TIV/TIV-D_square_{}_top', example: 'fr/signs/TIV/TIV-D_square_{140}_top' }
+      - match: 'railway:signal:speed_limit_distant:fixed:speed'
+        cases:
+          # Aligned to bottom
+          - { regex: '^[^;]+;([1-7]0|[89][05]|1[0-3][05]|140)$', value: 'fr/signs/TIV/TIV-D_square_{}_bottom', example: 'fr/signs/TIV/TIV-D_square_{100}_bottom' }
+    tags:
+      - { tag: 'railway:signal:speed_limit_distant', value: 'FR:speed_indicator' }
+      - { tag: 'railway:signal:speed_limit_distant:fixed', value: 'FR:TIV-D' }
+      - { tag: 'railway:signal:speed_limit_distant:fixed:form', value: 'sign' }
+
+  - description: TIV-D du type ordinaire
+    country: FR
+    exampleIcon: 'fr/boards/examples/TIV-D_square_split'
+    icon:
+      - match: 'railway:signal:speed_limit_distant:fixed:speed'
+        cases:
+          - { regex: '^[0-9]+;[0-9]+$', value: 'fr/boards/TIV-D_square_split' }
+        default: 'fr/boards/TIV-D_square'
+      - match: 'railway:signal:speed_limit_distant:fixed:speed'
+        cases:
+          # Centered
+          - { regex: '^([1-7]0|[89][05]|1[0-3][05]|140)$', value: 'fr/boards/TIV/TIV-D_square_{}', example: 'fr/boards/TIV/TIV-D_square_{140}' }
+          # Aligned to top
+          - { regex: '^([1-7]0|[89][05]|1[0-3][05]|140);[^;]+$', value: 'fr/boards/TIV/TIV-D_square_{}_top', example: 'fr/boards/TIV/TIV-D_square_{140}_top' }
+      - match: 'railway:signal:speed_limit_distant:fixed:speed'
+        cases:
+          # Aligned to bottom
+          - { regex: '^[^;]+;([1-7]0|[89][05]|1[0-3][05]|140)$', value: 'fr/boards/TIV/TIV-D_square_{}_bottom', example: 'fr/boards/TIV/TIV-D_square_{100}_bottom' }
+    tags:
+      - { tag: 'railway:signal:speed_limit_distant', value: 'FR:speed_indicator' }
+      - { tag: 'railway:signal:speed_limit_distant:fixed', value: 'FR:TIV-D' }
+      - { tag: 'railway:signal:speed_limit_distant:fixed:form', value: 'board' }
+
+  - description: TIV-D de type C
+    country: FR
+    exampleIcon: 'fr/signs/examples/TIV-D_C'
+    icon:
+      - default: 'fr/signs/TIV-D_C'
+      - match: 'railway:signal:speed_limit_distant:railcar:speed'
+        cases:
+          - { regex: '^([4-7]0|[89][05]|1[0-5][05]|160)$', value: 'fr/signs/TIV/TIV-D_C_{}', example: 'fr/signs/TIV/TIV-D_C_{80}' }
+    tags:
+      - { tag: 'railway:signal:speed_limit_distant', value: 'FR:speed_indicator' }
+      - { tag: 'railway:signal:speed_limit_distant:railcar', value: 'FR:TIV-D' }
+      - { tag: 'railway:signal:speed_limit_distant:railcar:form', value: 'sign' }
+
+  - description: TIV-D de type B
+    country: FR
+    exampleIcon: 'fr/signs/examples/TIV-D_B'
+    icon:
+      - default: 'fr/signs/TIV-D_B'
+      - match: 'railway:signal:speed_limit_distant:fast:speed'
+        cases:
+          - { regex: '^([67]0|[89][05]|1[0-5][05]|1[6-9]0)$', value: 'fr/signs/TIV/TIV-D_B_{}', example: 'fr/signs/TIV/TIV-D_B_{80}' }
+    tags:
+      - { tag: 'railway:signal:speed_limit_distant', value: 'FR:speed_indicator' }
+      - { tag: 'railway:signal:speed_limit_distant:fast', value: 'FR:TIV-D' }
+      - { tag: 'railway:signal:speed_limit_distant:fast:form', value: 'sign' }
+
+  - description: P Board
+    country: FR
+    icon:
+      - match: 'railway:signal:speed_limit_distant:form'
+        cases:
+          - { exact: 'board', value: 'fr/boards/P' }
+        default: 'fr/signs/P'
+    tags:
+      - { tag: 'railway:signal:speed_limit_distant', value: 'FR:P' }
+
+  # Example (from bottom to top):
+  # - L board > pentagonal TIV-D 3
+
+  - description: TIV-D de forme pentagonale
+    country: FR
+    exampleIcon: 'fr/signs/examples/TIV-D_pentagonal'
+    icon:
+      - default: 'fr/signs/TIV-D_pentagonal'
+      - match: 'railway:signal:speed_limit_distant:freight:speed'
+        cases:
+          - { regex: '^[1-9]0$', value: 'fr/signs/TIV/TIV-D_pentagonal_{}', example: 'fr/signs/TIV/TIV-D_pentagonal_{30}' }
+      - match: 'railway:signal:speed_limit_distant:restriction'
+        cases:
+          - { exact: 'FR:L', value: 'fr/signs/locomotive_restriction' }
+        position: bottom
+    tags:
+      - { tag: 'railway:signal:speed_limit_distant', value: 'FR:speed_indicator' }
+      - { tag: 'railway:signal:speed_limit_distant:freight', value: 'FR:TIV-D' }
+      - { tag: 'railway:signal:speed_limit_distant:freight:form', value: 'sign' }
+
+  - description: TIV d'exécution de forme pentagonale
+    country: FR
+    exampleIcon: 'fr/signs/examples/TIV-E_pentagonal'
+    icon:
+      - default: 'fr/signs/TIV-E_pentagonal'
+      - match: 'railway:signal:speed_limit:freight:speed'
+        cases:
+          - { regex: '^[1-9]0$', value: 'fr/signs/TIV/TIV-E_pentagonal_{}', example: 'fr/signs/TIV/TIV-E_pentagonal_{30}' }
+    tags:
+      - { tag: 'railway:signal:speed_limit', value: 'FR:speed_indicator' }
+      - { tag: 'railway:signal:speed_limit:freight', value: 'FR:TIV-E' }
+      - { tag: 'railway:signal:speed_limit:freight:function', value: 'entry' }
+      - { tag: 'railway:signal:speed_limit:freight:form', value: 'sign' }
+
+  - description: Tableau blanc de forme pentagonale
+    country: FR
+    icon: [ default: 'fr/signs/pentagonal_white_board' ]
+    tags:
+      - { tag: 'railway:signal:speed_limit', value: 'FR:speed_indicator' }
+      - { tag: 'railway:signal:speed_limit:freight', value: 'FR:white_board' }
+      - { tag: 'railway:signal:speed_limit:freight:function', value: 'exit' }
+      - { tag: 'railway:signal:speed_limit:freight:form', value: 'sign' }
+
+  # FR: Direction, provenance et IPCS
+
+  - description: TIDD
+    country: FR
+    exampleIcon: 'fr/boxes/examples/TIDD'
+    icon:
+      - default: 'fr/boxes/double'
+      - default: 'fr/boxes/double/TIDD_left'
+    tags:
+      - { tag: 'railway:signal:switch', value: 'FR:TIDD' }
+      - { tag: 'railway:signal:switch:form', value: 'light' }
+
+  - description: Indicateur de Direction
+    country: FR
+    icon:
+      - match: 'railway:signal:route:states'
+        cases:
+          - { exact: 'FR:ID5', value: 'fr/signals/ID5' }
+          - { exact: 'FR:ID4', value: 'fr/signals/ID4' }
+          - { exact: 'FR:ID2', value: 'fr/signals/ID2' }
+        default: 'fr/signals/ID3'
+    tags:
+      - { tag: 'railway:signal:route', value: 'FR:ID' }
+      - { tag: 'railway:signal:route:form', value: 'light' }
+
+  - description: Track Direction Sign
+    country: FR
+    icon:
+      - match: 'railway:signal:route_info:arrangement'
+        cases:
+          - { exact: 'vertical', value: 'fr/signs/vertical_track_direction' }
+        default: 'fr/signs/track_direction'
+    tags:
+      - { tag: 'railway:signal:route_info', value: 'FR:track_direction' }
+      - { tag: 'railway:signal:route_info:form', value: 'sign' }
+
+  - description: Track Indicator Sign
+    country: FR
+    icon: [ default: 'fr/signs/track_name' ]
+    tags:
+      - { tag: 'railway:signal:route_info', value: 'FR:track_name' }
+      - { tag: 'railway:signal:route_info:form', value: 'sign' }
+
+  # FR: double boxes
+
+  - description: TIP
+    country: FR
+    exampleIcon: 'fr/boxes/examples/TIP'
+    icon:
+      - default: 'fr/boxes/double'
+      - match: 'railway:signal:minor:caption'
+        cases:
+          - { regex: '^[1-9]?([0-9])$', value: 'fr/boxes/double/TIP_{}_right', example: 'fr/boxes/double/TIP_{6}_right' }
+        default: 'fr/boxes/double/TIP_{0}_right'
+      - match: 'railway:signal:minor:caption'
+        cases:
+          - { regex: '^([1-9])[0-9]$', value: 'fr/boxes/double/TIP_{}_left', example: 'fr/boxes/double/TIP_{1}_left' }
+    tags:
+      - { tag: 'railway:signal:minor', value: 'FR:TIP' }
+      - { tag: 'railway:signal:minor:form', value: 'light' }
+
+  - description: TLD
+    country: FR
+    icon: [ default: 'fr/boxes/TLD' ]
+    tags:
+      - { tag: 'railway:signal:route_distant', value: 'FR:TLD' }
+      - { tag: 'railway:signal:route_distant:form', value: 'light' }
+      - { tag: 'railway:signal:route_distant:shape', value: 'wide' }
+
+  - description: TLD
+    country: FR
+    exampleIcon: 'fr/boxes/examples/TLD'
+    icon: 
+      - default: 'fr/boxes/double'
+      - default: 'fr/boxes/double/TLD_{2}_right'
+    # TODO create digit icons
+    #icon:
+    #  - default: 'fr/boxes/double'
+    #  - match: 'railway:signal:route_distant:caption'
+    #    cases:
+    #      - { regex: '^([1-9])$', value: 'fr/boxes/double/TLD_{}_right' }
+    #  - match: 'railway:signal:route_distant:caption'
+    #    cases:
+    #      - { regex: '^([1-9])[0-9]$', value: 'fr/boxes/double/TLD_{}_left' }
+    #  - match: 'railway:signal:route_distant:caption'
+    #    cases:
+    #      - { regex: '^[1-9]([0-9])$', value: 'fr/boxes/double/TLD_{}_right' }
+    tags:
+      - { tag: 'railway:signal:route_distant', value: 'FR:TLD' }
+      - { tag: 'railway:signal:route_distant:form', value: 'light' }
+      - { tag: 'railway:signal:route_distant:shape', value: 'double' }
+
+  - description: Caisson double
+    country: FR
+    exampleIcon: 'fr/boxes/examples/D_G'
+    icon:
+      - default: 'fr/boxes/double'
+      - match: 'railway:signal:lightbox:left'
+        cases:
+          - { exact: 'FR:D', value: 'fr/boxes/double/D_left' }
+          - { exact: 'FR:G', value: 'fr/boxes/double/G_left' }
+          - { exact: 'FR:TECS', value: 'fr/boxes/double/TECS_left' }
+          - { exact: 'FR:TSCS', value: 'fr/boxes/double/TSCS_left' }
+          - { exact: 'FR:pantograph_down_advance', value: 'fr/boxes/double/distant_lower_pantograph_left' }
+      - match: 'railway:signal:lightbox:right'
+        cases:
+          - { exact: 'FR:D', value: 'fr/boxes/double/D_right' }
+          - { exact: 'FR:G', value: 'fr/boxes/double/G_right' }
+          - { exact: 'FR:TECS', value: 'fr/boxes/double/TECS_right' }
+          - { exact: 'FR:TSCS', value: 'fr/boxes/double/TSCS_right' }
+          - { exact: 'FR:pantograph_down_advance', value: 'fr/boxes/double/distant_lower_pantograph_right' }
+    tags:
+      - { tag: 'railway:signal:lightbox', value: 'FR:double_lightbox' }
+      - { tag: 'railway:signal:lightbox:form', value: 'light' }
+
+  # FR: boards and their single box equivalents
 
   - description: Tableau D
     country: FR
@@ -7619,178 +7900,6 @@ features:
       - { tag: 'railway:signal:shunting_route:stabling', value: 'FR:G' }
       - { tag: 'railway:signal:shunting_route:stabling:form', value: 'light' }
 
-  - description: Tableau à distance Heurtoir
-    country: FR
-    icon: [ default: 'fr/signs/distant_buffer_stop' ]
-    tags:
-      - { tag: 'railway:signal:shunting_route', value: 'FR:destination' }
-      - { tag: 'railway:signal:shunting_route:buffer_stop', value: 'FR:Heurtoir' }
-      - { tag: 'railway:signal:shunting_route:buffer_stop:form', value: 'sign' }
-
-  - description: Pancarte H
-    country: FR
-    icon: [ default: 'fr/signs/H' ]
-    tags:
-      - { tag: 'railway:signal:shunting', value: 'FR:H' }
-      - { tag: 'railway:signal:shunting:form', value: 'sign' }
-
-  - description: Pancarte Fond de Voie
-    country: FR
-    icon: [ default: 'fr/signs/end_of_track' ]
-    tags:
-      - { tag: 'railway:signal:shunting', value: 'FR:end_of_track' }
-      - { tag: 'railway:signal:shunting:form', value: 'sign' }
-
-  - description: Pancarte MV
-    country: FR
-    icon: [ default: 'fr/signs/MV' ]
-    tags:
-      - { tag: 'railway:signal:shunting', value: 'FR:MV' }
-      - { tag: 'railway:signal:shunting:form', value: 'sign' }
-
-  - description: Pancarte LGR
-    country: FR
-    icon: [ default: 'fr/signs/LGR' ]
-    tags:
-      - { tag: 'railway:signal:shunting', value: 'FR:LGR' }
-      - { tag: 'railway:signal:shunting:form', value: 'sign' }
-
-  - description: Pancarte LM
-    country: FR
-    icon: [ default: 'fr/signs/LM' ]
-    tags:
-      - { tag: 'railway:signal:shunting', value: 'FR:LM' }
-      - { tag: 'railway:signal:shunting:form', value: 'sign' }
-
-  - description: Limite de Manœuvre par l'Embranché'
-    country: FR
-    icon: [ default: 'fr/signs/LM_for_industrial_siding' ]
-    tags:
-      - { tag: 'railway:signal:shunting', value: 'FR:limit' }
-      - { tag: 'railway:signal:shunting:for', value: 'industrial_siding' }
-      - { tag: 'railway:signal:shunting:form', value: 'sign' }
-
-  - description: Limite des Manœuvres TGV
-    country: FR
-    icon: [ default: 'fr/signs/LM_for_highspeed_train' ]
-    tags:
-      - { tag: 'railway:signal:shunting', value: 'FR:limit' }
-      - { tag: 'railway:signal:shunting:for', value: 'highspeed_train' }
-      - { tag: 'railway:signal:shunting:form', value: 'sign' }
-
-  - description: Limite pour Dépotage
-    country: FR
-    icon: [ default: 'fr/signs/LM_for_unloading' ]
-    tags:
-      - { tag: 'railway:signal:shunting', value: 'FR:limit' }
-      - { tag: 'railway:signal:shunting:for', value: 'unloading' }
-      - { tag: 'railway:signal:shunting:form', value: 'sign' }
-
-  - description: Limite de Stationnement
-    country: FR
-    icon: [ default: 'fr/signs/LM_for_parking' ]
-    tags:
-      - { tag: 'railway:signal:shunting', value: 'FR:limit' }
-      - { tag: 'railway:signal:shunting:for', value: 'parking' }
-      - { tag: 'railway:signal:shunting:form', value: 'sign' }
-
-  - description: Limite de Manœuvre
-    country: FR
-    icon: [ default: 'fr/signs/LM_as_text' ]
-    tags:
-      - { tag: 'railway:signal:shunting', value: 'FR:limit' }
-      - { tag: 'railway:signal:shunting:form', value: 'sign' }
-
-  # FR: Direction, provenance et IPCS
-
-  - description: TIDD
-    country: FR
-    exampleIcon: 'fr/boxes/examples/TIDD'
-    icon:
-      - default: 'fr/boxes/double'
-      - default: 'fr/boxes/double/TIDD_left'
-    tags:
-      - { tag: 'railway:signal:switch', value: 'FR:TIDD' }
-      - { tag: 'railway:signal:switch:form', value: 'light' }
-
-  - description: Indicateur de Direction
-    country: FR
-    icon:
-      - match: 'railway:signal:route:states'
-        cases:
-          - { exact: 'FR:ID5', value: 'fr/signals/ID5' }
-          - { exact: 'FR:ID4', value: 'fr/signals/ID4' }
-          - { exact: 'FR:ID2', value: 'fr/signals/ID2' }
-        default: 'fr/signals/ID3'
-    tags:
-      - { tag: 'railway:signal:route', value: 'FR:ID' }
-      - { tag: 'railway:signal:route:form', value: 'light' }
-
-  - description: TIP
-    country: FR
-    exampleIcon: 'fr/boxes/examples/TIP'
-    icon:
-      - default: 'fr/boxes/double'
-      - match: 'railway:signal:minor:caption'
-        cases:
-          - { regex: '^[1-9]?([0-9])$', value: 'fr/boxes/double/TIP_{}_right', example: 'fr/boxes/double/TIP_{6}_right' }
-        default: 'fr/boxes/double/TIP_{0}_right'
-      - match: 'railway:signal:minor:caption'
-        cases:
-          - { regex: '^([1-9])[0-9]$', value: 'fr/boxes/double/TIP_{}_left', example: 'fr/boxes/double/TIP_{1}_left' }
-    tags:
-      - { tag: 'railway:signal:minor', value: 'FR:TIP' }
-      - { tag: 'railway:signal:minor:form', value: 'light' }
-
-  - description: TLD
-    country: FR
-    icon: [ default: 'fr/boxes/TLD' ]
-    tags:
-      - { tag: 'railway:signal:route_distant', value: 'FR:TLD' }
-      - { tag: 'railway:signal:route_distant:form', value: 'light' }
-      - { tag: 'railway:signal:route_distant:shape', value: 'wide' }
-
-  - description: TLD
-    country: FR
-    exampleIcon: 'fr/boxes/examples/TLD'
-    icon: 
-      - default: 'fr/boxes/double'
-      - default: 'fr/boxes/double/TLD_{2}_right'
-    # TODO create digit icons
-    #icon:
-    #  - default: 'fr/boxes/double'
-    #  - match: 'railway:signal:route_distant:caption'
-    #    cases:
-    #      - { regex: '^([1-9])$', value: 'fr/boxes/double/TLD_{}_right' }
-    #  - match: 'railway:signal:route_distant:caption'
-    #    cases:
-    #      - { regex: '^([1-9])[0-9]$', value: 'fr/boxes/double/TLD_{}_left' }
-    #  - match: 'railway:signal:route_distant:caption'
-    #    cases:
-    #      - { regex: '^[1-9]([0-9])$', value: 'fr/boxes/double/TLD_{}_right' }
-    tags:
-      - { tag: 'railway:signal:route_distant', value: 'FR:TLD' }
-      - { tag: 'railway:signal:route_distant:form', value: 'light' }
-      - { tag: 'railway:signal:route_distant:shape', value: 'double' }
-
-  - description: Track Direction Sign
-    country: FR
-    icon:
-      - match: 'railway:signal:route_info:arrangement'
-        cases:
-          - { exact: 'vertical', value: 'fr/signs/vertical_track_direction' }
-        default: 'fr/signs/track_direction'
-    tags:
-      - { tag: 'railway:signal:route_info', value: 'FR:track_direction' }
-      - { tag: 'railway:signal:route_info:form', value: 'sign' }
-
-  - description: Track Indicator Sign
-    country: FR
-    icon: [ default: 'fr/signs/track_name' ]
-    tags:
-      - { tag: 'railway:signal:route_info', value: 'FR:track_name' }
-      - { tag: 'railway:signal:route_info:form', value: 'sign' }
-
   - description: Tableau TECS
     country: FR
     icon: [ default: 'fr/signs/TECS' ]
@@ -7798,7 +7907,7 @@ features:
       - { tag: 'railway:signal:wrong_road', value: 'FR:IPCS' }
       - { tag: 'railway:signal:wrong_road:entry', value: 'FR:TECS' }
       - { tag: 'railway:signal:wrong_road:entry:form', value: 'sign' }
-    
+
   - description: Tableau TECS
     country: FR
     icon: [ default: 'fr/boards/TECS' ]
@@ -7806,7 +7915,7 @@ features:
       - { tag: 'railway:signal:wrong_road', value: 'FR:IPCS' }
       - { tag: 'railway:signal:wrong_road:entry', value: 'FR:TECS' }
       - { tag: 'railway:signal:wrong_road:entry:form', value: 'board' }
-    
+
   - description: Caisson TECS
     country: FR
     exampleIcon: 'fr/boxes/examples/TECS'
@@ -7899,61 +8008,133 @@ features:
       - { tag: 'railway:signal:shunting_route:dead_end', value: 'FR:Imp' }
       - { tag: 'railway:signal:shunting_route:dead_end:form', value: 'light' }
 
-  - description: Caisson double
+  - description: Caisson Givre
     country: FR
-    exampleIcon: 'fr/boxes/examples/D_G'
+    icon: [ default: 'fr/boxes/frost' ]
+    tags:
+      - { tag: 'railway:signal:electricity', value: 'FR:frost' }
+      - { tag: 'railway:signal:electricity:form', value: 'light' }
+
+  - description: Tableau Givre
+    country: FR
+    icon: [ default: 'fr/signs/frost' ]
+    tags:
+      - { tag: 'railway:signal:electricity', value: 'FR:frost' }
+      - { tag: 'railway:signal:electricity:form', value: 'sign' }
+
+  # FR: Signaux et plaques d'Autorisation de Mouvement
+
+  - description: Signal Lumineux d'Autorisation de Mouvement (SLD)
+    country: FR
+    icon: [ default: 'fr/boxes/SLD' ]
+    tags:
+      - { tag: 'railway:signal:departure', value: 'FR:SLD' }
+      - { tag: 'railway:signal:departure:form', value: 'light' }
+
+  - description: DAMM
+    country: FR
+    icon: [ default: 'fr/signals/DAMM' ]
+    tags:
+      - { tag: 'railway:signal:departure', value: 'FR:DAMM' }
+      - { tag: 'railway:signal:departure:form', value: 'light' }
+
+  - description: Répétiteur Lumineux d'Initinéraire (RLI)
+    country: FR
+    icon: [ default: 'fr/boxes/RLI' ]
+    tags:
+      - { tag: 'railway:signal:departure', value: 'FR:RLI' }
+      - { tag: 'railway:signal:departure:form', value: 'light' }
+
+  - description: TLC
+    country: FR
+    icon: [ default: 'fr/boxes/TLC' ]
+    tags:
+      - { tag: 'railway:signal:minor', value: 'FR:TLC' }
+      - { tag: 'railway:signal:minor:form', value: 'light' }
+
+  - description: Pancarte Mi-Blanche Mi-Verte
+    country: FR
+    icon: 
+      - default: 'fr/plates/departure_marker'
+        position: bottom
+    tags:
+      - { tag: 'railway:signal:departure', value: 'FR:departure_marker' }
+      - { tag: 'railway:signal:departure:form', value: 'sign' }
+
+  - description: Plaque de Demande de Départ (DD)
+    country: FR
+    icon: [ default: 'fr/plates/DD' ]
+    tags:
+      - { tag: 'railway:signal:departure', value: 'FR:DD' }
+      - { tag: 'railway:signal:departure:form', value: 'sign' }
+
+  # FR: Plaques de Reconnaissance
+
+  - description: Plaque de Reconnaissance (VAT)
+    country: FR
+    exampleIcon: 'fr/plates/examples/reporting_vat_slot'
     icon:
-      - default: 'fr/boxes/double'
-      - match: 'railway:signal:lightbox:left'
+      - match: 'railway:signal:departure:type'
         cases:
-          - { exact: 'FR:D', value: 'fr/boxes/double/D_left' }
-          - { exact: 'FR:G', value: 'fr/boxes/double/G_left' }
-          - { exact: 'FR:TECS', value: 'fr/boxes/double/TECS_left' }
-          - { exact: 'FR:TSCS', value: 'fr/boxes/double/TSCS_left' }
-          - { exact: 'FR:pantograph_down_advance', value: 'fr/boxes/double/distant_lower_pantograph_left' }
-      - match: 'railway:signal:lightbox:right'
+          - { exact: 'delayed', value: 'fr/plates/delayed_reporting_vat_slot' }
+          - { exact: 'exempt',  value: 'fr/plates/reporting_exemption_vat_slot' }
+        default: 'fr/plates/reporting_vat_slot'
+        position: bottom
+      - match: 'railway:signal:departure:phone:direction'
         cases:
-          - { exact: 'FR:D', value: 'fr/boxes/double/D_right' }
-          - { exact: 'FR:G', value: 'fr/boxes/double/G_right' }
-          - { exact: 'FR:TECS', value: 'fr/boxes/double/TECS_right' }
-          - { exact: 'FR:TSCS', value: 'fr/boxes/double/TSCS_right' }
-          - { exact: 'FR:pantograph_down_advance', value: 'fr/boxes/double/distant_lower_pantograph_right' }
+          - { exact: 'left',  value: 'fr/plates/arrow_left' }
+          - { exact: 'right', value: 'fr/plates/arrow_right' }
     tags:
-      - { tag: 'railway:signal:lightbox', value: 'FR:double_lightbox' }
-      - { tag: 'railway:signal:lightbox:form', value: 'light' }
+      - { tag: 'railway:signal:departure', value: 'FR:reporting' }
+      - { tag: 'railway:signal:departure:form', value: 'sign' }
+      - { tag: 'railway:signal:departure:phone:indicator' }
+      - { tag: 'railway:signal:departure:phone:direction', any: [ 'left', 'right' ] }
 
-  # FR: Radio
-
-  - description: GSM-R Network Marker
-    country: FR
-    icon: [ default: 'fr/signs/GSM-R_F' ]
-    tags:
-      - { tag: 'railway:signal:radio', value: 'FR:marker' }
-      - { tag: 'railway:signal:radio:mode', value: 'FR:GSM-R' }
-      - { tag: 'railway:signal:radio:mode:type', value: 'mode_transition' }
-      - { tag: 'railway:signal:radio:mode:form', value: 'sign' }
-
-  - description: RST Network Marker
-    country: FR
-    icon: [ default: 'fr/signs/RST' ]
-    tags:
-      - { tag: 'railway:signal:radio', value: 'FR:marker' }
-      - { tag: 'railway:signal:radio:mode', value: 'FR:RST' }
-      - { tag: 'railway:signal:radio:mode:type', value: 'mode_transition' }
-      - { tag: 'railway:signal:radio:mode:form', value: 'sign' }
-
-  - description: Change Radio Channel Sign
+  - description: Plaque de Reconnaissance (VAT)
     country: FR
     icon:
-      - match: 'railway:signal:radio:channel:uic_number'
+      - match: 'railway:signal:departure:type'
         cases:
-          - { regex: '^[0-9]+$', value: 'fr/signs/UIC_channel' }
-        default: 'fr/signs/channel'
+          - { exact: 'delayed', value: 'fr/plates/delayed_reporting_vat' }
+          - { exact: 'exempt',  value: 'fr/plates/reporting_exemption_vat' }
+        default: 'fr/plates/reporting_vat'
+        position: bottom
     tags:
-      - { tag: 'railway:signal:radio', value: 'FR:marker' }
-      - { tag: 'railway:signal:radio:channel', value: 'FR:channel' }
-      - { tag: 'railway:signal:radio:channel:type', value: 'channel_transition' }
-      - { tag: 'railway:signal:radio:channel:form', value: 'sign' }
+      - { tag: 'railway:signal:departure', value: 'FR:reporting' }
+      - { tag: 'railway:signal:departure:form', value: 'sign' }
+      - { tag: 'railway:signal:departure:phone:indicator' }
+
+  - description: Plaque de Reconnaissance
+    country: FR
+    exampleIcon: 'fr/plates/examples/reporting_slot'
+    icon:
+      - match: 'railway:signal:departure:type'
+        cases:
+          - { exact: 'delayed', value: 'fr/plates/delayed_reporting_slot' }
+          - { exact: 'exempt',  value: 'fr/plates/reporting_exemption_slot' }
+        default: 'fr/plates/reporting_slot'
+        position: bottom
+      - match: 'railway:signal:departure:phone:direction'
+        cases:
+          - { exact: 'left',  value: 'fr/plates/arrow_left' }
+          - { exact: 'right', value: 'fr/plates/arrow_right' }
+    tags:
+      - { tag: 'railway:signal:departure', value: 'FR:reporting' }
+      - { tag: 'railway:signal:departure:form', value: 'sign' }
+      - { tag: 'railway:signal:departure:phone:direction', any: [ 'left', 'right' ] }
+
+  - description: Plaque de Reconnaissance
+    country: FR
+    icon:
+      - match: 'railway:signal:departure:type'
+        cases:
+          - { exact: 'delayed', value: 'fr/plates/delayed_reporting' }
+          - { exact: 'exempt',  value: 'fr/plates/reporting_exemption' }
+        default: 'fr/plates/reporting'
+        position: bottom
+    tags:
+      - { tag: 'railway:signal:departure', value: 'FR:reporting' }
+      - { tag: 'railway:signal:departure:form', value: 'sign' }   
 
   # FR: TVM
 
@@ -8008,7 +8189,7 @@ features:
       - match: 'railway:signal:position'
         cases:
           - { exact: 'right', value: 'fr/signs/TVM_stop_marker_right' }
-          - { exact: 'overhead', value: 'fr/signs/TVM_stop_marker_top' }
+          - { any: ['bridge', 'overhead'], value: 'fr/signs/TVM_stop_marker_top' }
         default: 'fr/signs/TVM_stop_marker_left'
       - match: 'railway:signal:train_protection:main:type'
         cases:
@@ -8041,15 +8222,6 @@ features:
     tags:
       - { tag: 'railway:signal:short_route', value: 'FR:yellow_band' }
       - { tag: 'railway:signal:short_route:form', value: 'light' }
-
-  # FR: SACEM
-
-  - description: Signal d'annulation
-    country: FR
-    icon: [ default: 'fr/boxes/illuminated_cross' ]
-    tags:
-      - { tag: 'railway:signal:train_protection', value: 'FR:X' }
-      - { tag: 'railway:signal:train_protection:form', value: 'light' }
 
   # FR: Electricity
 
@@ -8250,107 +8422,6 @@ features:
       - { tag: 'railway:signal:electricity:form', value: 'sign' }
       - { tag: 'railway:signal:position', value: 'overhead' }
 
-  - description: Caisson Givre
-    country: FR
-    icon: [ default: 'fr/boxes/frost' ]
-    tags:
-      - { tag: 'railway:signal:electricity', value: 'FR:frost' }
-      - { tag: 'railway:signal:electricity:form', value: 'light' }
-
-  - description: Tableau Givre
-    country: FR
-    icon: [ default: 'fr/signs/frost' ]
-    tags:
-      - { tag: 'railway:signal:electricity', value: 'FR:frost' }
-      - { tag: 'railway:signal:electricity:form', value: 'sign' }
-
-  # FR: other boards
-
-  - description: Pancarte Signaux à Droite
-    country: FR
-    icon: [ default: 'fr/signs/signals_on_right' ]
-    tags:
-      - { tag: 'railway:signal:minor', value: 'FR:signals_on_right' }
-      - { tag: 'railway:signal:minor:form', value: 'sign' }
-
-  - description: Pancarte Signaux à Gauche
-    country: FR
-    icon: [ default: 'fr/signs/signals_on_left' ]
-    tags:
-      - { tag: 'railway:signal:minor', value: 'FR:signals_on_left' }
-      - { tag: 'railway:signal:minor:form', value: 'sign' }
-
-  - description: Signaux de sortie bilatéraux
-    country: FR
-    icon: [ default: 'fr/signs/bilateral_exit_signals' ]
-    tags:
-      - { tag: 'railway:signal:station', value: 'FR:bilateral_exit_signals' }
-      - { tag: 'railway:signal:station:form', value: 'sign' }
-
-  # FR: stations and facilities
-
-  - description: Approche d'un établissement
-    country: FR
-    icon: [ default: 'fr/signs/facility_approach' ]
-    tags:
-      - { tag: 'railway:signal:facility_distant', value: 'FR:marker' }
-      - { tag: 'railway:signal:facility_distant:form', value: 'sign' }
-
-  - description: Approche d'un établissement
-    country: FR
-    icon: [ default: 'fr/signs/facility_approach_simplified' ]
-    tags:
-      - { tag: 'railway:signal:facility_distant', value: 'FR:marker' }
-      - { tag: 'railway:signal:facility_distant:type', value: 'FR:VUSS' }
-      - { tag: 'railway:signal:facility_distant:form', value: 'sign' }
-
-  - description: Limite d'un établissement
-    country: FR
-    icon: [ default: 'fr/signs/facility_boundary' ]
-    tags:
-      - { tag: 'railway:signal:facility', value: 'FR:boundary' }
-      - { tag: 'railway:signal:facility:form', value: 'sign' }
-
-  - description: Pancarte GARE
-    country: FR
-    icon: [ default: 'fr/signs/GARE' ]
-    tags:
-      - { tag: 'railway:signal:station_distant', value: 'FR:GARE' }
-      - { tag: 'railway:signal:station_distant:form', value: 'sign' }
-
-  - description: Pancarte POSTE
-    country: FR
-    icon: [ default: 'fr/signs/POSTE' ]
-    tags:
-      - { tag: 'railway:signal:facility', value: 'FR:POSTE' }
-      - { tag: 'railway:signal:facility:form', value: 'sign' }
-
-  - description: Pancarte à distance Lavage
-    country: FR
-    icon:
-      - match: 'railway:signal:servicing_distant:height'
-        cases:
-          - { exact: 'dwarf', value: 'fr/signs/distant_washing_facility_small' }
-        default: 'fr/signs/distant_washing_facility'
-    tags:
-      - { tag: 'railway:signal:servicing_distant', value: 'FR:washing_facility' }
-      - { tag: 'railway:signal:servicing_distant:form', value: 'sign' }
-
-  - description: Pancarte L (Lavage)
-    country: FR
-    icon: [ default: 'fr/signs/washing_facility' ]
-    tags:
-      - { tag: 'railway:signal:servicing', value: 'FR:L' }
-      - { tag: 'railway:signal:servicing:type', value: 'washing_facility' }
-      - { tag: 'railway:signal:servicing:form', value: 'sign' }
-
-  - description: Limitation de vitesse pour lavage
-    country: FR
-    icon: [ default: 'fr/signs/washing_facility_speed_limit' ]
-    tags:
-      - { tag: 'railway:signal:speed_limit', value: 'FR:washing_facility' }
-      - { tag: 'railway:signal:speed_limit:form', value: 'sign' }
-
   # FR: Stops
 
   - description: Pancarte à distance ARRÊT pour Desserte
@@ -8489,6 +8560,30 @@ features:
     tags:
       - { tag: 'railway:signal:minor', value: 'FR:instruction_board' }
       - { tag: 'railway:signal:minor:form', value: 'sign' }
+
+  # FR: Repères d'arrêt pour coupes et raccordements
+
+  - description: Repère d'arrêt pour raccordement
+    country: FR
+    icon: [ default: 'fr/signs/coupling_stop_marker' ]
+    tags:
+      - { tag: 'railway:signal:coupling', value: 'FR:stop_marker' }
+      - { tag: 'railway:signal:coupling:type', value: 'coupling' }
+      - { tag: 'railway:signal:coupling:form', value: 'sign' }
+
+  - description: Repère d'arrêt pour coupe
+    country: FR
+    icon:
+      - default: 'fr/signs/uncoupling_stop_marker'
+      - match: 'railway:signal:coupling:length'
+        cases:
+          - { regex: '^[0-9]+$', value: 'fr/signs/L/L{}_uncoupling', example: 'fr/signs/L/L{170}_uncoupling' }
+        default: 'fr/signs/L_uncoupling_empty'
+        position: bottom
+    tags:
+      - { tag: 'railway:signal:coupling', value: 'FR:stop_marker' }
+      - { tag: 'railway:signal:coupling:type', value: 'uncoupling' }
+      - { tag: 'railway:signal:coupling:form', value: 'sign' }
 
   # FR: Arrêts voyageurs
 
@@ -8764,6 +8859,210 @@ features:
       - { tag: 'railway:signal:stop:accessibility', value: 'FR:UFR' }
       - { tag: 'railway:signal:stop:accessibility:form', value: 'sign' }
 
+  # FR: stations and facilities
+
+  - description: Approche d'un établissement
+    country: FR
+    icon: [ default: 'fr/signs/facility_approach' ]
+    tags:
+      - { tag: 'railway:signal:facility_distant', value: 'FR:marker' }
+      - { tag: 'railway:signal:facility_distant:form', value: 'sign' }
+
+  - description: Approche d'un établissement
+    country: FR
+    icon: [ default: 'fr/signs/facility_approach_simplified' ]
+    tags:
+      - { tag: 'railway:signal:facility_distant', value: 'FR:marker' }
+      - { tag: 'railway:signal:facility_distant:type', value: 'FR:VUSS' }
+      - { tag: 'railway:signal:facility_distant:form', value: 'sign' }
+
+  - description: Limite d'un établissement
+    country: FR
+    icon: [ default: 'fr/signs/facility_boundary' ]
+    tags:
+      - { tag: 'railway:signal:facility', value: 'FR:boundary' }
+      - { tag: 'railway:signal:facility:form', value: 'sign' }
+
+  - description: Pancarte GARE
+    country: FR
+    icon: [ default: 'fr/signs/GARE' ]
+    tags:
+      - { tag: 'railway:signal:station_distant', value: 'FR:GARE' }
+      - { tag: 'railway:signal:station_distant:form', value: 'sign' }
+
+  - description: Pancarte POSTE
+    country: FR
+    icon: [ default: 'fr/signs/POSTE' ]
+    tags:
+      - { tag: 'railway:signal:facility', value: 'FR:POSTE' }
+      - { tag: 'railway:signal:facility:form', value: 'sign' }
+
+  - description: Pancarte à distance Lavage
+    country: FR
+    icon:
+      - match: 'railway:signal:servicing_distant:height'
+        cases:
+          - { exact: 'dwarf', value: 'fr/signs/distant_washing_facility_small' }
+        default: 'fr/signs/distant_washing_facility'
+    tags:
+      - { tag: 'railway:signal:servicing_distant', value: 'FR:washing_facility' }
+      - { tag: 'railway:signal:servicing_distant:form', value: 'sign' }
+
+  - description: Pancarte L (Lavage)
+    country: FR
+    icon: [ default: 'fr/signs/washing_facility' ]
+    tags:
+      - { tag: 'railway:signal:servicing', value: 'FR:L' }
+      - { tag: 'railway:signal:servicing:type', value: 'washing_facility' }
+      - { tag: 'railway:signal:servicing:form', value: 'sign' }
+
+  - description: Limitation de vitesse pour lavage
+    country: FR
+    icon: [ default: 'fr/signs/washing_facility_speed_limit' ]
+    tags:
+      - { tag: 'railway:signal:speed_limit', value: 'FR:washing_facility' }
+      - { tag: 'railway:signal:speed_limit:form', value: 'sign' }
+
+  # FR: shunting board and signals
+
+  - description: Tableau à distance Heurtoir
+    country: FR
+    icon: [ default: 'fr/signs/distant_buffer_stop' ]
+    tags:
+      - { tag: 'railway:signal:shunting_route', value: 'FR:destination' }
+      - { tag: 'railway:signal:shunting_route:buffer_stop', value: 'FR:Heurtoir' }
+      - { tag: 'railway:signal:shunting_route:buffer_stop:form', value: 'sign' }
+
+  - description: Pancarte H
+    country: FR
+    icon: [ default: 'fr/signs/H' ]
+    tags:
+      - { tag: 'railway:signal:shunting', value: 'FR:H' }
+      - { tag: 'railway:signal:shunting:form', value: 'sign' }
+
+  - description: Pancarte Fond de Voie
+    country: FR
+    icon: [ default: 'fr/signs/end_of_track' ]
+    tags:
+      - { tag: 'railway:signal:shunting', value: 'FR:end_of_track' }
+      - { tag: 'railway:signal:shunting:form', value: 'sign' }
+
+  - description: Pancarte MV
+    country: FR
+    icon: [ default: 'fr/signs/MV' ]
+    tags:
+      - { tag: 'railway:signal:shunting', value: 'FR:MV' }
+      - { tag: 'railway:signal:shunting:form', value: 'sign' }
+
+  - description: Pancarte LGR
+    country: FR
+    icon: [ default: 'fr/signs/LGR' ]
+    tags:
+      - { tag: 'railway:signal:shunting', value: 'FR:LGR' }
+      - { tag: 'railway:signal:shunting:form', value: 'sign' }
+
+  - description: Pancarte LM
+    country: FR
+    icon: [ default: 'fr/signs/LM' ]
+    tags:
+      - { tag: 'railway:signal:shunting', value: 'FR:LM' }
+      - { tag: 'railway:signal:shunting:form', value: 'sign' }
+
+  - description: Limite de Manœuvre par l'Embranché'
+    country: FR
+    icon: [ default: 'fr/signs/LM_for_industrial_siding' ]
+    tags:
+      - { tag: 'railway:signal:shunting', value: 'FR:limit' }
+      - { tag: 'railway:signal:shunting:for', value: 'industrial_siding' }
+      - { tag: 'railway:signal:shunting:form', value: 'sign' }
+
+  - description: Limite des Manœuvres TGV
+    country: FR
+    icon: [ default: 'fr/signs/LM_for_highspeed_train' ]
+    tags:
+      - { tag: 'railway:signal:shunting', value: 'FR:limit' }
+      - { tag: 'railway:signal:shunting:for', value: 'highspeed_train' }
+      - { tag: 'railway:signal:shunting:form', value: 'sign' }
+
+  - description: Limite pour Dépotage
+    country: FR
+    icon: [ default: 'fr/signs/LM_for_unloading' ]
+    tags:
+      - { tag: 'railway:signal:shunting', value: 'FR:limit' }
+      - { tag: 'railway:signal:shunting:for', value: 'unloading' }
+      - { tag: 'railway:signal:shunting:form', value: 'sign' }
+
+  - description: Limite de Stationnement
+    country: FR
+    icon: [ default: 'fr/signs/LM_for_parking' ]
+    tags:
+      - { tag: 'railway:signal:shunting', value: 'FR:limit' }
+      - { tag: 'railway:signal:shunting:for', value: 'parking' }
+      - { tag: 'railway:signal:shunting:form', value: 'sign' }
+
+  - description: Limite de Manœuvre
+    country: FR
+    icon: [ default: 'fr/signs/LM_as_text' ]
+    tags:
+      - { tag: 'railway:signal:shunting', value: 'FR:limit' }
+      - { tag: 'railway:signal:shunting:form', value: 'sign' }
+
+  # FR: Radio
+
+  - description: GSM-R Network Marker
+    country: FR
+    icon: [ default: 'fr/signs/GSM-R_F' ]
+    tags:
+      - { tag: 'railway:signal:radio', value: 'FR:marker' }
+      - { tag: 'railway:signal:radio:mode', value: 'FR:GSM-R' }
+      - { tag: 'railway:signal:radio:mode:type', value: 'mode_transition' }
+      - { tag: 'railway:signal:radio:mode:form', value: 'sign' }
+
+  - description: RST Network Marker
+    country: FR
+    icon: [ default: 'fr/signs/RST' ]
+    tags:
+      - { tag: 'railway:signal:radio', value: 'FR:marker' }
+      - { tag: 'railway:signal:radio:mode', value: 'FR:RST' }
+      - { tag: 'railway:signal:radio:mode:type', value: 'mode_transition' }
+      - { tag: 'railway:signal:radio:mode:form', value: 'sign' }
+
+  - description: Change Radio Channel Sign
+    country: FR
+    icon:
+      - match: 'railway:signal:radio:channel:uic_number'
+        cases:
+          - { regex: '^[0-9]+$', value: 'fr/signs/UIC_channel' }
+        default: 'fr/signs/channel'
+    tags:
+      - { tag: 'railway:signal:radio', value: 'FR:marker' }
+      - { tag: 'railway:signal:radio:channel', value: 'FR:channel' }
+      - { tag: 'railway:signal:radio:channel:type', value: 'channel_transition' }
+      - { tag: 'railway:signal:radio:channel:form', value: 'sign' }
+
+  # FR: other boards
+
+  - description: Pancarte Signaux à Droite
+    country: FR
+    icon: [ default: 'fr/signs/signals_on_right' ]
+    tags:
+      - { tag: 'railway:signal:minor', value: 'FR:signals_on_right' }
+      - { tag: 'railway:signal:minor:form', value: 'sign' }
+
+  - description: Pancarte Signaux à Gauche
+    country: FR
+    icon: [ default: 'fr/signs/signals_on_left' ]
+    tags:
+      - { tag: 'railway:signal:minor', value: 'FR:signals_on_left' }
+      - { tag: 'railway:signal:minor:form', value: 'sign' }
+
+  - description: Signaux de sortie bilatéraux
+    country: FR
+    icon: [ default: 'fr/signs/bilateral_exit_signals' ]
+    tags:
+      - { tag: 'railway:signal:station', value: 'FR:bilateral_exit_signals' }
+      - { tag: 'railway:signal:station:form', value: 'sign' }
+
   # FR: level crossings
 
   - description: Pancarte à distance PN
@@ -8819,278 +9118,6 @@ features:
     tags:
       - { tag: 'railway:signal:whistle', value: 'FR:S' }
       - { tag: 'railway:signal:whistle:form', value: 'sign' }
-
-  # Examples (from bottom to top):
-  # - Z > Ordinary-type TIV-D 80 (square) > C-type TIV-D 90
-  # - Z > Lower pantograph
-  # - R > Km 181.4 > C-type TIV-D 160 > B-type TIV-D 150
-  # - R > Km 74.7 > Ordinary-type TIV-D 110 (square)
-  # - Reduced clearance > Z > Pentagonal TIV-E 5
-  # - 2 Tunnels > Reduced clearance
-
-  - description: Pancarte Tunnel
-    country: FR
-    icon: [ default: 'fr/signs/tunnel' ]
-    tags:
-      - { tag: 'railway:signal:structure', value: 'FR:tunnel' }
-      - { tag: 'railway:signal:structure:type', value: 'tunnel' }
-      - { tag: 'railway:signal:structure:form', value: 'sign' }
-
-  - description: Pancarte Gabarit Réduit
-    country: FR
-    icon: [ default: 'fr/signs/reduced_clearance' ]
-    tags:
-      - { tag: 'railway:signal:clearance', value: 'FR:reduced_clearance' }
-      - { tag: 'railway:signal:clearance:form', value: 'sign' }
-
-  - description: Pancarte Z
-    country: FR
-    icon: [ default: 'fr/signs/Z' ]
-    tags:
-      - { tag: 'railway:signal:speed_limit', value: 'FR:marker' }
-      - { tag: 'railway:signal:speed_limit:main', value: 'FR:Z' }
-      - { tag: 'railway:signal:speed_limit:main:function', value: 'entry' }
-      - { tag: 'railway:signal:speed_limit:main:form', value: 'sign' }
-
-  - description: Pancarte R
-    country: FR
-    icon: [ default: 'fr/signs/R' ]
-    tags:
-      - { tag: 'railway:signal:speed_limit', value: 'FR:marker' }
-      - { tag: 'railway:signal:speed_limit:main', value: 'FR:R' }
-      - { tag: 'railway:signal:speed_limit:main:function', value: 'exit' }
-      - { tag: 'railway:signal:speed_limit:main:form', value: 'sign' }
-
-  - description: Pancarte Km
-    country: FR
-    icon: [ default: 'fr/signs/Km' ]
-    tags:
-      - { tag: 'railway:signal:speed_limit', value: 'FR:marker' }
-      - { tag: 'railway:signal:speed_limit:transition', value: 'FR:Km' }
-      - { tag: 'railway:signal:speed_limit:transition:form', value: 'sign' }
-
-  # FR: TIV
-
-  - description: TIV-D Mobile
-    country: FR
-    exampleIcon: 'fr/boxes/TIV/TIV-D_{80}'
-    icon:
-      - match: 'railway:signal:speed_limit_distant:switchable:speed'
-        cases:
-          - { regex: '^([6-9]|1[0-6])0$', value: 'fr/boxes/TIV/TIV-D_{}', example: 'fr/boxes/TIV/TIV-D_{80}' }
-        default: 'fr/boxes/TIV-D_open'
-    tags:
-      - { tag: 'railway:signal:speed_limit_distant', value: 'FR:speed_indicator' }
-      - { tag: 'railway:signal:speed_limit_distant:switchable', value: 'FR:TIV-D' }
-      - { tag: 'railway:signal:speed_limit_distant:switchable:form', value: 'light' }
-
-  - description: TIV-D Mobile
-    country: FR
-    icon:
-      - match: 'railway:signal:speed_limit_distant:switchable:speed'
-        cases:
-          - { regex: '^([6-9]|1[0-6])0$', value: 'fr/signs/TIV/TIV-D_diamond_{}', example: 'fr/signs/TIV/TIV-D_diamond_{80}' }
-        default: 'fr/signs/TIV-D_diamond_switchable'
-    tags:
-      - { tag: 'railway:signal:speed_limit_distant', value: 'FR:speed_indicator' }
-      - { tag: 'railway:signal:speed_limit_distant:switchable', value: 'FR:TIV-D' }
-      - { tag: 'railway:signal:speed_limit_distant:switchable:form', value: 'sign' }
-
-  - description: TIV-R Mobile
-    country: FR
-    exampleIcon: 'fr/boxes/TIV/TIV-R_{80}'
-    icon:
-      - match: 'railway:signal:speed_limit:switchable:speed'
-        cases:
-          - { regex: '^([2-4]|[6-9]|1[0-6])0$', value: 'fr/boxes/TIV/TIV-R_{}', example: 'fr/boxes/TIV/TIV-R_{80}' }
-        default: 'fr/boxes/TIV-R_open'
-    tags:
-      - { tag: 'railway:signal:speed_limit', value: 'FR:speed_indicator' }
-      - { tag: 'railway:signal:speed_limit:switchable', value: 'FR:TIV-R' }
-      - { tag: 'railway:signal:speed_limit:switchable:form', value: 'light' }
-
-  - description: TIV-R Mobile
-    country: FR
-    icon:
-      - match: 'railway:signal:speed_limit:switchable:speed'
-        cases:
-          - { regex: '^([2-4]|[6-9]|1[0-6])0$', value: 'fr/signs/TIV/TIV-R_{}', example: 'fr/signs/TIV/TIV-R_{80}' }
-        default: 'fr/signs/TIV-R'
-    tags:
-      - { tag: 'railway:signal:speed_limit', value: 'FR:speed_indicator' }
-      - { tag: 'railway:signal:speed_limit:switchable', value: 'FR:TIV-R' }
-      - { tag: 'railway:signal:speed_limit:switchable:form', value: 'sign' }
-
-  # TIV-D à 1 ou 2 nombres
-
-  - description: TIV-D du type ordinaire
-    country: FR
-    exampleIcon: 'fr/signs/examples/TIV-D_diamond_split'
-    icon:
-      - match: 'railway:signal:speed_limit_distant:fixed:speed'
-        cases:
-          - { regex: '^[0-9]+;[0-9]+$', value: 'fr/signs/TIV-D_diamond_split' }
-      - match: 'railway:signal:speed_limit_distant:fixed:speed'
-        cases:
-          # Centered
-          - { regex: '^([1-7]0|[89][05]|1[01][05]|120)$', value: 'fr/signs/TIV/TIV-D_diamond_{}', example: 'fr/signs/TIV/TIV-D_diamond_{120}' }
-          # Aligned to top
-          - { regex: '^([1-7]0|[89][05]|1[01][05]|120);[^;]+$', value: 'fr/signs/TIV/TIV-D_diamond_{}_top', example: 'fr/signs/TIV/TIV-D_diamond_{120}_top' }
-        default: 'fr/signs/TIV-D_diamond'
-      - match: 'railway:signal:speed_limit_distant:fixed:speed'
-        cases:
-          # Aligned to bottom
-          - { regex: '^[^;]+;([1-7]0|[89][05]|1[01][05]|120)$', value: 'fr/signs/TIV/TIV-D_diamond_{}_bottom', example: 'fr/signs/TIV/TIV-D_diamond_{100}_bottom' }
-    tags:
-      - { tag: 'railway:signal:speed_limit_distant', value: 'FR:speed_indicator' }
-      - { tag: 'railway:signal:speed_limit_distant:fixed', value: 'FR:TIV-D' }
-      - { tag: 'railway:signal:speed_limit_distant:fixed:form', value: 'sign' }
-      - { tag: 'railway:crocodile' }
-
-  - description: TIV-D du type ordinaire
-    country: FR
-    exampleIcon: 'fr/boards/examples/TIV-D_diamond_split'
-    icon:
-      - match: 'railway:signal:speed_limit_distant:fixed:speed'
-        cases:
-          - { regex: '^[0-9]+;[0-9]+$', value: 'fr/boards/TIV-D_diamond_split' }
-      - match: 'railway:signal:speed_limit_distant:fixed:speed'
-        cases:
-          # Centered
-          - { regex: '^([1-7]0|[89][05]|1[01][05]|120)$', value: 'fr/boards/TIV/TIV-D_diamond_{}', example: 'fr/boards/TIV/TIV-D_diamond_{120}' }
-          # Aligned to top
-          - { regex: '^([1-7]0|[89][05]|1[01][05]|120);[^;]+$', value: 'fr/boards/TIV/TIV-D_diamond_{}_top', example: 'fr/boards/TIV/TIV-D_diamond_{120}_top' }
-        default: 'fr/boards/TIV-D_diamond'
-      - match: 'railway:signal:speed_limit_distant:fixed:speed'
-        cases:
-          # Aligned to bottom
-          - { regex: '^[^;]+;([1-7]0|[89][05]|1[01][05]|120)$', value: 'fr/boards/TIV/TIV-D_diamond_{}_bottom', example: 'fr/boards/TIV/TIV-D_diamond_{100}_bottom' }
-    tags:
-      - { tag: 'railway:signal:speed_limit_distant', value: 'FR:speed_indicator' }
-      - { tag: 'railway:signal:speed_limit_distant:fixed', value: 'FR:TIV-D' }
-      - { tag: 'railway:signal:speed_limit_distant:fixed:form', value: 'board' }
-      - { tag: 'railway:crocodile' }
-
-  - description: TIV-D du type ordinaire
-    country: FR
-    exampleIcon: 'fr/signs/examples/TIV-D_square_split'
-    icon:
-      - match: 'railway:signal:speed_limit_distant:fixed:speed'
-        cases:
-          - { regex: '^[0-9]+;[0-9]+$', value: 'fr/signs/TIV-D_square_split' }
-      - match: 'railway:signal:speed_limit_distant:fixed:speed'
-        cases:
-          # Centered
-          - { regex: '^([1-7]0|[89][05]|1[0-3][05]|140)$', value: 'fr/signs/TIV/TIV-D_square_{}', example: 'fr/signs/TIV/TIV-D_square_{140}' }
-          # Aligned to top
-          - { regex: '^([1-7]0|[89][05]|1[0-3][05]|140);[^;]+$', value: 'fr/signs/TIV/TIV-D_square_{}_top', example: 'fr/signs/TIV/TIV-D_square_{140}_top' }
-        default: 'fr/signs/TIV-D_square'
-      - match: 'railway:signal:speed_limit_distant:fixed:speed'
-        cases:
-          # Aligned to bottom
-          - { regex: '^[^;]+;([1-7]0|[89][05]|1[0-3][05]|140)$', value: 'fr/signs/TIV/TIV-D_square_{}_bottom', example: 'fr/signs/TIV/TIV-D_square_{140}_bottom' }
-    tags:
-      - { tag: 'railway:signal:speed_limit_distant', value: 'FR:speed_indicator' }
-      - { tag: 'railway:signal:speed_limit_distant:fixed', value: 'FR:TIV-D' }
-      - { tag: 'railway:signal:speed_limit_distant:fixed:form', value: 'sign' }
-
-  - description: TIV-D du type ordinaire
-    country: FR
-    exampleIcon: 'fr/boards/examples/TIV-D_square_split'
-    icon:
-      - match: 'railway:signal:speed_limit_distant:fixed:speed'
-        cases:
-          - { regex: '^[0-9]+;[0-9]+$', value: 'fr/boards/TIV-D_square_split' }
-      - match: 'railway:signal:speed_limit_distant:fixed:speed'
-        cases:
-          # Centered
-          - { regex: '^([1-7]0|[89][05]|1[0-3][05]|140)$', value: 'fr/boards/TIV/TIV-D_square_{}', example: 'fr/boards/TIV/TIV-D_square_{140}' }
-          # Aligned to top
-          - { regex: '^([1-7]0|[89][05]|1[0-3][05]|140);[^;]+$', value: 'fr/boards/TIV/TIV-D_square_{}_top', example: 'fr/boards/TIV/TIV-D_square_{140}_top' }
-        default: 'fr/boards/TIV-D_square'
-      - match: 'railway:signal:speed_limit_distant:fixed:speed'
-        cases:
-          # Aligned to bottom
-          - { regex: '^[^;]+;([1-7]0|[89][05]|1[0-3][05]|140)$', value: 'fr/boards/TIV/TIV-D_square_{}_bottom', example: 'fr/boards/TIV/TIV-D_square_{140}_bottom' }
-    tags:
-      - { tag: 'railway:signal:speed_limit_distant', value: 'FR:speed_indicator' }
-      - { tag: 'railway:signal:speed_limit_distant:fixed', value: 'FR:TIV-D' }
-      - { tag: 'railway:signal:speed_limit_distant:fixed:form', value: 'board' }
-
-  - description: TIV-D de type C
-    country: FR
-    icon:
-      - match: 'railway:signal:speed_limit_distant:railcar:speed'
-        cases:
-          - { regex: '^([4-7]0|[89][05]|1[0-5][05]|160)$', value: 'fr/signs/TIV/TIV-D_C_{}', example: 'fr/signs/TIV/TIV-D_C_{80}' }
-        default: 'fr/signs/TIV-D_C'
-    tags:
-      - { tag: 'railway:signal:speed_limit_distant', value: 'FR:speed_indicator' }
-      - { tag: 'railway:signal:speed_limit_distant:railcar', value: 'FR:TIV-D' }
-      - { tag: 'railway:signal:speed_limit_distant:railcar:form', value: 'sign' }
-
-  - description: TIV-D de type B
-    country: FR
-    icon:
-      - match: 'railway:signal:speed_limit_distant:fast:speed'
-        cases:
-          - { regex: '^([67]0|[89][05]|1[0-5][05]|1[6-9]0)$', value: 'fr/signs/TIV/TIV-D_B_{}', example: 'fr/signs/TIV/TIV-D_B_{80}' }
-        default: 'fr/signs/TIV-D_B'
-    tags:
-      - { tag: 'railway:signal:speed_limit_distant', value: 'FR:speed_indicator' }
-      - { tag: 'railway:signal:speed_limit_distant:fast', value: 'FR:TIV-D' }
-      - { tag: 'railway:signal:speed_limit_distant:fast:form', value: 'sign' }
-
-  - description: P Board
-    country: FR
-    icon:
-      - match: 'railway:signal:speed_limit_distant:form'
-        cases:
-          - { exact: 'board', value: 'fr/boards/P' }
-        default: 'fr/signs/P'
-    tags:
-      - { tag: 'railway:signal:speed_limit_distant', value: 'FR:P' }
-
-  # Example (from bottom to top):
-  # - L board > pentagonal TIV-D 3
-
-  - description: TIV-D de forme pentagonale
-    country: FR
-    icon:
-      - match: 'railway:signal:speed_limit_distant:freight:speed'
-        cases:
-          - { regex: '^[1-9]0$', value: 'fr/signs/TIV/TIV-D_pentagonal_{}', example: 'fr/signs/TIV/TIV-D_pentagonal_{30}' }
-        default: 'fr/signs/TIV-D_pentagonal'
-      - match: 'railway:signal:speed_limit_distant:restriction'
-        cases:
-          - { exact: 'FR:L', value: 'fr/signs/locomotive_restriction' }
-        position: bottom
-    tags:
-      - { tag: 'railway:signal:speed_limit_distant', value: 'FR:speed_indicator' }
-      - { tag: 'railway:signal:speed_limit_distant:freight', value: 'FR:TIV-D' }
-      - { tag: 'railway:signal:speed_limit_distant:freight:form', value: 'sign' }
-
-  - description: TIV d'exécution de forme pentagonale
-    country: FR
-    icon:
-      - match: 'railway:signal:speed_limit:freight:speed'
-        cases:
-          - { regex: '^[1-9]0$', value: 'fr/signs/TIV/TIV-E_pentagonal_{}', example: 'fr/signs/TIV/TIV-E_pentagonal_{30}' }
-        default: 'fr/signs/TIV-E_pentagonal'
-    tags:
-      - { tag: 'railway:signal:speed_limit', value: 'FR:speed_indicator' }
-      - { tag: 'railway:signal:speed_limit:freight', value: 'FR:TIV-E' }
-      - { tag: 'railway:signal:speed_limit:freight:function', value: 'entry' }
-      - { tag: 'railway:signal:speed_limit:freight:form', value: 'sign' }
-
-  - description: Tableau blanc de forme pentagonale
-    country: FR
-    icon: [ default: 'fr/signs/pentagonal_white_board' ]
-    tags:
-      - { tag: 'railway:signal:speed_limit', value: 'FR:speed_indicator' }
-      - { tag: 'railway:signal:speed_limit:freight', value: 'FR:white_board' }
-      - { tag: 'railway:signal:speed_limit:freight:function', value: 'exit' }
-      - { tag: 'railway:signal:speed_limit:freight:form', value: 'sign' }
 
   # FR: snowplow markers
 
@@ -9155,99 +9182,99 @@ features:
 
   # --- ETCS --- #
 
-  - description: ETCS Transition Marker
-    country: FR
-    icon: [ default: 'fr/signs/ETCS/transition_marker' ]
-    tags:
-      - { tag: 'railway:signal:train_protection', value: 'ETCS:marker' }
-      - { tag: 'railway:signal:train_protection:system_change', value: 'ETCS:level_transition' }
-      - { tag: 'railway:signal:train_protection:system_change:form', value: 'sign' }
-
-  - description: ETCS Stop Marker
-    country: FR
-    icon:
-      - match: 'railway:signal:position'
-        cases:
-          - { exact: 'right', value: 'fr/signs/ETCS/stop_marker_right' }
-          - { any: ['bridge', 'overhead'], value: 'fr/signs/ETCS/stop_marker_top' }
-        default: 'fr/signs/ETCS/stop_marker_left'
-    tags:
-      - { tag: 'railway:signal:train_protection', value: 'ETCS:marker' }
-      - { tag: 'railway:signal:train_protection:main', value: 'ETCS:stop_marker' }
-      - { tag: 'railway:signal:train_protection:main:form', value: 'sign' }
-
-  - description: ETCS Location Marker
-    country: FR
-    icon: [ default: 'fr/signs/ETCS/location_marker' ]
-    tags:
-      - { tag: 'railway:signal:train_protection', value: 'ETCS:marker' }
-      - { tag: 'railway:signal:train_protection:main', value: 'ETCS:location_marker' }
-      - { tag: 'railway:signal:train_protection:main:form', value: 'sign' }
-
-  - description: Distant Neutral Section
-    country: FR
-    icon: [ default: 'fr/signs/ETCS/distant_neutral_section' ]
-    tags:
-      - { tag: 'railway:signal:electricity', value: 'ETCS:power_off_advance' }
-      - { tag: 'railway:signal:electricity:type', value: 'power_off_advance' }
-      - { tag: 'railway:signal:electricity:form', value: 'sign' }
-
-  - description: Begin of Neutral Section
-    country: FR
-    icon: [ default: 'fr/signs/ETCS/neutral_section' ]
-    tags:
-      - { tag: 'railway:signal:electricity', value: 'ETCS:power_off' }
-      - { tag: 'railway:signal:electricity:type', value: 'power_off' }
-      - { tag: 'railway:signal:electricity:form', value: 'sign' }
-
-  - description: End of Neutral Section
-    country: FR
-    icon: [ default: 'fr/signs/ETCS/end_of_neutral_section' ]
-    tags:
-      - { tag: 'railway:signal:electricity', value: 'ETCS:power_on' }
-      - { tag: 'railway:signal:electricity:type', value: 'power_on' }
-      - { tag: 'railway:signal:electricity:form', value: 'sign' }
-
-  - description: Distant Lower Pantograph
-    country: FR
-    icon: [ default: 'fr/signs/ETCS/distant_lower_pantograph' ]
-    tags:
-      - { tag: 'railway:signal:electricity', value: 'ETCS:pantograph_down_advance' }
-      - { tag: 'railway:signal:electricity:type', value: 'pantograph_down_advance' }
-      - { tag: 'railway:signal:electricity:form', value: 'sign' }
-
-  - description: Lower Pantograph
-    country: FR
-    icon: [ default: 'fr/signs/ETCS/lower_pantograph' ]
-    tags:
-      - { tag: 'railway:signal:electricity', value: 'ETCS:pantograph_down' }
-      - { tag: 'railway:signal:electricity:type', value: 'pantograph_down' }
-      - { tag: 'railway:signal:electricity:form', value: 'sign' }
-
-  - description: Raise Pantograph
-    country: FR
-    icon: [ default: 'fr/signs/ETCS/raise_pantograph' ]
-    tags:
-      - { tag: 'railway:signal:electricity', value: 'ETCS:pantograph_up' }
-      - { tag: 'railway:signal:electricity:type', value: 'pantograph_up' }
-      - { tag: 'railway:signal:electricity:form', value: 'sign' }
-
-  - description: Distant End of Catenary
-    country: FR
-    icon: [ default: 'fr/signs/ETCS/distant_end_of_catenary' ]
-    tags:
-      - { tag: 'railway:signal:electricity', value: 'ETCS:end_of_catenary_advance' }
-      - { tag: 'railway:signal:electricity:type', value: 'end_of_catenary_advance' }
-      - { tag: 'railway:signal:electricity:form', value: 'sign' }
-
-  - description: End of Catenary
-    country: FR
-    icon: [ default: 'fr/signs/ETCS/end_of_catenary' ]
-    tags:
-      - { tag: 'railway:signal:electricity', value: 'ETCS:end_of_catenary' }
-      - { tag: 'railway:signal:electricity:type', value: 'end_of_catenary' }
-      - { tag: 'railway:signal:electricity:form', value: 'sign' }
-      - { tag: 'railway:signal:position', value: 'overhead' }
+  #- description: ETCS Transition Marker
+  #  country: FR
+  #  icon: [ default: 'fr/signs/ETCS/transition_marker' ]
+  #  tags:
+  #    - { tag: 'railway:signal:train_protection', value: 'ETCS:marker' }
+  #    - { tag: 'railway:signal:train_protection:system_change', value: 'ETCS:level_transition' }
+  #    - { tag: 'railway:signal:train_protection:system_change:form', value: 'sign' }
+  #
+  #- description: ETCS Stop Marker
+  #  country: FR
+  #  icon:
+  #    - match: 'railway:signal:position'
+  #      cases:
+  #        - { exact: 'right', value: 'fr/signs/ETCS/stop_marker_right' }
+  #        - { any: ['bridge', 'overhead'], value: 'fr/signs/ETCS/stop_marker_top' }
+  #      default: 'fr/signs/ETCS/stop_marker_left'
+  #  tags:
+  #    - { tag: 'railway:signal:train_protection', value: 'ETCS:marker' }
+  #    - { tag: 'railway:signal:train_protection:main', value: 'ETCS:stop_marker' }
+  #    - { tag: 'railway:signal:train_protection:main:form', value: 'sign' }
+  #
+  #- description: ETCS Location Marker
+  #  country: FR
+  #  icon: [ default: 'fr/signs/ETCS/location_marker' ]
+  #  tags:
+  #    - { tag: 'railway:signal:train_protection', value: 'ETCS:marker' }
+  #    - { tag: 'railway:signal:train_protection:main', value: 'ETCS:location_marker' }
+  #    - { tag: 'railway:signal:train_protection:main:form', value: 'sign' }
+  #
+  #- description: Distant Neutral Section
+  #  country: FR
+  #  icon: [ default: 'fr/signs/ETCS/distant_neutral_section' ]
+  #  tags:
+  #    - { tag: 'railway:signal:electricity', value: 'ETCS:power_off_advance' }
+  #    - { tag: 'railway:signal:electricity:type', value: 'power_off_advance' }
+  #    - { tag: 'railway:signal:electricity:form', value: 'sign' }
+  #
+  #- description: Begin of Neutral Section
+  #  country: FR
+  #  icon: [ default: 'fr/signs/ETCS/neutral_section' ]
+  #  tags:
+  #    - { tag: 'railway:signal:electricity', value: 'ETCS:power_off' }
+  #    - { tag: 'railway:signal:electricity:type', value: 'power_off' }
+  #    - { tag: 'railway:signal:electricity:form', value: 'sign' }
+  #
+  #- description: End of Neutral Section
+  #  country: FR
+  #  icon: [ default: 'fr/signs/ETCS/end_of_neutral_section' ]
+  #  tags:
+  #    - { tag: 'railway:signal:electricity', value: 'ETCS:power_on' }
+  #    - { tag: 'railway:signal:electricity:type', value: 'power_on' }
+  #    - { tag: 'railway:signal:electricity:form', value: 'sign' }
+  #
+  #- description: Distant Lower Pantograph
+  #  country: FR
+  #  icon: [ default: 'fr/signs/ETCS/distant_lower_pantograph' ]
+  #  tags:
+  #    - { tag: 'railway:signal:electricity', value: 'ETCS:pantograph_down_advance' }
+  #    - { tag: 'railway:signal:electricity:type', value: 'pantograph_down_advance' }
+  #    - { tag: 'railway:signal:electricity:form', value: 'sign' }
+  #
+  #- description: Lower Pantograph
+  #  country: FR
+  #  icon: [ default: 'fr/signs/ETCS/lower_pantograph' ]
+  #  tags:
+  #    - { tag: 'railway:signal:electricity', value: 'ETCS:pantograph_down' }
+  #    - { tag: 'railway:signal:electricity:type', value: 'pantograph_down' }
+  #    - { tag: 'railway:signal:electricity:form', value: 'sign' }
+  #
+  #- description: Raise Pantograph
+  #  country: FR
+  #  icon: [ default: 'fr/signs/ETCS/raise_pantograph' ]
+  #  tags:
+  #    - { tag: 'railway:signal:electricity', value: 'ETCS:pantograph_up' }
+  #    - { tag: 'railway:signal:electricity:type', value: 'pantograph_up' }
+  #    - { tag: 'railway:signal:electricity:form', value: 'sign' }
+  #
+  #- description: Distant End of Catenary
+  #  country: FR
+  #  icon: [ default: 'fr/signs/ETCS/distant_end_of_catenary' ]
+  #  tags:
+  #    - { tag: 'railway:signal:electricity', value: 'ETCS:end_of_catenary_advance' }
+  #    - { tag: 'railway:signal:electricity:type', value: 'end_of_catenary_advance' }
+  #    - { tag: 'railway:signal:electricity:form', value: 'sign' }
+  #
+  #- description: End of Catenary
+  #  country: FR
+  #  icon: [ default: 'fr/signs/ETCS/end_of_catenary' ]
+  #  tags:
+  #    - { tag: 'railway:signal:electricity', value: 'ETCS:end_of_catenary' }
+  #    - { tag: 'railway:signal:electricity:type', value: 'end_of_catenary' }
+  #    - { tag: 'railway:signal:electricity:form', value: 'sign' }
+  #    - { tag: 'railway:signal:position', value: 'overhead' }
 
   # --- GB --- #
 
