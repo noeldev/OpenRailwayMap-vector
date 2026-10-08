@@ -1,10 +1,10 @@
 -- Clustered stations without importance
 CREATE MATERIALIZED VIEW IF NOT EXISTS stations_clustered AS
   SELECT
-    row_number() over (order by name, station, railway_ref, uic_ref, feature) as id,
+    (MIN(facilities.id)::TEXT || '-' || station || '-' || feature) as id,
     name,
     station,
-    railway_ref,
+    map_reference,
     uic_ref,
     feature,
     state,
@@ -21,29 +21,31 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS stations_clustered AS
   FROM (
     SELECT
       *,
-      ST_ClusterDBSCAN(way, 400, 1) OVER (PARTITION BY name, station, railway_ref, uic_ref, feature, state) AS cluster_id
+      ST_ClusterDBSCAN(way, 400, 1) OVER (PARTITION BY name, station, map_reference, uic_ref, feature, state) AS cluster_id
     FROM (
       SELECT
         st_collect(any_value(s.way), st_collect(distinct q.way)) as way,
         name,
         station,
-        railway_ref,
-        uic_ref,
+        map_reference,
+        s."references"->'uic' as uic_ref,
         feature,
         state,
         id
       FROM stations s
-      left join stop_areas sa
-        ON (ARRAY[s.osm_id] <@ sa.node_ref_ids AND s.osm_type = 'N')
-          OR (ARRAY[s.osm_id] <@ sa.way_ref_ids AND s.osm_type = 'W')
-          OR (ARRAY[s.osm_id] <@ sa.stop_ref_ids AND s.osm_type = 'N')
+      LEFT JOIN stations_stop_areas ssa
+        ON ssa.station_id = s.id
+      LEFT JOIN stop_areas sa
+        ON ssa.stop_area_osm_id = sa.osm_id
       left join (
         select
           sa.osm_id as stop_area_id,
           se.way
         from stop_areas sa
+        join stop_area_entrances sae
+          on sae.stop_area_osm_id = sa.osm_id
         join station_entrances se
-          on array[se.osm_id] <@ sa.node_ref_ids
+          on se.osm_id = sae.entrance_osm_id
 
         union all
 
@@ -51,13 +53,15 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS stations_clustered AS
           sa.osm_id as stop_area_id,
           pl.way
         from stop_areas sa
+        join stop_area_platforms sap
+          on sap.stop_area_id = sa.osm_id
         join platforms pl
-          on array[pl.osm_id] <@ sa.platform_ref_ids
+          on pl.osm_id = sap.platform_id
       ) q on q.stop_area_id = sa.osm_id
-      group by name, station, railway_ref, uic_ref, feature, state, id
+      group by name, station, map_reference, uic_ref, feature, state, id
     ) stations_with_entrances
   ) AS facilities
-  GROUP BY cluster_id, name, station, railway_ref, uic_ref, feature, state;
+  GROUP BY cluster_id, name, station, map_reference, uic_ref, feature, state;
 
 CREATE INDEX IF NOT EXISTS stations_clustered_station_ids
   ON stations_clustered
@@ -69,25 +73,27 @@ CREATE INDEX IF NOT EXISTS stations_clustered_station_ids
 CREATE MATERIALIZED VIEW IF NOT EXISTS grouped_stations_with_importance AS
   SELECT
     -- Aggregated station columns
-    array_agg(DISTINCT station_id ORDER BY station_id) as station_ids,
-    hstore(string_agg(nullif(name_tags::text, ''), ',')) as name_tags,
-    array_agg(osm_id ORDER BY osm_id) as osm_ids,
-    array_agg(osm_type ORDER BY osm_id) as osm_types,
-    array_remove(string_to_array(array_to_string(array_agg(DISTINCT array_to_string(s.operator, U&'\001E')), U&'\001E'), U&'\001E'), null) as operator,
-    array_remove(string_to_array(array_to_string(array_agg(DISTINCT array_to_string(s.network, U&'\001E')), U&'\001E'), U&'\001E'), null) as network,
-    array_remove(string_to_array(array_to_string(array_agg(DISTINCT array_to_string(s.position, U&'\001E')), U&'\001E'), U&'\001E'), null) as position,
-    array_remove(array_agg(DISTINCT s.wikidata ORDER BY s.wikidata), null) as wikidata,
-    array_remove(array_agg(DISTINCT s.wikimedia_commons ORDER BY s.wikimedia_commons), null) as wikimedia_commons,
-    array_remove(array_agg(DISTINCT s.wikimedia_commons_file ORDER BY s.wikimedia_commons_file), null) as wikimedia_commons_file,
-    array_remove(array_agg(DISTINCT s.wikipedia ORDER BY s.wikipedia), null) as wikipedia,
-    array_remove(array_agg(DISTINCT s.image ORDER BY s.image), null) as image,
-    array_remove(array_agg(DISTINCT s.mapillary ORDER BY s.mapillary), null) as mapillary,
-    array_remove(array_agg(DISTINCT s.note ORDER BY s.note), null) as note,
-    array_remove(array_agg(DISTINCT s.description ORDER BY s.description), null) as description,
-    array_remove(string_to_array(array_to_string(array_agg(DISTINCT array_to_string(s.yard_purpose, U&'\001E')), U&'\001E'), U&'\001E'), null) as yard_purpose,
+    array_agg(DISTINCT clustered.station_id ORDER BY clustered.station_id) as station_ids,
+    nullif(hstore_agg(name_tags), ''::hstore) as name_tags,
+    nullif(hs_concat(coalesce(hstore_agg(sa."references"), ''::hstore), coalesce(hstore_agg(s."references"), ''::hstore)), ''::hstore) as "references",
+    array_agg(s.osm_id ORDER BY s.osm_id) as osm_ids,
+    array_agg(osm_type ORDER BY s.osm_id) as osm_types,
+    nullif(array_remove(string_to_array(array_to_string(array_agg(DISTINCT array_to_string(s.operator, U&'\001E')), U&'\001E'), U&'\001E'), null), '{}'::text[]) as operator,
+    nullif(array_remove(array_agg(DISTINCT s.owner), null), '{}'::text[]) as owner,
+    nullif(array_remove(string_to_array(array_to_string(array_agg(DISTINCT array_to_string(s.network, U&'\001E')), U&'\001E'), U&'\001E'), null), '{}'::text[]) as network,
+    nullif(array_remove(string_to_array(array_to_string(array_agg(DISTINCT array_to_string(s.position, U&'\001E')), U&'\001E'), U&'\001E'), null), '{}'::text[]) as position,
+    nullif(array_remove(array_agg(DISTINCT s.wikidata ORDER BY s.wikidata), null), '{}'::text[]) as wikidata,
+    nullif(array_remove(array_agg(DISTINCT s.wikimedia_commons ORDER BY s.wikimedia_commons), null), '{}'::text[]) as wikimedia_commons,
+    nullif(array_remove(array_agg(DISTINCT s.wikimedia_commons_file ORDER BY s.wikimedia_commons_file), null), '{}'::text[]) as wikimedia_commons_file,
+    nullif(array_remove(array_agg(DISTINCT s.wikipedia ORDER BY s.wikipedia), null), '{}'::text[]) as wikipedia,
+    nullif(array_remove(array_agg(DISTINCT s.image ORDER BY s.image), null), '{}'::text[]) as image,
+    nullif(array_remove(array_agg(DISTINCT s.mapillary ORDER BY s.mapillary), null), '{}'::text[]) as mapillary,
+    nullif(array_remove(array_agg(DISTINCT s.note ORDER BY s.note), null), '{}'::text[]) as note,
+    nullif(array_remove(array_agg(DISTINCT s.description ORDER BY s.description), null), '{}'::text[]) as description,
+    nullif(array_remove(string_to_array(array_to_string(array_agg(DISTINCT array_to_string(s.yard_purpose, U&'\001E')), U&'\001E'), U&'\001E'), null), '{}'::text[]) as yard_purpose,
     bool_or(s.yard_hump) as yard_hump,
     -- Routes
-    array_remove(string_to_array(array_to_string(array_agg(DISTINCT array_to_string(sr.route_ids, U&'\001E')), U&'\001E'), U&'\001E'), null)::bigint[] as route_ids,
+    nullif(array_remove(string_to_array(array_to_string(array_agg(DISTINCT array_to_string(sr.route_ids, U&'\001E')), U&'\001E'), U&'\001E'), null)::bigint[], '{}'::bigint[]) as route_ids,
     -- Aggregated importance
     max(si.importance) as importance,
     max(si.discr_iso) as discr_iso,
@@ -97,7 +103,7 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS grouped_stations_with_importance AS
     any_value(clustered.buffered) as buffered,
     any_value(clustered.name) as name,
     any_value(clustered.station) as station,
-    any_value(clustered.railway_ref) as railway_ref,
+    any_value(clustered.map_reference) as map_reference,
     any_value(clustered.uic_ref) as uic_ref,
     any_value(clustered.feature) as feature,
     any_value(clustered.state) as state,
@@ -106,13 +112,13 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS grouped_stations_with_importance AS
     SELECT
       id,
       UNNEST(sc.station_ids) as station_id,
-      name, station, railway_ref, uic_ref, feature, state, station_ids, center, buffered, count
+      name, station, map_reference, uic_ref, feature, state, station_ids, center, buffered, count
     FROM stations_clustered sc
   ) clustered
   JOIN stations s
     ON clustered.station_id = s.id
   JOIN stations_with_importance si
-    ON clustered.station_id = si.id
+    ON clustered.station_id = si.station_id
   LEFT JOIN (
     SELECT
       id,
@@ -133,22 +139,26 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS grouped_stations_with_importance AS
     GROUP BY id
   ) sr
     ON clustered.station_id = sr.id
+  LEFT JOIN stations_stop_areas ssa
+    ON ssa.station_id = s.id
+  LEFT JOIN stop_areas sa
+    ON ssa.stop_area_osm_id = sa.osm_id
   GROUP BY clustered.id;
-
-CREATE INDEX IF NOT EXISTS grouped_stations_with_importance_center_index
-  ON grouped_stations_with_importance
-    USING GIST(center);
 
 CREATE INDEX IF NOT EXISTS grouped_stations_with_importance_buffered_index
   ON grouped_stations_with_importance
     USING GIST(buffered);
 
-CREATE INDEX IF NOT EXISTS grouped_stations_with_importance_osm_ids_index
+CREATE INDEX IF NOT EXISTS grouped_stations_with_importance_station_index
   ON grouped_stations_with_importance
-    USING GIN(osm_ids);
+    USING GIN(station_ids);
+
+CREATE UNIQUE INDEX IF NOT EXISTS grouped_stations_with_importance_id
+  ON grouped_stations_with_importance
+    USING BTREE(id);
 
 CLUSTER grouped_stations_with_importance
-  USING grouped_stations_with_importance_center_index;
+  USING grouped_stations_with_importance_buffered_index;
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS stop_area_groups_buffered AS
   SELECT
@@ -157,18 +167,12 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS stop_area_groups_buffered AS
   FROM stop_area_groups sag
   JOIN stop_areas sa
     ON ARRAY[sa.osm_id] <@ sag.stop_area_ref_ids
+  JOIN stations_stop_areas ssa
+     ON ssa.stop_area_osm_id = sa.osm_id
   JOIN stations s
-    ON (ARRAY[s.osm_id] <@ sa.node_ref_ids AND s.osm_type = 'N')
-      OR (ARRAY[s.osm_id] <@ sa.way_ref_ids AND s.osm_type = 'W')
-      OR (ARRAY[s.osm_id] <@ sa.stop_ref_ids AND s.osm_type = 'N')
-  JOIN (
-    SELECT
-      unnest(osm_ids) AS osm_id,
-      unnest(osm_types) AS osm_type,
-      buffered
-    FROM grouped_stations_with_importance
-  ) gs
-    ON s.osm_id = gs.osm_id and s.osm_type = gs.osm_type
+    ON ssa.station_id = s.id
+  JOIN grouped_stations_with_importance gs
+    ON ARRAY[s.id] <@ gs.station_ids
   GROUP BY sag.osm_id
   -- Only use station area groups that have more than one station area
   HAVING COUNT(distinct sa.osm_id) > 1;
@@ -179,3 +183,70 @@ CREATE INDEX IF NOT EXISTS stop_area_groups_buffered_index
 
 CLUSTER stop_area_groups_buffered
   USING stop_area_groups_buffered_index;
+
+CREATE MATERIALIZED VIEW IF NOT EXISTS interlocking_buffered AS
+  SELECT
+    interlocking_id as id,
+    CASE
+      WHEN bool_or(landuse) THEN ST_PointOnSurface(ST_RemoveRepeatedPoints(ST_Collect(way)))
+      ELSE ST_Centroid(ST_ConvexHull(ST_RemoveRepeatedPoints(ST_Collect(way))))
+    END as center,
+    CASE
+      WHEN bool_or(landuse) THEN ST_Buffer(ST_RemoveRepeatedPoints(ST_Collect(way)), 10)
+      ELSE ST_Buffer(ST_ConvexHull(ST_RemoveRepeatedPoints(ST_Collect(way))), 20)
+    END as buffered
+  FROM (
+    SELECT
+      interlocking_id,
+      s.way,
+      false as landuse,
+      false as facility
+    FROM interlocking_switch "is"
+    JOIN railway_switches s
+      ON "is".switch_id = s.osm_id
+
+    UNION ALL
+
+    SELECT
+      interlocking_id,
+    l.way,
+      true as landuse,
+      false as facility
+    FROM interlocking_landuse il
+    JOIN landuse l
+      ON il.landuse_id = l.id
+
+    UNION ALL
+
+    SELECT
+      interlocking_id,
+      s.way,
+      false as landuse,
+      false as facility
+    FROM interlocking_signal "is"
+    JOIN signals s
+      ON "is".signal_id = s.osm_id
+
+    UNION ALL
+
+    SELECT
+      interlocking_id,
+      b.way,
+      false as landuse,
+      false as facility
+    FROM interlocking_signal_box isb
+    JOIN boxes b
+      ON isb.signal_box_id = b.id
+  ) elements
+  GROUP BY elements.interlocking_id;
+
+CREATE INDEX IF NOT EXISTS interlocking_buffered_index
+  ON interlocking_buffered
+    USING GIST(buffered);
+
+CREATE UNIQUE INDEX IF NOT EXISTS interlocking_id_index
+  ON interlocking_buffered
+    USING BTREE(id);
+
+CLUSTER interlocking_buffered
+  USING interlocking_buffered_index;

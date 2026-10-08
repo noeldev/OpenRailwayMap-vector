@@ -69,11 +69,14 @@ CREATE OR REPLACE VIEW station_nodes_stop_positions_rel_count AS
       s.id as id,
       rs.route_id as route_id
     FROM stations s
+    JOIN stations_stop_areas ssa
+      ON ssa.station_id = s.id
     JOIN stop_areas sa
-      ON (ARRAY[s.osm_id] <@ sa.node_ref_ids AND s.osm_type = 'N')
-        OR (ARRAY[s.osm_id] <@ sa.way_ref_ids AND s.osm_type = 'W')
+      ON ssa.stop_area_osm_id = sa.osm_id
+    JOIN stop_area_route_stops sars
+      ON sa.osm_id = sars.stop_area_id
     JOIN route_stop rs
-      ON ARRAY[rs.stop_id] <@ sa.stop_ref_ids
+      ON rs.stop_id = sars.route_stop_id
   ) sr
   GROUP BY id;
 
@@ -97,9 +100,10 @@ CREATE OR REPLACE VIEW station_nodes_platforms_rel_count AS
       s.id as id,
       r.osm_id as route_id
     FROM stations s
+    JOIN stations_stop_areas ssa
+      ON ssa.station_id = s.id
     JOIN stop_areas sa
-      ON (ARRAY[s.osm_id] <@ sa.node_ref_ids AND s.osm_type = 'N')
-        OR (ARRAY[s.osm_id] <@ sa.way_ref_ids AND s.osm_type = 'W')
+      ON ssa.stop_area_osm_id = sa.osm_id
     JOIN routes r
       ON sa.platform_ref_ids && r.platform_ref_ids
   ) sr
@@ -134,13 +138,13 @@ CREATE OR REPLACE VIEW stations_with_importance_view AS
     SELECT
       s.id,
       -- The square root and factor are made to align the importance factors of yards
-      --   with stations. A 320 km yard is equivalent to a station with 140 routes.
+      --   with stations. A 320 km yard is equivalent to a station with 94 routes.
       SQRT(
-        SUM(ST_Length(ST_Intersection(ST_Buffer(s.way, 50), l.way)))
-      ) / 4 AS importance
+        SUM(ST_Length(ST_Transform(ST_Intersection(CASE WHEN GeometryType(s.way) = 'POINT' THEN ST_Buffer(s.way, 50) ELSE s.way END, l.way), 4326), false))
+      ) / 6 AS importance
     FROM stations s
     JOIN railway_line l
-      ON ST_DWithin(s.way, l.way, 50)
+      ON ST_DWithin(s.way, l.way, CASE WHEN GeometryType(s.way) = 'POINT' THEN 50 ELSE 0 END)
     WHERE s.feature = 'yard'
     GROUP BY s.id
 
@@ -155,7 +159,8 @@ CREATE OR REPLACE VIEW stations_with_importance_view AS
 
 -- Not a materialized view because the Osm2Pgsql scripts update the discrete isolation values
 CREATE TABLE IF NOT EXISTS stations_with_importance (
-  id BIGINT NOT NULL PRIMARY KEY,
+  id SERIAL NOT NULL PRIMARY KEY,
+  station_id TEXT NOT NULL,
   way GEOMETRY NOT NULL,
   importance NUMERIC NOT NULL DEFAULT 0,
   discr_iso REAL NOT NULL DEFAULT 0.0, -- Column name is fixed
