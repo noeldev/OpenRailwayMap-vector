@@ -93,13 +93,19 @@ node tools/orm.mjs render 123456789 --category main,distant --scale 20 --backgro
 Resolves the signals like the ORM import (`signal_features.sql.mjs`: per
 signal type, the first matching YAML feature wins; features ordered by
 their YAML position, lowest at the bottom) and lays them out like the map:
-icons composited by position as in `proxy/js/ui.js`, features stacked in
+icons composited by position as in `proxy/js/ui.js`, inline features
+(`inline: true` in the YAML, e.g. the single light boxes) drawn side by side,
+two per row, features and rows stacked in
 one centered pile with a 2 px gap, ORM's generic cross over deactivated
-features.
+features. In the console, `[category]` is the category the map filters the
+feature (or its row) under.
 
 Scenes: every node id, every tag set of a `--tags-file`, is drawn side by
 side with its name below, which makes before/after or variant comparisons
-easy. `--tag key=value` adds or overrides a tag in every scene, or builds a
+easy. Scenes wrap to a new row past `--width` map pixels (default 400, i.e.
+4000 px at the default scale; `--width 0` keeps one row); the scenes of a
+row share the same baseline, and long names wrap over several lines. Every
+row is its own `<g>`. `--tag key=value` adds or overrides a tag in every scene, or builds a
 single scene on its own. A tags file is either a JSON object of tags (one
 scene), an array of `{ "name": ..., "tags": {...} }`, an object of
 `name -> tags`, or plain `key=value` lines as copied from an editor's text
@@ -141,9 +147,15 @@ shown and why. A section that also matches but only checks tags the drawn
 section checks too (e.g. the reporting plate without arrow, behind the one
 with arrow) is a fallback: it is listed only with `--verbose`. The image is
 named after the tags file when it is the only source, otherwise after the
-first scene (`--out` overrides both). Signals sharing a type (e.g. a B and a C TIV-D, both
-`speed_limit_distant`, or the R and Km signs) need one section drawing
+first scene (`--out` overrides both).
+
+Signals sharing a type (e.g. a B and a C TIV-D, both `speed_limit_distant`,
+or the R and Km signs) are drawn together when their subkeys are declared as
+subtypes of the type (`types[].subtypes`, e.g.
+`railway:signal:speed_limit_distant:fast` and `:railcar`): the import then
+has one feature column per subtype. Otherwise they need one section drawing
 them together, as the TVM stop marker does with the transition marker.
+`tools/render-examples/subtypes.json` shows such nodes.
 
 ### resize
 
@@ -337,6 +349,10 @@ like the "L" on the length plates, just needs `text-anchor="middle"` and a
 single `<text>`/`<tspan>` holding the whole string: the renderer's own text
 layout keeps it centered for every value, with no per-template font-metrics
 configuration needed.
+
+A non-numeric value (e.g. the Roman numerals of the SLM identification
+plates) replaces the whole text instead of a digit run: such a template
+holds the value alone.
 
 #### Running it
 

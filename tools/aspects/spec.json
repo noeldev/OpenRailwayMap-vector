@@ -607,6 +607,11 @@
       "layers": [ "boxes/single", "boxes/single/TSCS" ]
     },
     {
+      "name": "distant_lower_pantograph",
+      "mode": "compose",
+      "layers": [ "boxes/single", "boxes/single/distant_lower_pantograph" ]
+    },
+    {
       "name": "SAS",
       "mode": "compose",
       "layers": [ "boxes/medium", "boxes/medium/SAS" ]
@@ -615,6 +620,15 @@
       "name": "Imp",
       "mode": "compose",
       "layers": [ "boxes/medium", "boxes/medium/Imp" ]
+    },
+    {
+      "name": "SLM",
+      "_source": "SLM identification plate, ref, regex ^(I{1,3}|IV|V)$ - matches 'fr/plates/SLM/SLM_{}'. Roman numerals: the whole text is replaced.",
+      "mode": "fused",
+      "template": "plates/SLM.svg",
+      "overlayDir": "plates/SLM",
+      "fileName": "{name}_{v}",
+      "values": [ "I", "II", "III", "IV", "V" ]
     },
     {
       "name": "reporting_slot",

@@ -1,22 +1,29 @@
 // icon-composer.mjs
 // Builds one SVG from resolved signal features, laid out like the ORM map:
 // the icons of a feature are composited like proxy/js/ui.js layoutImages()
-// (center/top/bottom/left/right), and the features of a node are stacked in
-// one pile, bottom first, centered, with a 2 px gap (proxy/js/styles.mjs
-// icon-offset). Several scenes (nodes or tag sets) can be drawn next to
-// each other, each with its name below. Every feature is its own <g>, every
-// icon a nested <svg> keeping its own viewBox.
+// (center/top/bottom/left/right), the features of a row (inline features)
+// are placed side by side, vertically centered, with a 2 px gap (ui.js
+// generateImage()), and the rows of a node are stacked in one pile, bottom
+// first, centered, with a 2 px gap (proxy/js/styles.mjs icon-offset). Several scenes (nodes or tag sets) are drawn side by side,
+// each with its name below, and wrap to a new row past a maximum width.
+// Every row of scenes, scene and row of features is its own <g>, every icon a nested <svg>
+// keeping its own viewBox.
 
 import fs from 'node:fs';
 import path from 'node:path';
 import { DOMParser, XMLSerializer } from '@xmldom/xmldom';
 
 const FEATURE_GAP = 2;
+const ROW_FEATURE_GAP = 2;
 const SCENE_GAP = 20;
+const ROW_GAP = 15;
 const MARGIN = 5;
 const LABEL_SIZE = 4;
-const LABEL_HEIGHT = 8;
-const LABEL_CHAR_WIDTH = 2.4;
+const LABEL_LINE_HEIGHT = 5;
+const LABEL_TOP = 3;
+const LABEL_CHAR_WIDTH = 2.2;
+// Narrowest label column, in characters, whatever the scene width.
+const LABEL_MIN_CHARS = 18;
 // Common fonts first: a bare sans-serif may resolve to a symbol font.
 const LABEL_FONT = 'Arial, Helvetica, DejaVu Sans, sans-serif';
 const DEACTIVATED_ICON = 'general/signal-deactivated';
@@ -112,25 +119,42 @@ function iconMarkup(icon, x, y) {
   return new XMLSerializer().serializeToString(svg).replace(/ xmlns="http:\/\/www\.w3\.org\/2000\/svg"/, '');
 }
 
+// Lays out a row of features side by side, vertically centered: the icons
+// of every feature with their offsets in the row.
+function layoutRow(row, symbolsRoot) {
+  const members = row.members.map((feature) => {
+    const loaded = feature.icons.map((icon) => ({ ...loadIcon(symbolsRoot, icon.id), position: icon.position }));
+    return layoutIcons(loaded);
+  });
+  const height = Math.max(...members.map((m) => m.height));
+  let width = -ROW_FEATURE_GAP;
+  const icons = members.flatMap((member) => {
+    const x0 = width + ROW_FEATURE_GAP;
+    const y0 = (height - member.height) / 2;
+    width = x0 + member.width;
+    return member.icons.map((icon) => ({ ...icon, x: x0 + icon.x, y: y0 + icon.y }));
+  });
+  return { row, icons, width, height };
+}
+
 // Lays out the pile of one scene: returns its size and a function drawing
 // it at a given origin.
-function layoutScene(features, symbolsRoot, deactivatedIcon) {
-  const blocks = features.map((feature) => {
-    const loaded = feature.icons.map((icon) => ({ ...loadIcon(symbolsRoot, icon.id), position: icon.position }));
-    return { feature, ...layoutIcons(loaded) };
-  });
+function layoutScene(rows, symbolsRoot, deactivatedIcon) {
+  const blocks = rows.map((row) => layoutRow(row, symbolsRoot));
   const width = Math.max(0, ...blocks.map((b) => b.width));
   const height = blocks.reduce((sum, b) => sum + b.height, 0) + FEATURE_GAP * Math.max(0, blocks.length - 1);
 
   const draw = (x, y, prefix, featureAttrs) => {
     const parts = [];
     let bottom = y + height;
-    blocks.forEach(({ feature, icons, width: w, height: h }, index) => {
+    blocks.forEach(({ row, icons, width: w, height: h }, index) => {
       const x0 = x + (width - w) / 2;
       const y0 = bottom - h;
-      parts.push(`<g id="${prefix}feature-${index}-${escapeXml(feature.type ?? 'unknown')}"${featureAttrs}><title>${escapeXml(feature.description)}</title>`);
+      const types = row.members.map((f) => f.type ?? 'unknown').join('+');
+      const title = row.members.map((f) => f.description).join(', ');
+      parts.push(`<g id="${prefix}feature-${index}-${escapeXml(types)}"${featureAttrs}><title>${escapeXml(title)}</title>`);
       icons.forEach((icon) => parts.push(iconMarkup(icon, x0 + icon.x, y0 + icon.y)));
-      if (feature.deactivated) {
+      if (row.deactivated) {
         parts.push(iconMarkup(deactivatedIcon, x0 + (w - deactivatedIcon.width) / 2, y0 + (h - deactivatedIcon.height) / 2));
       }
       parts.push('</g>');
@@ -142,42 +166,89 @@ function layoutScene(features, symbolsRoot, deactivatedIcon) {
   return { width, height, draw };
 }
 
+// Splits a label into lines of about `maxChars` characters, at spaces.
+function wrapLabel(text, maxChars) {
+  const lines = [];
+  for (const word of text.split(/\s+/)) {
+    const last = lines.length - 1;
+    if (last >= 0 && lines[last].length + 1 + word.length <= maxChars) lines[last] += ` ${word}`;
+    else lines.push(word);
+  }
+  return lines;
+}
+
+// Greedy packing of scene slots into rows no wider than `maxWidth` (0: one row).
+function packRows(items, maxWidth) {
+  const rows = [];
+  for (const item of items) {
+    const row = rows[rows.length - 1];
+    const width = row ? row.width + SCENE_GAP + item.slot : item.slot;
+    if (row && (maxWidth <= 0 || width <= maxWidth)) {
+      row.items.push(item);
+      row.width = width;
+    } else {
+      rows.push({ items: [item], width: item.slot });
+    }
+  }
+  for (const row of rows) {
+    row.height = Math.max(...row.items.map((item) => item.height));
+    row.labelHeight = Math.max(...row.items.map((item) => item.labelHeight));
+  }
+  return rows;
+}
+
 /**
- * Renders scenes side by side, bottom-aligned, into one SVG document.
- * @param {Array<{name: string, features: Array}>} scenes
- *                                     Features (bottom first) come from matchSignals().
+ * Renders scenes side by side into one SVG document, in rows wrapped at
+ * `maxWidth`. Scenes of a row share the same baseline (the signal anchor).
+ * @param {Array<{name: string, rows: Array}>} scenes
+ *                                     Rows (bottom first) come from groupRows().
  * @param {string} symbolsRoot         The symbols/ folder.
- * @param {{scale: number, title: string, background: string|null, labels: boolean}} options
- *                                     A background also adds a shadow under each feature.
+ * @param {{scale: number, title: string, background: string|null, labels: boolean, maxWidth: number}} options
+ *                                     A background also adds a shadow under each
+ *                                     feature. maxWidth is in map pixels, 0 for one row.
  */
-export function composeSvg(scenes, symbolsRoot, { scale, title, background, labels }) {
+export function composeSvg(scenes, symbolsRoot, { scale, title, background, labels, maxWidth }) {
   const deactivatedIcon = loadIcon(symbolsRoot, DEACTIVATED_ICON);
   const laidOut = scenes.map((scene) => {
-    const layout = layoutScene(scene.features, symbolsRoot, deactivatedIcon);
-    // Each scene gets a slot wide enough for its label.
-    const slot = labels ? Math.max(layout.width, scene.name.length * LABEL_CHAR_WIDTH) : layout.width;
-    return { ...scene, ...layout, slot };
+    const layout = layoutScene(scene.rows, symbolsRoot, deactivatedIcon);
+    // The label wraps to the scene width, with a minimum column.
+    const maxChars = Math.max(LABEL_MIN_CHARS, Math.floor(layout.width / LABEL_CHAR_WIDTH));
+    const lines = labels ? wrapLabel(scene.name, maxChars) : [];
+    const labelWidth = Math.max(0, ...lines.map((line) => line.length)) * LABEL_CHAR_WIDTH;
+    const labelHeight = lines.length ? LABEL_TOP + lines.length * LABEL_LINE_HEIGHT : 0;
+    return { ...scene, ...layout, lines, labelHeight, slot: Math.max(layout.width, labelWidth) };
   });
-  const labelHeight = labels ? LABEL_HEIGHT : 0;
+  const rows = packRows(laidOut, maxWidth);
 
-  const contentWidth = laidOut.reduce((sum, s) => sum + s.slot, 0) + SCENE_GAP * Math.max(0, laidOut.length - 1);
-  const contentHeight = Math.max(0, ...laidOut.map((s) => s.height));
+  const contentWidth = Math.max(...rows.map((row) => row.width));
+  const contentHeight = rows.reduce((sum, row) => sum + row.height + row.labelHeight, 0) + ROW_GAP * (rows.length - 1);
   const totalWidth = contentWidth + 2 * MARGIN;
-  const totalHeight = contentHeight + labelHeight + 2 * MARGIN;
+  const totalHeight = contentHeight + 2 * MARGIN;
 
   const parts = [];
   if (background) parts.push(`<defs>${SHADOW_FILTER}</defs><rect width="100%" height="100%" fill="${escapeXml(background)}"/>`);
   const featureAttrs = background ? ' filter="url(#shadow)"' : '';
-  let left = MARGIN;
-  laidOut.forEach((scene, index) => {
-    const prefix = laidOut.length > 1 ? `s${index}-` : '';
-    parts.push(`<g id="scene-${index}"><title>${escapeXml(scene.name)}</title>`);
-    parts.push(scene.draw(left + (scene.slot - scene.width) / 2, MARGIN + contentHeight - scene.height, prefix, featureAttrs));
-    if (labels) {
-      parts.push(`<text x="${left + scene.slot / 2}" y="${MARGIN + contentHeight + LABEL_HEIGHT - 2}" font-family="${LABEL_FONT}" font-size="${LABEL_SIZE}" text-anchor="middle" fill="#333">${escapeXml(scene.name)}</text>`);
+  const multiple = laidOut.length > 1;
+  let top = MARGIN;
+  let index = 0;
+  rows.forEach((row, rowIndex) => {
+    const baseline = top + row.height;
+    parts.push(`<g id="row-${rowIndex}">`);
+    let left = MARGIN;
+    for (const scene of row.items) {
+      const prefix = multiple ? `s${index}-` : '';
+      parts.push(`<g id="scene-${index}"><title>${escapeXml(scene.name)}</title>`);
+      parts.push(scene.draw(left + (scene.slot - scene.width) / 2, baseline - scene.height, prefix, featureAttrs));
+      scene.lines.forEach((line, lineIndex) => {
+        const y = baseline + LABEL_TOP + (lineIndex + 1) * LABEL_LINE_HEIGHT - 1;
+        parts.push(`<text x="${left + scene.slot / 2}" y="${y}" font-family="${LABEL_FONT}" font-size="${LABEL_SIZE}" text-anchor="middle" fill="#333">${escapeXml(line)}</text>`);
+      });
+      parts.push('</g>');
+      left += scene.slot + SCENE_GAP;
+      index += 1;
     }
     parts.push('</g>');
-    left += scene.slot + SCENE_GAP;
+    top = baseline + row.labelHeight + ROW_GAP;
   });
 
   return '<?xml version="1.0" encoding="UTF-8"?>\r\n'

@@ -199,9 +199,15 @@ function setTextContent(node, value) {
 // (e.g. "90") still works the same way: the whole string is itself the
 // digit run being replaced. The template's own placeholder number is
 // otherwise never used for anything, so it can be any value in range.
+// A non-numeric value (e.g. the Roman numeral of an SLM plate) replaces the
+// whole text instead, so its template holds that value alone.
 function setDisplayValue(textElement, value) {
   const node = findTspan(textElement) || textElement;
   const current = node.textContent;
+  if (typeof value === 'string' && !/^\d+$/.test(value)) {
+    setTextContent(node, value);
+    return;
+  }
   if (!/\d/.test(current)) {
     throw new Error(`no digit found to substitute in text "${current}"`);
   }

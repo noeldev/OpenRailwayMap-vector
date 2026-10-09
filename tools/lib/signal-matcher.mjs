@@ -2,15 +2,21 @@
 // Resolves the signal features of one OSM node the way the ORM import does
 // (import/sql/signal_features.sql.mjs): per signal type, the first matching
 // feature of the YAML wins, a feature is only drawn for its own (first)
-// type, and all features of the node form one pile ordered by rank (their
-// position in the YAML), lowest rank at the bottom. The map shows the first
-// MAX_FEATURES of the pile, filtered by the selected categories.
+// type (and subtype, types[].subtypes), and all features of the node form
+// one pile ordered by rank (their
+// position in the YAML), lowest rank at the bottom. Inline features
+// (features[].inline) are merged, INLINE_ROW_LENGTH at a time, into rows
+// drawn side by side. The map shows the first MAX_FEATURES rows of the pile,
+// filtered by the selected categories.
 
 import fs from 'node:fs';
 import yaml from 'yaml';
 
 /** Features drawn by the map per node (feature0 to feature11). */
 export const MAX_FEATURES = 12;
+
+/** Inline features drawn side by side per row (INLINE_ROW_LENGTH of the import). */
+export const INLINE_ROW_LENGTH = 2;
 
 /** Loads the signal YAML: types, tag value types and features. */
 export function loadSignalConfig(yamlPath) {
@@ -19,8 +25,14 @@ export function loadSignalConfig(yamlPath) {
   // Like the import: the signal type of a feature is the first type (in
   // types order) whose tag the feature carries.
   const signalTypeOf = (feature) => types.find(({ type }) => feature.tags.some((tag) => tag.tag === `railway:signal:${type}`))?.type;
+  // Feature columns of the import: one per type, plus one per subtype.
+  const columns = types.flatMap((type) => [
+    { ...type, subtype: null },
+    ...(type.subtypes ?? []).map((subtype) => ({ ...type, subtype })),
+  ]);
   return {
     types,
+    columns,
     categories: [...new Set(types.map((type) => type.category))],
     tagTypes: Object.fromEntries(config.tags.map((tag) => [tag.tag, tag.type])),
     features: config.features.map((feature, rank) => ({ ...feature, rank, signalType: signalTypeOf(feature) })),
@@ -120,6 +132,12 @@ function isFallback(feature, winner) {
   return feature.tags.every((tag) => winnerConditions.has(conditionKey(tag)));
 }
 
+// Declared subtype of a feature for a type, or null.
+function featureSubtype(config, feature, type) {
+  const subtypes = config.types.find((t) => t.type === type)?.subtypes ?? [];
+  return subtypes.find((subtype) => feature.tags.some((tag) => tag.tag === `railway:signal:${type}:${subtype}`)) ?? null;
+}
+
 const unknownEntry = (type, category) => ({
   type, category, description: `Unknown signal (${type})`, rank: null,
   icons: [{ id: `general/signal-unknown-${type}`, position: 'center' }],
@@ -134,21 +152,27 @@ const unknownEntry = (type, category) => ({
  */
 export function matchSignals(config, tags) {
   const pile = [];
-  for (const { type, category } of config.types) {
+  for (const { type, category, subtype, subtypes = [] } of config.columns) {
     const key = `railway:signal:${type}`;
     if (tags[key] === undefined) continue;
+    if (subtype && tags[`${key}:${subtype}`] === undefined) continue;
 
-    const matching = config.features.filter((f) => f.tags.some((t) => t.tag === key) && matchesFeatureTags(config, tags, f));
+    const matching = config.features.filter((f) => f.tags.some((t) => t.tag === key)
+      && featureSubtype(config, f, type) === subtype
+      && matchesFeatureTags(config, tags, f));
     const feature = matching[0];
     let entry;
     if (!feature) {
+      // The type column leaves the unknown signal to the subtype columns
+      // when a subtype key is present.
+      if (!subtype && subtypes.some((s) => tags[`${key}:${s}`] !== undefined)) continue;
       entry = unknownEntry(type, category);
     } else if (feature.signalType === type) {
       const icons = feature.icon.map((icon) => resolveIcon(config, tags, icon)).filter(Boolean);
       // Later matching features of the same type are never drawn.
       const shadowed = matching.slice(1).filter((f) => f.signalType === type)
         .map((f) => ({ description: f.description, fallback: isFallback(f, feature) }));
-      entry = { type, category, description: feature.description, rank: feature.rank, icons, shadowed };
+      entry = { type: subtype ? `${type}:${subtype}` : type, category, description: feature.description, rank: feature.rank, inline: feature.inline === true, icons, shadowed };
     } else {
       // Drawn by the column of its own type.
       continue;
@@ -161,4 +185,28 @@ export function matchSignals(config, tags) {
     pile.push({ ...unknownEntry(null, 'other'), description: 'Unknown signal', icons: [{ id: 'general/signal-unknown', position: 'center' }], deactivated: false });
   }
   return pile.sort((a, b) => (a.rank ?? Infinity) - (b.rank ?? Infinity));
+}
+
+/**
+ * Merges the inline features of a pile into rows, like the import: per
+ * deactivation, inline features are taken INLINE_ROW_LENGTH at a time in
+ * rank order, whatever their category. A row takes the rank and the
+ * category of its first feature.
+ * @returns {Array<{category: string, deactivated: boolean, rank: number|null, members: Array}>}
+ *   The rows of the pile, bottom first; members are matchSignals() entries, left first.
+ */
+export function groupRows(pile) {
+  const rows = [];
+  const openRows = new Map();
+  for (const feature of pile) {
+    const open = feature.inline ? openRows.get(feature.deactivated) : null;
+    if (open && open.members.length < INLINE_ROW_LENGTH) {
+      open.members.push(feature);
+      continue;
+    }
+    const row = { category: feature.category, deactivated: feature.deactivated, rank: feature.rank, members: [feature] };
+    if (feature.inline) openRows.set(feature.deactivated, row);
+    rows.push(row);
+  }
+  return rows;
 }

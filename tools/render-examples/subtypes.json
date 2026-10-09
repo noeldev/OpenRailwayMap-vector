@@ -1,0 +1,54 @@
+{
+  "TIV-D B 150 + C 160 + Km + R": {
+    "railway": "signal",
+    "railway:signal:speed_limit_distant": "FR:speed_indicator",
+    "railway:signal:speed_limit_distant:fast": "FR:TIV-D",
+    "railway:signal:speed_limit_distant:fast:form": "sign",
+    "railway:signal:speed_limit_distant:fast:speed": "150",
+    "railway:signal:speed_limit_distant:railcar": "FR:TIV-D",
+    "railway:signal:speed_limit_distant:railcar:form": "sign",
+    "railway:signal:speed_limit_distant:railcar:speed": "160",
+    "railway:signal:speed_limit": "FR:marker",
+    "railway:signal:speed_limit:main": "FR:R",
+    "railway:signal:speed_limit:main:function": "exit",
+    "railway:signal:speed_limit:main:form": "sign",
+    "railway:signal:speed_limit:transition": "FR:Km",
+    "railway:signal:speed_limit:transition:form": "sign"
+  },
+  "Z + TIV-D 80 carre + TIV-D C 90": {
+    "railway": "signal",
+    "railway:signal:speed_limit": "FR:marker",
+    "railway:signal:speed_limit:main": "FR:Z",
+    "railway:signal:speed_limit:main:function": "entry",
+    "railway:signal:speed_limit:main:form": "sign",
+    "railway:signal:speed_limit_distant": "FR:speed_indicator",
+    "railway:signal:speed_limit_distant:fixed": "FR:TIV-D",
+    "railway:signal:speed_limit_distant:fixed:form": "sign",
+    "railway:signal:speed_limit_distant:fixed:speed": "80",
+    "railway:signal:speed_limit_distant:railcar": "FR:TIV-D",
+    "railway:signal:speed_limit_distant:railcar:form": "sign",
+    "railway:signal:speed_limit_distant:railcar:speed": "90"
+  },
+  "R + Km 74.7 + TIV-D 110 carre": {
+    "railway": "signal",
+    "railway:signal:speed_limit": "FR:marker",
+    "railway:signal:speed_limit:main": "FR:R",
+    "railway:signal:speed_limit:main:function": "exit",
+    "railway:signal:speed_limit:main:form": "sign",
+    "railway:signal:speed_limit:transition": "FR:Km",
+    "railway:signal:speed_limit:transition:form": "sign",
+    "railway:signal:speed_limit_distant": "FR:speed_indicator",
+    "railway:signal:speed_limit_distant:fixed": "FR:TIV-D",
+    "railway:signal:speed_limit_distant:fixed:form": "sign",
+    "railway:signal:speed_limit_distant:fixed:speed": "110"
+  },
+  "Type sans sous-type inconnu": {
+    "railway": "signal",
+    "railway:signal:speed_limit": "FR:foo"
+  },
+  "Sous-type inconnu": {
+    "railway": "signal",
+    "railway:signal:speed_limit": "FR:marker",
+    "railway:signal:speed_limit:main": "FR:XX"
+  }
+}
