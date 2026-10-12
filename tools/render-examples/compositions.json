@@ -8,7 +8,7 @@
     "railway:signal:short_route": "FR:yellow_band",
     "railway:signal:short_route:form": "light"
   },
-  "X X": {
+  "X X (2TMV)": {
     "railway": "signal",
     "railway:signal:main": "FR:C",
     "railway:signal:main:form": "light",
@@ -359,10 +359,17 @@
     "railway:signal:crossing_info": "FR:PN",
     "railway:signal:crossing_info:form": "sign"
   },
-  "Triangle de Relevage (Baissez)": {
+  "Triangle d'Abaissement'": {
     "railway": "signal",
     "railway:signal:snowplow": "FR:equipment",
     "railway:signal:snowplow:type": "down",
     "railway:signal:snowplow:form": "sign"
+  },
+  "Repère d'arrêt pour coupe + L170 (2TMV)": {
+    "railway": "signal",
+    "railway:signal:coupling": "FR:stop_marker",
+    "railway:signal:coupling:type": "uncoupling",
+    "railway:signal:coupling:form": "sign",
+    "railway:signal:coupling:length": "170"
   }
 }
