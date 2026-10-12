@@ -342,7 +342,6 @@ tags:
   - { tag: 'railway:signal:radio:channel', title: 'Radio channel' }
   - { tag: 'railway:signal:radio:channel:type', title: 'Radio channel type' }
   - { tag: 'railway:signal:radio:channel:form', title: 'Radio channel form' }
-  - { tag: 'railway:signal:radio:channel:uic_number', title: 'Radio channel UIC number' }
   - { tag: 'railway:signal:electricity:installation', title: 'Electricity installation' }
   - { tag: 'railway:signal:catenary', title: 'Catenary' }
   - { tag: 'railway:signal:catenary:deactivated', title: 'Catenary deactivated', type: boolean }
@@ -7679,17 +7678,19 @@ features:
       - { tag: 'railway:signal:speed_limit_distant:fast', value: 'FR:TIV-D' }
       - { tag: 'railway:signal:speed_limit_distant:fast:form', value: 'sign' }
 
-  - description: P Board
+  - description: Caisson P
     country: FR
-    icon:
-      - match: 'railway:signal:speed_limit_distant:form'
-        cases:
-          - { exact: 'board', value: 'fr/boards/P' }
-          - { exact: 'light', value: 'fr/boxes/P' }
-       # TODO sign version does not exist
-        default: 'fr/signs/P'
+    icon: [ default: 'fr/boxes/P' ]
     tags:
       - { tag: 'railway:signal:speed_limit_distant', value: 'FR:P' }
+      - { tag: 'railway:signal:speed_limit_distant:form', value: 'light' }
+
+  - description: Tableau P
+    country: FR
+    icon: [ default: 'fr/boards/P' ]
+    tags:
+      - { tag: 'railway:signal:speed_limit_distant', value: 'FR:P' }
+      - { tag: 'railway:signal:speed_limit_distant:form', value: 'sign' }
 
   # Example (from bottom to top):
   # - L board > pentagonal TIV-D 3
@@ -8032,6 +8033,16 @@ features:
     icon: [ default: 'fr/boxes/frost' ]
     tags:
       - { tag: 'railway:signal:electricity', value: 'FR:frost' }
+      - { tag: 'railway:signal:electricity:form', value: 'light' }
+
+  - description: Caisson LGV
+    country: FR
+    exampleIcon: 'fr/boxes/examples/LGV'
+    icon: 
+      - default: 'fr/boxes/medium'
+      - default: 'fr/boxes/medium/LGV'
+    tags:
+      - { tag: 'railway:signal:electricity', value: 'FR:LGV' }
       - { tag: 'railway:signal:electricity:form', value: 'light' }
 
   # FR: Signaux et plaques d'Autorisation de Mouvement
@@ -9043,11 +9054,7 @@ features:
 
   - description: Change Radio Channel Sign
     country: FR
-    icon:
-      - match: 'railway:signal:radio:channel:uic_number'
-        cases:
-          - { regex: '^[0-9]+$', value: 'fr/signs/UIC_channel' }
-        default: 'fr/signs/channel'
+    icon: [ default: 'fr/signs/channel' ]
     tags:
       - { tag: 'railway:signal:radio', value: 'FR:marker' }
       - { tag: 'railway:signal:radio:channel', value: 'FR:channel' }
