@@ -181,7 +181,6 @@ function signal_caption(tags)
     or tags['railway:signal:facility_distant:caption']
     or tags['railway:signal:servicing_distant:caption']
     or tags['railway:signal:shunting_route:buffer_stop:caption']
-    or tags['railway:signal:catenary:caption']
     or tags['railway:signal:bimode:caption']
     or tags['railway:signal:structure:caption']
     or tags['railway:signal:radio:channel:caption']
