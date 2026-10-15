@@ -184,7 +184,7 @@
       "template": "boxes/TIV-D.svg",
       "base": "boxes/TIV-D_closed",
       "overlayDir": "boxes/TIV",
-      "textByLength": { "3": { "x": 435, "y": 570, "font-size": 260 } },
+      "textByLength": { "3": { "x": 594, "y": 780, "font-size": 360 } },
       "values": [ 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160 ],
       "example": 80
     },

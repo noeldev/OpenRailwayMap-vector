@@ -7,7 +7,8 @@
 // first, centered, with a 2 px gap (proxy/js/styles.mjs icon-offset). Several scenes (nodes or tag sets) are drawn side by side,
 // each with its name below, and wrap to a new row past a maximum width.
 // Every row of scenes, scene and row of features is its own <g>, every icon a nested <svg>
-// keeping its own viewBox.
+// keeping its own viewBox, its ids made unique within the document. Rows of scenes
+// can be split into pages of a fixed number of rows, one SVG document each.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -108,9 +109,31 @@ function layoutIcons(icons) {
   return { icons: placed, width, height };
 }
 
+// Prefixes every id of an icon and the references to it (url(#id), href="#id"),
+// so that icons sharing ids (gradients "a", "b"...) do not resolve each other's
+// definitions once embedded in the same document.
+function prefixIds(svg, prefix) {
+  const elements = [svg, ...Array.from(svg.getElementsByTagName('*'))];
+  const ids = new Set(elements.map((el) => el.getAttribute('id')).filter(Boolean));
+  if (ids.size === 0) return;
+  const rename = (value) => value
+    .replace(/url\(\s*#([^)\s]+)\s*\)/g, (m, id) => (ids.has(id) ? `url(#${prefix}${id})` : m))
+    .replace(/^#(.+)$/, (m, id) => (ids.has(id) ? `#${prefix}${id}` : m));
+  for (const el of elements) {
+    for (const attr of Array.from(el.attributes)) {
+      const value = attr.name === 'id' ? (ids.has(attr.value) ? `${prefix}${attr.value}` : attr.value) : rename(attr.value);
+      if (value !== attr.value) el.setAttribute(attr.name, value);
+    }
+    // Inline <style> blocks may also reference ids.
+    if (el.tagName === 'style' && el.textContent) el.textContent = rename(el.textContent).replace(/#([\w-]+)/g, (m, id) => (ids.has(id) ? `#${prefix}${id}` : m));
+  }
+}
+
 // Nested <svg> for one icon at (x, y), keeping its own viewBox.
+let iconCount = 0;
 function iconMarkup(icon, x, y) {
   const svg = icon.svg.cloneNode(true);
+  prefixIds(svg, `i${iconCount++}-`);
   for (const attr of ['x', 'y', 'width', 'height']) svg.removeAttribute(attr);
   svg.setAttribute('x', String(x));
   svg.setAttribute('y', String(y));
@@ -197,17 +220,30 @@ function packRows(items, maxWidth) {
   return rows;
 }
 
+// Splits rows of scenes into pages of `pageRows` rows (0: one page).
+function paginate(rows, pageRows) {
+  if (pageRows <= 0) return [rows];
+  const pages = [];
+  for (let i = 0; i < rows.length; i += pageRows) pages.push(rows.slice(i, i + pageRows));
+  return pages;
+}
+
 /**
- * Renders scenes side by side into one SVG document, in rows wrapped at
- * `maxWidth`. Scenes of a row share the same baseline (the signal anchor).
+ * Renders scenes side by side, in rows wrapped at `maxWidth`, as SVG
+ * documents: one page, or pages of `pageRows` rows when it is set. Scenes
+ * of a row share the same baseline (the signal anchor). All pages share the
+ * same size (the widest row, the tallest page), so they can be laid out one
+ * after the other.
  * @param {Array<{name: string, rows: Array}>} scenes
  *                                     Rows (bottom first) come from groupRows().
  * @param {string} symbolsRoot         The symbols/ folder.
- * @param {{scale: number, title: string, background: string|null, labels: boolean, maxWidth: number}} options
+ * @param {{scale: number, title: string, background: string|null, labels: boolean, maxWidth: number, pageRows: number}} options
  *                                     A background also adds a shadow under each
- *                                     feature. maxWidth is in map pixels, 0 for one row.
+ *                                     feature. maxWidth is in map pixels, 0 for one
+ *                                     row; pageRows 0 for one page.
+ * @returns {string[]}                 One SVG document per page.
  */
-export function composeSvg(scenes, symbolsRoot, { scale, title, background, labels, maxWidth }) {
+export function composeSvg(scenes, symbolsRoot, { scale, title, background, labels, maxWidth, pageRows = 0 }) {
   const deactivatedIcon = loadIcon(symbolsRoot, DEACTIVATED_ICON);
   const laidOut = scenes.map((scene) => {
     const layout = layoutScene(scene.rows, symbolsRoot, deactivatedIcon);
@@ -219,39 +255,41 @@ export function composeSvg(scenes, symbolsRoot, { scale, title, background, labe
     return { ...scene, ...layout, lines, labelHeight, slot: Math.max(layout.width, labelWidth) };
   });
   const rows = packRows(laidOut, maxWidth);
+  const pages = paginate(rows, pageRows);
 
-  const contentWidth = Math.max(...rows.map((row) => row.width));
-  const contentHeight = rows.reduce((sum, row) => sum + row.height + row.labelHeight, 0) + ROW_GAP * (rows.length - 1);
-  const totalWidth = contentWidth + 2 * MARGIN;
-  const totalHeight = contentHeight + 2 * MARGIN;
-
-  const parts = [];
-  if (background) parts.push(`<defs>${SHADOW_FILTER}</defs><rect width="100%" height="100%" fill="${escapeXml(background)}"/>`);
+  const rowsHeight = (rowList) => rowList.reduce((sum, row) => sum + row.height + row.labelHeight, 0) + ROW_GAP * (rowList.length - 1);
+  const totalWidth = Math.max(...rows.map((row) => row.width)) + 2 * MARGIN;
+  const totalHeight = Math.max(...pages.map((pageRowList) => rowsHeight(pageRowList))) + 2 * MARGIN;
   const featureAttrs = background ? ' filter="url(#shadow)"' : '';
   const multiple = laidOut.length > 1;
-  let top = MARGIN;
-  let index = 0;
-  rows.forEach((row, rowIndex) => {
-    const baseline = top + row.height;
-    parts.push(`<g id="row-${rowIndex}">`);
-    let left = MARGIN;
-    for (const scene of row.items) {
-      const prefix = multiple ? `s${index}-` : '';
-      parts.push(`<g id="scene-${index}"><title>${escapeXml(scene.name)}</title>`);
-      parts.push(scene.draw(left + (scene.slot - scene.width) / 2, baseline - scene.height, prefix, featureAttrs));
-      scene.lines.forEach((line, lineIndex) => {
-        const y = baseline + LABEL_TOP + (lineIndex + 1) * LABEL_LINE_HEIGHT - 1;
-        parts.push(`<text x="${left + scene.slot / 2}" y="${y}" font-family="${LABEL_FONT}" font-size="${LABEL_SIZE}" text-anchor="middle" fill="#333">${escapeXml(line)}</text>`);
-      });
-      parts.push('</g>');
-      left += scene.slot + SCENE_GAP;
-      index += 1;
-    }
-    parts.push('</g>');
-    top = baseline + row.labelHeight + ROW_GAP;
-  });
 
-  return '<?xml version="1.0" encoding="UTF-8"?>\r\n'
-    + `<svg xmlns="http://www.w3.org/2000/svg" width="${totalWidth * scale}" height="${totalHeight * scale}" viewBox="0 0 ${totalWidth} ${totalHeight}">`
-    + `<title>${escapeXml(title)}</title>${parts.join('')}</svg>\r\n`;
+  let index = 0;
+  return pages.map((pageRowList, pageIndex) => {
+    const parts = [];
+    if (background) parts.push(`<defs>${SHADOW_FILTER}</defs><rect width="100%" height="100%" fill="${escapeXml(background)}"/>`);
+    let top = MARGIN;
+    pageRowList.forEach((row) => {
+      const baseline = top + row.height;
+      parts.push(`<g id="row-${rows.indexOf(row)}">`);
+      let left = MARGIN;
+      for (const scene of row.items) {
+        const prefix = multiple ? `s${index}-` : '';
+        parts.push(`<g id="scene-${index}"><title>${escapeXml(scene.name)}</title>`);
+        parts.push(scene.draw(left + (scene.slot - scene.width) / 2, baseline - scene.height, prefix, featureAttrs));
+        scene.lines.forEach((line, lineIndex) => {
+          const y = baseline + LABEL_TOP + (lineIndex + 1) * LABEL_LINE_HEIGHT - 1;
+          parts.push(`<text x="${left + scene.slot / 2}" y="${y}" font-family="${LABEL_FONT}" font-size="${LABEL_SIZE}" text-anchor="middle" fill="#333">${escapeXml(line)}</text>`);
+        });
+        parts.push('</g>');
+        left += scene.slot + SCENE_GAP;
+        index += 1;
+      }
+      parts.push('</g>');
+      top = baseline + row.labelHeight + ROW_GAP;
+    });
+    const pageTitle = pages.length > 1 ? `${title} (${pageIndex + 1}/${pages.length})` : title;
+    return '<?xml version="1.0" encoding="UTF-8"?>\r\n'
+      + `<svg xmlns="http://www.w3.org/2000/svg" width="${totalWidth * scale}" height="${totalHeight * scale}" viewBox="0 0 ${totalWidth} ${totalHeight}">`
+      + `<title>${escapeXml(pageTitle)}</title>${parts.join('')}</svg>\r\n`;
+  });
 }

@@ -85,6 +85,7 @@ node tools/orm.mjs render 123456789                      # node id, tags from th
 node tools/orm.mjs render 123456789 987654321            # several nodes side by side
 node tools/orm.mjs render 123456789 --png                # PNG instead of SVG
 node tools/orm.mjs render --tags-file tools/render-examples/compositions.json
+node tools/orm.mjs render --tags-file tools/render-examples/compositions.json --page-rows 2 --png
 node tools/orm.mjs render 123456789 --tag railway:signal:main:states=FR:VL
 node tools/orm.mjs render --tag railway:signal:main=FR:C --tag railway:signal:main:form=light
 node tools/orm.mjs render 123456789 --category main,distant --scale 20 --background none
@@ -105,7 +106,10 @@ side with its name below, which makes before/after or variant comparisons
 easy. Scenes wrap to a new row past `--width` map pixels (default 400, i.e.
 4000 px at the default scale; `--width 0` keeps one row); the scenes of a
 row share the same baseline, and long names wrap over several lines. Every
-row is its own `<g>`. `--tag key=value` adds or overrides a tag in every scene, or builds a
+row is its own `<g>`. `--page-rows` splits the rows into pages of that
+many rows, all of the same size (the widest row, the tallest page), written
+as `<out>-1`, `<out>-2`... so a long set of examples can be published page
+by page; with the default width, 2 rows per page give landscape pages. `--tag key=value` adds or overrides a tag in every scene, or builds a
 single scene on its own. A tags file is either a JSON object of tags (one
 scene), an array of `{ "name": ..., "tags": {...} }`, an object of
 `name -> tags`, or plain `key=value` lines as copied from an editor's text
@@ -121,7 +125,9 @@ view (one scene, `#` comments allowed):
 The YAML and `symbols/` are read in place (uncommitted work included);
 the output embeds a copy of every icon it uses, so it can be opened or
 shared on its own. Every scene and feature is its own `<g>` (the
-feature description as `<title>`), every icon a nested `<svg>`.
+feature description as `<title>`), every icon a nested `<svg>` whose ids
+are prefixed, so icons using the same ids (gradients `a`, `b`...) do not
+pick up each other's definitions.
 
 `--scale` multiplies the map pixel size (an icon is about 20 px wide on
 the map): it sets the SVG width/height, i.e. the size it opens at, and
@@ -133,8 +139,8 @@ the template fonts of `tools/aspects/fonts`, so icons still holding
 `<text>` (not yet optimized) render with the SNCF digits.
 
 Ready-made tag files are in `tools/render-examples/`: `cibles.json` (every
-light signal target), `compositions.json` (signals combined on one node),
-`tvm.json`, `tip.json` and `carre.txt` (the `key=value` form).
+light signal target) and `compositions.json` (signals combined on one node),
+both objects of `name -> tags`, and `carre.txt` (the `key=value` form).
 
 Like the map, a node shows one feature per signal type
 (`railway:signal:<type>` keys listed under `types`), the first matching
@@ -155,7 +161,7 @@ subtypes of the type (`types[].subtypes`, e.g.
 `railway:signal:speed_limit_distant:fast` and `:railcar`): the import then
 has one feature column per subtype. Otherwise they need one section drawing
 them together, as the TVM stop marker does with the transition marker.
-`tools/render-examples/subtypes.json` shows such nodes.
+`compositions.json` holds such nodes (e.g. R + Km + B and C TIV-D).
 
 ### resize
 
