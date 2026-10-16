@@ -7613,20 +7613,6 @@ features:
       - { tag: 'railway:signal:speed_limit:switchable', value: 'FR:TIV-R' }
       - { tag: 'railway:signal:speed_limit:switchable:form', value: 'board' }
 
-  # TODO no sign version?
-  - description: TIV-R Mobile
-    country: FR
-    exampleIcon: 'fr/signs/examples/TIV-R'
-    icon:
-      - default: 'fr/signs/TIV-R'
-      - match: 'railway:signal:speed_limit:switchable:speed'
-        cases:
-          - { regex: '^([2-46-9]0|1[0-6]0)$', value: 'fr/signs/TIV/TIV-R_{}', example: 'fr/signs/TIV/TIV-R_{80}' }
-    tags:
-      - { tag: 'railway:signal:speed_limit', value: 'FR:speed_indicator' }
-      - { tag: 'railway:signal:speed_limit:switchable', value: 'FR:TIV-R' }
-      - { tag: 'railway:signal:speed_limit:switchable:form', value: 'sign' }
-
   # TIV-D à 1 ou 2 nombres
 
   - description: TIV-D du type ordinaire
