@@ -5,6 +5,8 @@
 // project YAML and symbols are read in place; the output embeds the icons
 // it uses so it stays viewable on its own. Scenes (nodes or tag sets) are
 // drawn side by side, each signal (feature) of a scene is its own <g>.
+// With --page-rows, the rows of scenes are split into pages of the same
+// size, one image each, ready to be published one after the other.
 // Like the map, a node shows one pile of at most MAX_FEATURES rows (inline
 // features side by side, other features alone), filtered by the selected
 // signal categories.
@@ -46,6 +48,9 @@ Options:
   --scale <n>         Display size multiplier of the map pixel size (default: 10)
   --width <px>        Maximum image width in map pixels; scenes wrap to a new
                       row past it, 0 for a single row (default: ${DEFAULT_WIDTH})
+  --page-rows <n>     Rows of scenes per page: every page is written as
+                      <out>-1, <out>-2... all of the same size
+                      (default: 0, one image)
   --background <c>    Background color, drawn with a soft shadow under each
                       signal, or "none" for transparent (default: ${DEFAULT_BACKGROUND})
   --png               Write a PNG instead of an SVG (also implied by --out *.png)
@@ -66,7 +71,7 @@ function parseTagAssignment(text) {
 
 function parseArgs(argv) {
   const opts = {
-    nodeIds: [], tagsFiles: [], tags: {}, categories: null, scale: 10, width: DEFAULT_WIDTH, background: DEFAULT_BACKGROUND,
+    nodeIds: [], tagsFiles: [], tags: {}, categories: null, scale: 10, width: DEFAULT_WIDTH, pageRows: 0, background: DEFAULT_BACKGROUND,
     png: false, verbose: false, out: null, yaml: DEFAULT_YAML_FILE, symbols: DEFAULT_SYMBOLS,
   };
   for (let i = 0; i < argv.length; i++) {
@@ -76,6 +81,7 @@ function parseArgs(argv) {
     else if (a === '--category') opts.categories = (argv[++i] ?? '').split(',').map((c) => c.trim()).filter(Boolean);
     else if (a === '--scale') opts.scale = Number(argv[++i]);
     else if (a === '--width') opts.width = Number(argv[++i]);
+    else if (a === '--page-rows') opts.pageRows = Number(argv[++i]);
     else if (a === '--background') { const c = argv[++i]; opts.background = c === 'none' ? null : c; }
     else if (a === '--png') opts.png = true;
     else if (a === '--verbose') opts.verbose = true;
@@ -91,6 +97,7 @@ function parseArgs(argv) {
   }
   if (!Number.isFinite(opts.scale) || opts.scale <= 0) throw new Error('invalid --scale value');
   if (!Number.isFinite(opts.width) || opts.width < 0) throw new Error('invalid --width value');
+  if (!Number.isInteger(opts.pageRows) || opts.pageRows < 0) throw new Error('invalid --page-rows value');
   if (opts.out && path.extname(opts.out).toLowerCase() === '.png') opts.png = true;
   return opts;
 }
@@ -193,17 +200,25 @@ async function main() {
   const single = opts.tagsFiles.length === 1 && opts.nodeIds.length === 0;
   const baseName = single ? path.basename(opts.tagsFiles[0], path.extname(opts.tagsFiles[0])) : scenes[0].name;
   const out = opts.out ?? `${baseName}.${opts.png ? 'png' : 'svg'}`;
-  const svg = composeSvg(scenes, opts.symbols, {
-    scale: opts.scale, title: scenes.map((s) => s.name).join(', '), background: opts.background, labels: scenes.length > 1, maxWidth: opts.width,
+  const pages = composeSvg(scenes, opts.symbols, {
+    scale: opts.scale, title: scenes.map((s) => s.name).join(', '), background: opts.background, labels: scenes.length > 1,
+    maxWidth: opts.width, pageRows: opts.pageRows,
   });
+  // Several pages: <out>-1, <out>-2... (zero-padded past 9 pages).
+  const ext = path.extname(out);
+  const digits = String(pages.length).length;
+  const pageFile = (index) => (pages.length === 1 ? out : `${out.slice(0, out.length - ext.length)}-${String(index + 1).padStart(digits, '0')}${ext}`);
   try {
-    if (opts.png) await writePng(out, svg);
-    else fs.writeFileSync(out, svg, 'utf8');
+    for (const [index, svg] of pages.entries()) {
+      const file = pageFile(index);
+      if (opts.png) await writePng(file, svg);
+      else fs.writeFileSync(file, svg, 'utf8');
+      console.log(color.green(`Written: ${file}`));
+    }
   } catch (err) {
     console.error(color.red(`ERROR: ${err.message}`));
     return 1;
   }
-  console.log(color.green(`Written: ${out}`));
   return 0;
 }
 
