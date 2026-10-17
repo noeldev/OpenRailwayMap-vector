@@ -258,7 +258,11 @@ function captionValueSql(feature) {
   }
 
   const number = `COALESCE(${[caption.tag].flat().map(captionNumberSql).join(', ')})`
-  const rounded = caption.decimals !== undefined ? `round(${number}, ${caption.decimals})` : number
+  const rounding = caption.rounding ?? 'round'
+  if (!['round', 'truncate'].includes(rounding)) {
+    throw new Error(`Caption rounding of feature ${feature.description} must be round or truncate: "${rounding}"`)
+  }
+  const rounded = caption.decimals !== undefined ? `${rounding === 'truncate' ? 'trunc' : 'round'}(${number}, ${caption.decimals})` : number
   const text = caption.decimalSeparator ? `replace(${rounded}::text, '.', ${sqlString(caption.decimalSeparator)})` : `${rounded}::text`
   return `${sqlString(parts[0])} || ${text} || ${sqlString(parts[1])}`
 }

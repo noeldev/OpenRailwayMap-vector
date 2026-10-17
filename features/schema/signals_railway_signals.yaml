@@ -101,7 +101,14 @@ properties:
             decimals:
               type: integer
               minimum: 0
-              description: Rounds the number to this many decimals. Without it, the number is shown as tagged.
+              description: Shows the number with this many decimals. Without it, the number is shown as tagged.
+            rounding:
+              type: string
+              enum:
+                - round
+                - truncate
+              default: round
+              description: How extra decimals are dropped, rounded to the nearest value or truncated
             decimalSeparator:
               type: string
               default: '.'
