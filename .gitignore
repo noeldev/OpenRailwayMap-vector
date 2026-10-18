@@ -22,3 +22,4 @@ taginfo.json
 /.vs
 /symbols/fr/_backup
 /tools/package-lock.json
+/tools/audit-svg.html
