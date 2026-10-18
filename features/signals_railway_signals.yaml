@@ -7351,7 +7351,10 @@ features:
 
   - description: Guidon d'Arrêt
     country: FR
-    icon: [ default: 'fr/signals/GA' ]
+    icon: 
+      - default: 'fr/signals/GA'
+      - default: 'fr/plates/GA'
+        position: bottom
     tags:
       - { tag: 'railway:signal:main', value: 'FR:GA' }
       - { tag: 'railway:signal:main:form', value: 'light' }
@@ -8272,7 +8275,7 @@ features:
         position: bottom
       - match: 'railway:signal:train_protection:main:passing_light'
         cases:
-          - { value: 'fr/signals/TVM_passing_light' }
+          - { value: 'fr/signals/passing_light' }
         position: bottom
     tags:
       - { tag: 'railway:signal:train_protection', value: 'FR:marker' }
@@ -8286,6 +8289,8 @@ features:
         cases:
           - { exact: 'right', value: 'fr/signs/shunting_marker_right' }
         default: 'fr/signs/shunting_marker_left'
+      - default: 'fr/signals/passing_light'
+        position: bottom
     tags:
       - { tag: 'railway:signal:shunting', value: 'FR:marker' }
       - { tag: 'railway:signal:shunting:form', value: 'sign' }
