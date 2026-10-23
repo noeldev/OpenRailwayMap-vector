@@ -441,9 +441,9 @@
     "railway:signal:coupling:form": "sign",
     "railway:signal:coupling:length": "170"
   },
-  "TVM transition + arrêt": {
+  "Repères d'arrêt et de transition TVM": {
     "railway": "signal",
-    "railway:signal:train_protection": "FR:marker",
+    "railway:signal:train_protection": "FR:TVM",
     "railway:signal:train_protection:system_change": "FR:type_transition",
     "railway:signal:train_protection:system_change:form": "sign",
     "railway:signal:train_protection:system_change:type": "300",
@@ -452,14 +452,24 @@
     "railway:signal:train_protection:main:type": "FR:Nf",
     "railway:signal:train_protection:main:passing_light": "yes"
   },
-  "TVM arrêt + bande jaune": {
+  "Repère d'arrêt TVM + bande jaune": {
     "railway": "signal",
-    "railway:signal:train_protection": "FR:marker",
+    "railway:signal:train_protection": "FR:TVM",
     "railway:signal:train_protection:main": "stop_marker",
     "railway:signal:train_protection:main:form": "sign",
     "railway:signal:train_protection:main:type": "FR:F",
     "railway:signal:short_route": "FR:yellow_band",
     "railway:signal:short_route:form": "light"
+  },
+  "Repères d'arrêt TVM et ETCS": {
+    "railway": "signal",
+    "railway:signal:position": "right",
+    "railway:signal:train_protection": "FR:TVM",
+    "railway:signal:train_protection:main": "stop_marker",
+    "railway:signal:train_protection:main:form": "sign",
+    "railway:signal:train_protection:main:type": "FR:Nf",
+    "railway:signal:train_protection:main:passing_light": "yes",
+    "railway:signal:train_protection:main:etcs": "yes"
   },
   "SLM": {
     "railway": "signal",
@@ -482,7 +492,7 @@
     "railway:signal:crossing_info": "FR:PN",
     "railway:signal:crossing_info:form": "sign"
   },
-  "Triangle d'Abaissement'": {
+  "Triangle d'Abaissement": {
     "railway": "signal",
     "railway:signal:snowplow": "FR:equipment",
     "railway:signal:snowplow:type": "down",

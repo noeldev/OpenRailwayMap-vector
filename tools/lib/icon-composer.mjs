@@ -220,17 +220,34 @@ function packRows(items, maxWidth) {
   return rows;
 }
 
-// Splits rows of scenes into pages of `pageRows` rows (0: one page).
+// Total height of rows of scenes, labels and gaps included.
+function rowsHeight(rowList) {
+  return rowList.reduce((sum, row) => sum + row.height + row.labelHeight, 0) + ROW_GAP * (rowList.length - 1);
+}
+
+// Splits rows of scenes into pages (0: one page). The page height is the
+// tallest run of `pageRows` consecutive rows; every page then takes as many
+// rows as fit in that height, so short rows share a page instead of
+// spilling over to a new one.
 function paginate(rows, pageRows) {
-  if (pageRows <= 0) return [rows];
-  const pages = [];
-  for (let i = 0; i < rows.length; i += pageRows) pages.push(rows.slice(i, i + pageRows));
+  if (pageRows <= 0 || rows.length <= pageRows) return [rows];
+  let limit = 0;
+  for (let i = 0; i + pageRows <= rows.length; i++) {
+    limit = Math.max(limit, rowsHeight(rows.slice(i, i + pageRows)));
+  }
+  const pages = [[]];
+  for (const row of rows) {
+    const page = pages[pages.length - 1];
+    if (page.length > 0 && rowsHeight([...page, row]) > limit) pages.push([row]);
+    else page.push(row);
+  }
   return pages;
 }
 
 /**
  * Renders scenes side by side, in rows wrapped at `maxWidth`, as SVG
- * documents: one page, or pages of `pageRows` rows when it is set. Scenes
+ * documents: one page, or pages as tall as `pageRows` rows when it is set
+ * (see paginate). Scenes
  * of a row share the same baseline (the signal anchor). All pages share the
  * same size (the widest row, the tallest page), so they can be laid out one
  * after the other.
@@ -257,7 +274,6 @@ export function composeSvg(scenes, symbolsRoot, { scale, title, background, labe
   const rows = packRows(laidOut, maxWidth);
   const pages = paginate(rows, pageRows);
 
-  const rowsHeight = (rowList) => rowList.reduce((sum, row) => sum + row.height + row.labelHeight, 0) + ROW_GAP * (rowList.length - 1);
   const totalWidth = Math.max(...rows.map((row) => row.width)) + 2 * MARGIN;
   const totalHeight = Math.max(...pages.map((pageRowList) => rowsHeight(pageRowList))) + 2 * MARGIN;
   const featureAttrs = background ? ' filter="url(#shadow)"' : '';

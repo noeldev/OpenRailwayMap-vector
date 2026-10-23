@@ -48,9 +48,10 @@ Options:
   --scale <n>         Display size multiplier of the map pixel size (default: 10)
   --width <px>        Maximum image width in map pixels; scenes wrap to a new
                       row past it, 0 for a single row (default: ${DEFAULT_WIDTH})
-  --page-rows <n>     Rows of scenes per page: every page is written as
-                      <out>-1, <out>-2... all of the same size
-                      (default: 0, one image)
+  --page-rows <n>     Page height, as the tallest run of n rows of scenes:
+                      a page takes every row that fits in it, and every
+                      page is written as <out>-1, <out>-2... all of the
+                      same size (default: 0, one image)
   --background <c>    Background color, drawn with a soft shadow under each
                       signal, or "none" for transparent (default: ${DEFAULT_BACKGROUND})
   --png               Write a PNG instead of an SVG (also implied by --out *.png)
