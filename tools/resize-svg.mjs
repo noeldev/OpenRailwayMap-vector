@@ -6,6 +6,9 @@
 // Output dimensions are rounded to the nearest 0.25.
 // The viewBox attribute is never modified.
 //
+// Files whose name starts with "_" (e.g. _spacer.svg) keep a fixed size and
+// are skipped: their width/height is set by hand, independently of --scale.
+//
 // Usage:
 //   node tools/resize-svg.mjs                          # dry-run, boxes/
 //   node tools/resize-svg.mjs --apply
@@ -27,7 +30,7 @@
 
 import { readFile, writeFile, mkdir, copyFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
-import { join, relative, sep } from 'node:path';
+import { basename, join, relative, sep } from 'node:path';
 
 import {
   DEFAULT_SVG_ROOT,
@@ -39,6 +42,7 @@ import {
 } from './lib/shared.mjs';
 
 const BACKUP_DIR_NAME = '_backup';
+const FIXED_SIZE_PREFIX = '_';
 
 const HELP = `
 Usage: node tools/resize-svg.mjs [options]
@@ -51,6 +55,8 @@ Options:
   --apply            Write changes to disk (default: dry-run)
   --no-backup        Skip the pristine-copy backup when applying
   -h, --help         Show this help
+
+Files whose name starts with "${FIXED_SIZE_PREFIX}" keep their size and are skipped.
 `;
 
 function parseArgs(argv) {
@@ -160,9 +166,15 @@ async function main() {
 
   let resized = 0;
   let unchanged = 0;
+  let fixed = 0;
   let warned = 0;
 
   for await (const filePath of walkFiles(svgDir, { ext: '.svg', skipDirs: [BACKUP_DIR_NAME] })) {
+    if (basename(filePath).startsWith(FIXED_SIZE_PREFIX)) {
+      fixed++;
+      continue;
+    }
+
     const outcome = await resizeOne(filePath, svgDir, backupDir, opts);
     if (outcome === 'resized') resized++;
     else if (outcome === 'unchanged') unchanged++;
@@ -173,6 +185,7 @@ async function main() {
   console.log(color.cyan('===== Summary ====='));
   console.log(color.green(`  Resized   : ${resized}`));
   console.log(`  Unchanged : ${unchanged}`);
+  console.log(`  Fixed size: ${fixed}`);
   console.log(warned ? color.yellow(`  Skipped   : ${warned} (no viewBox / unparsable tag)`) : '  Skipped   : 0');
   if (!opts.apply) console.log(color.yellow('\nDry-run only - pass --apply to write changes.'));
 

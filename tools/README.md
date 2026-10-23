@@ -106,14 +106,17 @@ side with its name below, which makes before/after or variant comparisons
 easy. Scenes wrap to a new row past `--width` map pixels (default 400, i.e.
 4000 px at the default scale; `--width 0` keeps one row); the scenes of a
 row share the same baseline, and long names wrap over several lines. Every
-row is its own `<g>`. `--page-rows` splits the rows into pages of that
-many rows, all of the same size (the widest row, the tallest page), written
-as `<out>-1`, `<out>-2`... so a long set of examples can be published page
-by page; with the default width, 2 rows per page give landscape pages. `--tag key=value` adds or overrides a tag in every scene, or builds a
-single scene on its own. A tags file is either a JSON object of tags (one
-scene), an array of `{ "name": ..., "tags": {...} }`, an object of
-`name -> tags`, or plain `key=value` lines as copied from an editor's text
-view (one scene, `#` comments allowed):
+row is its own `<g>`. `--page-rows` splits the rows into pages as tall as
+the tallest run of that many rows: every page takes the rows that fit in
+that height, so short rows share a page. The pages, all of the same size
+(the widest row, the tallest page), are written as `<out>-1`, `<out>-2`...
+so a long set of examples can be published page by page; with the default
+width, 2 rows per page give landscape pages. `--tag key=value` adds or
+overrides a tag in every scene, or builds a single scene on its own. A tags
+file is either a JSON object of tags (one scene), an array of 
+`{ "name": ..., "tags": {...} }`, an object of `name -> tags`, or plain 
+`key=value` lines as copied from an editor's text view (one scene, `#` 
+comments allowed):
 
 ```json
 {
@@ -189,6 +192,8 @@ file it applies to is saved once before the first modification - to
 `tools/_backup/<subdir>/` for a `--subdir` run, or plain `tools/_backup/`
 (mirroring the full `symbols/fr` layout) for `--all` - the same convention
 and backup directory `optimize` uses; pass `--no-backup` to skip it.
+Files whose name starts with `_` (e.g. `_spacer.svg`) are skipped: their
+width/height is set by hand and must not follow `--scale`.
 
 ### aspects
 
