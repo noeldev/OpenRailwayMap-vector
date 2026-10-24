@@ -192,8 +192,9 @@ file it applies to is saved once before the first modification - to
 `tools/_backup/<subdir>/` for a `--subdir` run, or plain `tools/_backup/`
 (mirroring the full `symbols/fr` layout) for `--all` - the same convention
 and backup directory `optimize` uses; pass `--no-backup` to skip it.
-Files whose name starts with `_` (e.g. `_spacer.svg`) are skipped: their
-width/height is set by hand and must not follow `--scale`.
+Files whose name starts with `_` (e.g. `_spacer.svg`) are layout helpers, not
+icons: `resize` skips them, since their width/height is set by hand and must
+not follow `--scale`, and `audit` leaves them out of the report.
 
 ### aspects
 

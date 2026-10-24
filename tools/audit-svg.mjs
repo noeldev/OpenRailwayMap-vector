@@ -27,6 +27,7 @@ import {
   hasInkscapeMarkup,
   hasNonEmptyText,
   humanBytes,
+  isHelperFile,
   parseSvgOpenTag,
   parseViewBox,
   toPosix,
@@ -91,6 +92,8 @@ async function scanIcons(absRoot, minDim) {
   const icons = [];
 
   for await (const file of walkFiles(absRoot, { ext: '.svg' })) {
+    if (isHelperFile(file)) continue;
+
     const [source, fileStat] = await Promise.all([
       readFile(file, 'utf8'),
       stat(file),

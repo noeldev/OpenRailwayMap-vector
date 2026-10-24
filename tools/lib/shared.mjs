@@ -4,7 +4,7 @@
 // are always correct regardless of the current working directory.
 
 import { fileURLToPath } from 'node:url';
-import { dirname, join, relative, sep } from 'node:path';
+import { basename, dirname, join, relative, sep } from 'node:path';
 import { readdir, access } from 'node:fs/promises';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -21,6 +21,16 @@ export const DEFAULT_SVG_ROOT = join(PROJECT_ROOT, 'symbols', 'fr');
 
 /** Default YAML file: <project>/features/signals_railway_signals.yaml */
 export const DEFAULT_YAML_FILE = join(PROJECT_ROOT, 'features', 'signals_railway_signals.yaml');
+
+/**
+ * Prefix of layout helper files (e.g. _spacer.svg): they are composed with
+ * icons but are not icons themselves, so resize keeps their hand-set size
+ * and audit leaves them out of the report.
+ */
+export const HELPER_FILE_PREFIX = '_';
+
+/** True for a layout helper file (see HELPER_FILE_PREFIX). */
+export const isHelperFile = (filePath) => basename(filePath).startsWith(HELPER_FILE_PREFIX);
 
 /**
  * Minimum safe viewBox dimension (smallest of width/height), shared by:

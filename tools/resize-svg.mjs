@@ -6,8 +6,9 @@
 // Output dimensions are rounded to the nearest 0.25.
 // The viewBox attribute is never modified.
 //
-// Files whose name starts with "_" (e.g. _spacer.svg) keep a fixed size and
-// are skipped: their width/height is set by hand, independently of --scale.
+// Layout helper files, whose name starts with "_" (e.g. _spacer.svg), keep a
+// fixed size and are skipped: their width/height is set by hand, independently
+// of --scale (see isHelperFile in lib/shared.mjs).
 //
 // Usage:
 //   node tools/resize-svg.mjs                          # dry-run, boxes/
@@ -30,19 +31,20 @@
 
 import { readFile, writeFile, mkdir, copyFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
-import { basename, join, relative, sep } from 'node:path';
+import { join, relative, sep } from 'node:path';
 
 import {
   DEFAULT_SVG_ROOT,
   TOOLS_DIR,
   color,
   walkFiles,
+  isHelperFile,
+  HELPER_FILE_PREFIX,
   parseSvgOpenTag,
   parseViewBox,
 } from './lib/shared.mjs';
 
 const BACKUP_DIR_NAME = '_backup';
-const FIXED_SIZE_PREFIX = '_';
 
 const HELP = `
 Usage: node tools/resize-svg.mjs [options]
@@ -56,7 +58,7 @@ Options:
   --no-backup        Skip the pristine-copy backup when applying
   -h, --help         Show this help
 
-Files whose name starts with "${FIXED_SIZE_PREFIX}" keep their size and are skipped.
+Files whose name starts with "${HELPER_FILE_PREFIX}" keep their size and are skipped.
 `;
 
 function parseArgs(argv) {
@@ -170,7 +172,7 @@ async function main() {
   let warned = 0;
 
   for await (const filePath of walkFiles(svgDir, { ext: '.svg', skipDirs: [BACKUP_DIR_NAME] })) {
-    if (basename(filePath).startsWith(FIXED_SIZE_PREFIX)) {
+    if (isHelperFile(filePath)) {
       fixed++;
       continue;
     }
