@@ -319,6 +319,7 @@ tags:
   - { tag: 'railway:signal:speed_limit:switchable', title: 'Speed limit switchable' }
   - { tag: 'railway:signal:speed_limit:switchable:speed', title: 'Speed limit switchable speed' }
   - { tag: 'railway:signal:speed_limit:switchable:form', title: 'Speed limit switchable form' }
+  - { tag: 'railway:signal:speed_limit:switchable:states', title: 'Speed limit switchable states', type: array }
   - { tag: 'railway:signal:speed_limit:freight', title: 'Speed limit freight' }
   - { tag: 'railway:signal:speed_limit:freight:speed', title: 'Speed limit freight speed' }
   - { tag: 'railway:signal:speed_limit:freight:function', title: 'Speed limit freight function' }
@@ -326,6 +327,7 @@ tags:
   - { tag: 'railway:signal:speed_limit_distant:switchable', title: 'Speed limit distant switchable' }
   - { tag: 'railway:signal:speed_limit_distant:switchable:speed', title: 'Speed limit distant switchable speed' }
   - { tag: 'railway:signal:speed_limit_distant:switchable:form', title: 'Speed limit distant switchable form' }
+  - { tag: 'railway:signal:speed_limit_distant:switchable:states', title: 'Speed limit distant switchable states', type: array }
   - { tag: 'railway:signal:speed_limit_distant:fixed', title: 'Speed limit distant fixed' }
   - { tag: 'railway:signal:speed_limit_distant:fixed:speed', title: 'Speed limit distant fixed speed' }
   - { tag: 'railway:signal:speed_limit_distant:fixed:form', title: 'Speed limit distant fixed form' }
@@ -7554,6 +7556,26 @@ features:
   # Every TIV is a base (the empty board, box or sign) plus a number overlay.
   # Switchable and fixed TIV-D share their overlays, on distinct bases.
 
+  # The states of a switchable TIV light box, when given alone: off (unlit
+  # box) or open (no number). Otherwise the speed tells closed from open.
+  - description: TIV-D Mobile
+    country: FR
+    icon: [ default: 'fr/boxes/TIV-D' ]
+    tags:
+      - { tag: 'railway:signal:speed_limit_distant', value: 'FR:speed_indicator' }
+      - { tag: 'railway:signal:speed_limit_distant:switchable', value: 'FR:TIV-D' }
+      - { tag: 'railway:signal:speed_limit_distant:switchable:form', value: 'light' }
+      - { tag: 'railway:signal:speed_limit_distant:switchable:states', values: [ 'off' ] }
+
+  - description: TIV-D Mobile
+    country: FR
+    icon: [ default: 'fr/boxes/TIV-D_open' ]
+    tags:
+      - { tag: 'railway:signal:speed_limit_distant', value: 'FR:speed_indicator' }
+      - { tag: 'railway:signal:speed_limit_distant:switchable', value: 'FR:TIV-D' }
+      - { tag: 'railway:signal:speed_limit_distant:switchable:form', value: 'light' }
+      - { tag: 'railway:signal:speed_limit_distant:switchable:states', values: [ 'open' ] }
+
   - description: TIV-D Mobile
     country: FR
     exampleIcon: 'fr/boxes/examples/TIV-D_closed'
@@ -7598,6 +7620,32 @@ features:
 
   - description: TIV-R Mobile
     country: FR
+    icon:
+      - match: 'railway:signal:speed_limit:switchable:speed'
+        cases:
+          - { regex: '^1[0-6]0$', value: 'fr/boxes/TIV-R_wide' }
+        default: 'fr/boxes/TIV-R'
+    tags:
+      - { tag: 'railway:signal:speed_limit', value: 'FR:speed_indicator' }
+      - { tag: 'railway:signal:speed_limit:switchable', value: 'FR:TIV-R' }
+      - { tag: 'railway:signal:speed_limit:switchable:form', value: 'light' }
+      - { tag: 'railway:signal:speed_limit:switchable:states', values: [ 'off' ] }
+
+  - description: TIV-R Mobile
+    country: FR
+    icon:
+      - match: 'railway:signal:speed_limit:switchable:speed'
+        cases:
+          - { regex: '^1[0-6]0$', value: 'fr/boxes/TIV-R_open_wide' }
+        default: 'fr/boxes/TIV-R_open'
+    tags:
+      - { tag: 'railway:signal:speed_limit', value: 'FR:speed_indicator' }
+      - { tag: 'railway:signal:speed_limit:switchable', value: 'FR:TIV-R' }
+      - { tag: 'railway:signal:speed_limit:switchable:form', value: 'light' }
+      - { tag: 'railway:signal:speed_limit:switchable:states', values: [ 'open' ] }
+
+  - description: TIV-R Mobile
+    country: FR
     exampleIcon: 'fr/boxes/examples/TIV-R'
     icon:
       - match: 'railway:signal:speed_limit:switchable:speed'
@@ -7627,106 +7675,6 @@ features:
       - { tag: 'railway:signal:speed_limit:switchable:form', value: 'board' }
 
   # TIV-D à 1 ou 2 nombres
-
-  # A fixed TIV-D grouped with a light main or distant signal is square-shaped:
-  # the crocodile on the support belongs to the signal (S1A art. 307). These
-  # come before the diamond-shaped features so that railway:crocodile only
-  # selects the diamond shape on a standalone TIV-D.
-  - description: TIV-D Fixe du type ordinaire groupé avec un signal
-    country: FR
-    exampleIcon: 'fr/signs/examples/TIV-D_square_split'
-    icon:
-      - match: 'railway:signal:speed_limit_distant:fixed:speed'
-        cases:
-          - { regex: '^[0-9]+;[0-9]+$', value: 'fr/signs/TIV-D_square_split' }
-        default: 'fr/signs/TIV-D_square'
-      - match: 'railway:signal:speed_limit_distant:fixed:speed'
-        cases:
-          # Centered
-          - { regex: '^([1-7]0|[89][05]|1[0-3][05]|140)$', value: 'fr/signs/TIV/TIV-D_square_{}', example: 'fr/signs/TIV/TIV-D_square_{140}' }
-          # Aligned to top
-          - { regex: '^([1-7]0|[89][05]|1[0-3][05]|140);[^;]+$', value: 'fr/signs/TIV/TIV-D_square_{}_top', example: 'fr/signs/TIV/TIV-D_square_{140}_top' }
-      - match: 'railway:signal:speed_limit_distant:fixed:speed'
-        cases:
-          # Aligned to bottom
-          - { regex: '^[^;]+;([1-7]0|[89][05]|1[0-3][05]|140)$', value: 'fr/signs/TIV/TIV-D_square_{}_bottom', example: 'fr/signs/TIV/TIV-D_square_{100}_bottom' }
-    tags:
-      - { tag: 'railway:signal:speed_limit_distant', value: 'FR:speed_indicator' }
-      - { tag: 'railway:signal:speed_limit_distant:fixed', value: 'FR:TIV-D' }
-      - { tag: 'railway:signal:speed_limit_distant:fixed:form', value: 'sign' }
-      - { tag: 'railway:signal:main:form', value: 'light' }
-
-  - description: TIV-D Fixe du type ordinaire groupé avec un signal
-    country: FR
-    exampleIcon: 'fr/boards/examples/TIV-D_square_split'
-    icon:
-      - match: 'railway:signal:speed_limit_distant:fixed:speed'
-        cases:
-          - { regex: '^[0-9]+;[0-9]+$', value: 'fr/boards/TIV-D_square_split' }
-        default: 'fr/boards/TIV-D_square'
-      - match: 'railway:signal:speed_limit_distant:fixed:speed'
-        cases:
-          # Centered
-          - { regex: '^([1-7]0|[89][05]|1[0-3][05]|140)$', value: 'fr/boards/TIV/TIV-D_square_{}', example: 'fr/boards/TIV/TIV-D_square_{140}' }
-          # Aligned to top
-          - { regex: '^([1-7]0|[89][05]|1[0-3][05]|140);[^;]+$', value: 'fr/boards/TIV/TIV-D_square_{}_top', example: 'fr/boards/TIV/TIV-D_square_{140}_top' }
-      - match: 'railway:signal:speed_limit_distant:fixed:speed'
-        cases:
-          # Aligned to bottom
-          - { regex: '^[^;]+;([1-7]0|[89][05]|1[0-3][05]|140)$', value: 'fr/boards/TIV/TIV-D_square_{}_bottom', example: 'fr/boards/TIV/TIV-D_square_{100}_bottom' }
-    tags:
-      - { tag: 'railway:signal:speed_limit_distant', value: 'FR:speed_indicator' }
-      - { tag: 'railway:signal:speed_limit_distant:fixed', value: 'FR:TIV-D' }
-      - { tag: 'railway:signal:speed_limit_distant:fixed:form', value: 'board' }
-      - { tag: 'railway:signal:main:form', value: 'light' }
-
-  - description: TIV-D Fixe du type ordinaire groupé avec un signal
-    country: FR
-    exampleIcon: 'fr/signs/examples/TIV-D_square_split'
-    icon:
-      - match: 'railway:signal:speed_limit_distant:fixed:speed'
-        cases:
-          - { regex: '^[0-9]+;[0-9]+$', value: 'fr/signs/TIV-D_square_split' }
-        default: 'fr/signs/TIV-D_square'
-      - match: 'railway:signal:speed_limit_distant:fixed:speed'
-        cases:
-          # Centered
-          - { regex: '^([1-7]0|[89][05]|1[0-3][05]|140)$', value: 'fr/signs/TIV/TIV-D_square_{}', example: 'fr/signs/TIV/TIV-D_square_{140}' }
-          # Aligned to top
-          - { regex: '^([1-7]0|[89][05]|1[0-3][05]|140);[^;]+$', value: 'fr/signs/TIV/TIV-D_square_{}_top', example: 'fr/signs/TIV/TIV-D_square_{140}_top' }
-      - match: 'railway:signal:speed_limit_distant:fixed:speed'
-        cases:
-          # Aligned to bottom
-          - { regex: '^[^;]+;([1-7]0|[89][05]|1[0-3][05]|140)$', value: 'fr/signs/TIV/TIV-D_square_{}_bottom', example: 'fr/signs/TIV/TIV-D_square_{100}_bottom' }
-    tags:
-      - { tag: 'railway:signal:speed_limit_distant', value: 'FR:speed_indicator' }
-      - { tag: 'railway:signal:speed_limit_distant:fixed', value: 'FR:TIV-D' }
-      - { tag: 'railway:signal:speed_limit_distant:fixed:form', value: 'sign' }
-      - { tag: 'railway:signal:distant:form', value: 'light' }
-
-  - description: TIV-D Fixe du type ordinaire groupé avec un signal
-    country: FR
-    exampleIcon: 'fr/boards/examples/TIV-D_square_split'
-    icon:
-      - match: 'railway:signal:speed_limit_distant:fixed:speed'
-        cases:
-          - { regex: '^[0-9]+;[0-9]+$', value: 'fr/boards/TIV-D_square_split' }
-        default: 'fr/boards/TIV-D_square'
-      - match: 'railway:signal:speed_limit_distant:fixed:speed'
-        cases:
-          # Centered
-          - { regex: '^([1-7]0|[89][05]|1[0-3][05]|140)$', value: 'fr/boards/TIV/TIV-D_square_{}', example: 'fr/boards/TIV/TIV-D_square_{140}' }
-          # Aligned to top
-          - { regex: '^([1-7]0|[89][05]|1[0-3][05]|140);[^;]+$', value: 'fr/boards/TIV/TIV-D_square_{}_top', example: 'fr/boards/TIV/TIV-D_square_{140}_top' }
-      - match: 'railway:signal:speed_limit_distant:fixed:speed'
-        cases:
-          # Aligned to bottom
-          - { regex: '^[^;]+;([1-7]0|[89][05]|1[0-3][05]|140)$', value: 'fr/boards/TIV/TIV-D_square_{}_bottom', example: 'fr/boards/TIV/TIV-D_square_{100}_bottom' }
-    tags:
-      - { tag: 'railway:signal:speed_limit_distant', value: 'FR:speed_indicator' }
-      - { tag: 'railway:signal:speed_limit_distant:fixed', value: 'FR:TIV-D' }
-      - { tag: 'railway:signal:speed_limit_distant:fixed:form', value: 'board' }
-      - { tag: 'railway:signal:distant:form', value: 'light' }
 
   - description: TIV-D Fixe du type ordinaire
     country: FR
@@ -7914,6 +7862,7 @@ features:
       - default: 'fr/boxes/double'
       - match: 'railway:signal:switch:states'
         cases:
+          - { exact: 'off', value: 'fr/boxes/double' }
           - { exact: 'right', value: 'fr/boxes/double/TIDD_right' }
         default: 'fr/boxes/double/TIDD_left'
     tags:
@@ -8215,9 +8164,20 @@ features:
       - { tag: 'railway:signal:departure', value: 'FR:RLI' }
       - { tag: 'railway:signal:departure:form', value: 'light' }
 
+  # The TLC box is drawn off, with the lit indication on top: the stop
+  # marker (C), the group signal (T, steady or flashing) or the SLD.
   - description: Tableau Lumineux de Correspondance (TLC)
     country: FR
-    icon: [ default: 'fr/boxes/TLC' ]
+    exampleIcon: 'fr/boxes/examples/TLC'
+    icon:
+      - default: 'fr/boxes/TLC'
+      - match: 'railway:signal:minor:states'
+        cases:
+          - { exact: 'off', value: 'fr/boxes/TLC' }
+          - { exact: 'FR:T', value: 'fr/boxes/TLC/T' }
+          - { exact: 'FR:(T)', value: 'fr/boxes/TLC/T' }
+          - { exact: 'FR:SLD', value: 'fr/boxes/TLC/SLD' }
+        default: 'fr/boxes/TLC/C'
     tags:
       - { tag: 'railway:signal:minor', value: 'FR:TLC' }
       - { tag: 'railway:signal:minor:form', value: 'light' }
