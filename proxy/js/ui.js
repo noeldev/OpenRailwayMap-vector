@@ -410,9 +410,9 @@ function hideNews() {
 function newsLink(presetOrStyle, zoom, lat, lon, date, bearing, pitch) {
   hideNews();
   if (typeof presetOrStyle === 'string') {
-    selectPreset(preset);
+    selectPreset(presetOrStyle);
   } else if (typeof presetOrStyle === 'object') {
-    selectedStyle(presetOrStyle)
+    selectStyle(presetOrStyle)
   }
   selectDate(date ?? defaultDate);
   map.jumpTo({zoom, center: {lat, lon}, bearing: bearing ?? 0, pitch: pitch ?? 0});
@@ -1552,6 +1552,11 @@ map.setStyle(`${location.origin}/style.json`, {
 
 function selectPreset(preset) {
   styleControl.selectPreset(preset);
+  onStyleChange();
+}
+
+function selectStyle(style) {
+  styleControl.selectStyleOptions(style);
   onStyleChange();
 }
 
