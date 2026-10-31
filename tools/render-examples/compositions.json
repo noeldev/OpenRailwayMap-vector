@@ -178,7 +178,7 @@
     "railway:signal:speed_limit_distant:fixed:form": "board",
     "railway:signal:speed_limit_distant:fixed:speed": "50"
   },
-  "C C (BM) + Z + TIV-D 70 carré + DD": {
+  "C C (BM) + Z + TIV-D 90 carré + DD": {
     "railway": "signal",
     "railway:signal:departure": "FR:DD",
     "railway:signal:departure:form": "sign",
@@ -194,7 +194,7 @@
     "railway:signal:speed_limit_distant": "FR:speed_indicator",
     "railway:signal:speed_limit_distant:fixed": "FR:TIV-D",
     "railway:signal:speed_limit_distant:fixed:form": "board",
-    "railway:signal:speed_limit_distant:fixed:speed": "70"
+    "railway:signal:speed_limit_distant:fixed:speed": "90"
   },
   "H C + Z + TIV-D 70 carré + ID2 + TLD double": {
     "railway": "signal",
@@ -216,7 +216,7 @@
     "railway:signal:route_distant": "FR:TLD",
     "railway:signal:route_distant:form": "light"
   },
-  "C VL (PR) + Z + TIV-D 70 carré": {
+  "C VL (PR) + Z + TIV-D 70 carré + plaque MIB-MIV": {
     "railway": "signal",
     "railway:signal:main": "FR:C",
     "railway:signal:main:form": "light",
@@ -230,7 +230,9 @@
     "railway:signal:speed_limit_distant": "FR:speed_indicator",
     "railway:signal:speed_limit_distant:fixed": "FR:TIV-D",
     "railway:signal:speed_limit_distant:fixed:form": "sign",
-    "railway:signal:speed_limit_distant:fixed:speed": "70"
+    "railway:signal:speed_limit_distant:fixed:speed": "70",
+    "railway:signal:departure": "FR:authorization_plate",
+    "railway:signal:departure:form": "sign"
   },
   "Z + TIV-D 40 carré + TLC": {
     "railway": "signal",
