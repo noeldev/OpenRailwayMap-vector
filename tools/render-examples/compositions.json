@@ -247,12 +247,12 @@
     "railway:signal:minor": "FR:TLC",
     "railway:signal:minor:form": "light"
   },
-  "F R+A + TIV-R 60 + ID4": {
+  "F (R)+(A) + TIV-R 60 + ID4": {
     "railway": "signal",
     "railway:signal:main": "FR:C",
     "railway:signal:main:form": "light",
     "railway:signal:main:shape": "FR:F",
-    "railway:signal:main:states": "FR:R+A",
+    "railway:signal:main:states": "FR:(R)+(A)",
     "railway:signal:speed_limit": "FR:speed_indicator",
     "railway:signal:speed_limit:switchable": "FR:TIV-R",
     "railway:signal:speed_limit:switchable:form": "board",
@@ -472,6 +472,13 @@
     "railway:signal:train_protection:main:type": "FR:Nf",
     "railway:signal:train_protection:main:passing_light": "yes",
     "railway:signal:train_protection:main:etcs": "yes"
+  },
+  "Jalon de manœuvres TVM": {
+    "railway": "signal",
+    "railway:signal:position": "left",
+    "railway:signal:train_protection": "FR:TVM",
+    "railway:signal:train_protection:main": "shunting_marker",
+    "railway:signal:train_protection:main:form": "sign"
   },
   "SLM": {
     "railway": "signal",

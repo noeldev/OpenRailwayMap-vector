@@ -3,5 +3,5 @@ railway=signal
 railway:signal:main=FR:C
 railway:signal:main:form=light
 railway:signal:main:shape=FR:F
-railway:signal:main:states=FR:C;FR:R+A;FR:VL
+railway:signal:main:states=FR:C;FR:(R)+(A);FR:VL
 railway:signal:main:type=FR:BM
