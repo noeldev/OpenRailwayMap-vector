@@ -34,7 +34,7 @@ function loadParts() {
  * Render the audit HTML report.
  * @param {Record<string, string|number>} data
  *   Values for the data placeholders (TITLE, TOTAL, TOTAL_PLURAL, MIN,
- *   WARN_COUNT, EMPTY_STATE, CARDS). CSS and JS are provided internally.
+ *   WARN_COUNT, EMPTY_STATE, CARDS, SPRITE). CSS and JS are provided internally.
  * @returns {string}
  */
 export function renderAuditHtml(data) {

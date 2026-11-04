@@ -178,13 +178,29 @@ h1 {
   background-position: 0 0, 0 6px, 6px -6px, -6px 0;
 }
 
-  .thumb img {
+  .thumb img,
+  .thumb svg {
     width: 100%;
     height: 100%;
     object-fit: contain;
     display: block;
     /* Real colors, always. The theme never modifies the artwork. */
   }
+
+/* Cards outside the viewport are not rendered until scrolled into view. */
+.card {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 240px;
+}
+
+/* Icon sprite, hidden by size rather than display:none so that gradients
+   inside the symbols still render. */
+.sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
 
 /* Status badge in the top-right corner. Solid background so the glyph
    stays legible in both themes and in the printed PDF. */
@@ -328,8 +344,14 @@ footer {
     background: #fff;
   }
 
-  .thumb img {
+  .thumb img,
+  .thumb svg {
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .35));
+  }
+
+  /* Print every card, not only the ones rendered on screen. */
+  .card {
+    content-visibility: visible;
   }
 
   /* Preserve ONLY the corner badge colors. */

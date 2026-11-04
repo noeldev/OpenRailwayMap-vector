@@ -46,6 +46,13 @@ node tools/orm.mjs audit --root symbols/fr/boxes --min 100
 node tools/orm.mjs audit --out report.html
 ```
 
+The HTML report is a single self-contained file. Each icon is defined once
+as a `<symbol>` of an SVG sprite at the end of the page, with an id hashed
+from its path, and every card draws it with `<use>`; ids inside an icon
+(gradients, clip paths) are prefixed with that hash so icons never clash.
+An icon containing `<style>` or `<script>` is shown as an isolated `<img>`
+instead, so its rules cannot leak into the page.
+
 ### check
 
 ```
@@ -464,6 +471,7 @@ against, unlike the others. Treat those filenames as not yet final.
       shared.mjs                   # PROJECT_ROOT / DEFAULT_* / shared helpers
       svg-tidy.mjs                 # tidy pass shared by optimize and clean-templates
       audit-template.{mjs,html,css,js}
+      svg-sprite.mjs               # audit: inline SVG sprite (hashed symbol ids)
       signal-matcher.mjs           # render: YAML feature matching
       icon-composer.mjs            # render: map-like icon layout
       osm-api.mjs                  # render: node tags from the OSM API

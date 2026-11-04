@@ -12,6 +12,12 @@
 // The report shows, for each icon: a square-aligned preview, its relative
 // path, viewBox size, file size, and warning markers.
 //
+// In the HTML report the icons are inline SVG: every icon is defined once
+// as a <symbol> of a single sprite placed at the end of the page, and each
+// card draws it with <use>. The cards are laid out first, the icons appear
+// as soon as the sprite is parsed. Icons with <style> or <script> keep an
+// isolated <img> (see lib/svg-sprite.mjs).
+//
 // The HTML/CSS/JS template lives in lib/audit-template.{html,css,js}
 // and is loaded and assembled by lib/audit-template.mjs.
 
@@ -34,6 +40,7 @@ import {
   walkFiles,
 } from './lib/shared.mjs';
 import { renderAuditHtml } from './lib/audit-template.mjs';
+import { canInline, renderSprite, symbolIdOf, toSymbol } from './lib/svg-sprite.mjs';
 
 const HELP = `
 SVG icon audit
@@ -58,6 +65,7 @@ Examples:
 
 const fmt = (n) => Number.isInteger(n) ? String(n) : n.toFixed(2).replace(/\.?0+$/, '');
 const vbLabelOf = (vb) => vb ? `${fmt(vb.w)} × ${fmt(vb.h)}` : 'missing';
+const vbAttrOf = (vb) => vb ? `${fmt(vb.x)} ${fmt(vb.y)} ${fmt(vb.w)} ${fmt(vb.h)}` : null;
 
 // ---------- argument parsing ----------
 
@@ -192,13 +200,28 @@ function renderJson(icons, total, warnCount, absRoot, minDim) {
 
 // ---------- HTML output ----------
 //
-// renderHtml() only builds the per-icon cards and the empty-state block,
-// then hands everything to renderAuditHtml() from lib/audit-template.mjs.
-// The HTML structure, CSS and client-side JS live in separate files.
+// renderHtml() only builds the per-icon cards, the sprite and the
+// empty-state block, then hands everything to renderAuditHtml() from
+// lib/audit-template.mjs. The HTML structure, CSS and client-side JS live
+// in separate files.
+
+// Preview of one icon: a <use> of its sprite symbol, or an isolated <img>.
+function thumbHtml(icon, symbols) {
+  if (!canInline(icon.source)) {
+    const dataUri = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(icon.source);
+    return `<img loading="lazy" alt="" src="${dataUri}">`;
+  }
+  // The outer <svg> has no viewBox: the symbol's own viewBox scales the icon
+  // into the box, which also keeps icons whose viewBox does not start at 0 0
+  // in place.
+  const id = symbolIdOf(icon.rel);
+  symbols.push(toSymbol(id, icon.source, vbAttrOf(icon.viewBox)));
+  return `<svg aria-hidden="true"><use href="#${id}"/></svg>`;
+}
 
 function renderHtml(icons, total, warnCount, absRoot, displayRoot, minDim) {
+  const symbols = [];
   const cardsHtml = icons.map((icon) => {
-    const dataUri = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(icon.source);
     const vbLabel = vbLabelOf(icon.viewBox);
     const titleAttr = icon.flags.length ? ' title="' + esc(icon.flags.join(' • ')) + '"' : '';
     const minForSort = icon.minDim ?? -1;
@@ -212,7 +235,7 @@ function renderHtml(icons, total, warnCount, absRoot, displayRoot, minDim) {
       `         data-min="${minForSort}"`,
       `         data-size="${icon.sizeBytes}"`,
       `         data-warn="${icon.warn ? 1 : 0}"${titleAttr}>`,
-      `  <div class="thumb"><img loading="lazy" alt="" src="${dataUri}"></div>`,
+      `  <div class="thumb">${thumbHtml(icon, symbols)}</div>`,
       `  <span class="flag ${icon.warn ? 'warn' : 'ok'}" aria-hidden="true">${icon.warn ? '⚠' : '✓'}</span>`,
       `  <div class="body">`,
       `    <div class="path">${esc(icon.rel)}</div>`,
@@ -241,6 +264,7 @@ function renderHtml(icons, total, warnCount, absRoot, displayRoot, minDim) {
     WARN_COUNT: warnCount,
     EMPTY_STATE: emptyStateHtml,
     CARDS: cardsHtml,
+    SPRITE: renderSprite(symbols),
   });
 }
 
