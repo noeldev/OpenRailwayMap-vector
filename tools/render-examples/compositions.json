@@ -32,7 +32,7 @@
     "railway:signal:lightbox:left": "FR:D",
     "railway:signal:lightbox:right": "FR:TECS"
   },
-  "H VL + ID2 + reconnaissance VAT droite ": {
+  "H R + ID2 + reconnaissance VAT droite ": {
     "railway": "signal",
     "railway:signal:main": "FR:C",
     "railway:signal:main:form": "light",
