@@ -382,68 +382,67 @@ tags:
   - { tag: 'railway:signal:crossing_hint:type', title: 'Crossing hint type' }
   - { tag: 'railway:signal:whistle:type', title: 'Whistle type' }
 
-  # FR: signal idreseau (SNCF Réseau network IDs)
-  - { tag: 'railway:signal:main:ref', title: 'Main signal idreseau' }
-  - { tag: 'railway:signal:distant:ref', title: 'Distant signal idreseau' }
-  - { tag: 'railway:signal:lightbox:ref', title: 'Lightbox idreseau' }
-  - { tag: 'railway:signal:minor:ref', title: 'Minor signal idreseau' }
-  - { tag: 'railway:signal:stop:ref', title: 'Stop signal idreseau' }
-  - { tag: 'railway:signal:stop_distant:ref', title: 'Stop distant idreseau' }
-  - { tag: 'railway:signal:stop:any:ref', title: 'Stop any idreseau' }
-  - { tag: 'railway:signal:stop:conventional:ref', title: 'Stop conventional idreseau' }
-  - { tag: 'railway:signal:stop:suburban:ref', title: 'Stop suburban idreseau' }
-  - { tag: 'railway:signal:stop:regional:ref', title: 'Stop regional idreseau' }
-  - { tag: 'railway:signal:stop:highspeed:ref', title: 'Stop highspeed idreseau' }
-  - { tag: 'railway:signal:stop:accessibility:ref', title: 'Stop accessibility idreseau' }
-  - { tag: 'railway:signal:speed_limit:ref', title: 'Speed limit idreseau' }
-  - { tag: 'railway:signal:speed_limit:marker:ref', title: 'Speed limit marker idreseau' }
-  - { tag: 'railway:signal:speed_limit:switch:ref', title: 'Speed limit switch idreseau' }
-  - { tag: 'railway:signal:speed_limit:transition:ref', title: 'Speed limit transition idreseau' }
-  - { tag: 'railway:signal:speed_limit:switchable:ref', title: 'Speed limit switchable idreseau' }
-  - { tag: 'railway:signal:speed_limit:freight:ref', title: 'Speed limit freight idreseau' }
-  - { tag: 'railway:signal:speed_limit_distant:ref', title: 'Speed limit distant idreseau' }
-  - { tag: 'railway:signal:speed_limit_distant:fixed:ref', title: 'Speed limit distant fixed idreseau' }
-  - { tag: 'railway:signal:speed_limit_distant:switchable:ref', title: 'Speed limit distant switchable idreseau' }
-  - { tag: 'railway:signal:speed_limit_distant:fast:ref', title: 'Speed limit distant fast idreseau' }
-  - { tag: 'railway:signal:speed_limit_distant:railcar:ref', title: 'Speed limit distant railcar idreseau' }
-  - { tag: 'railway:signal:speed_limit_distant:freight:ref', title: 'Speed limit distant freight idreseau' }
-  - { tag: 'railway:signal:speed_limit_distant:restriction:ref', title: 'Speed limit distant restriction idreseau' }
-  - { tag: 'railway:signal:route:ref', title: 'Route signal idreseau' }
-  - { tag: 'railway:signal:route_distant:ref', title: 'Route distant idreseau' }
-  - { tag: 'railway:signal:route_info:ref', title: 'Route info idreseau' }
-  - { tag: 'railway:signal:shunting:ref', title: 'Shunting signal idreseau' }
-  - { tag: 'railway:signal:shunting_route:depot:ref', title: 'Shunting route depot idreseau' }
-  - { tag: 'railway:signal:shunting_route:stabling:ref', title: 'Shunting route stabling idreseau' }
-  - { tag: 'railway:signal:shunting_route:short_block:ref', title: 'Shunting route short block idreseau' }
-  - { tag: 'railway:signal:shunting_route:dead_end:ref', title: 'Shunting route dead end idreseau' }
-  - { tag: 'railway:signal:shunting_route:buffer_stop:ref', title: 'Shunting route buffer stop idreseau' }
-  - { tag: 'railway:signal:departure:ref', title: 'Departure signal idreseau' }
-  - { tag: 'railway:signal:train_protection:ref', title: 'Train protection idreseau' }
-  - { tag: 'railway:signal:train_protection:main:ref', title: 'Train protection main idreseau' }
-  - { tag: 'railway:signal:train_protection:system_change:ref', title: 'Train protection system change idreseau' }
-  - { tag: 'railway:signal:train_protection_distant:ref', title: 'Train protection distant idreseau' }
-  - { tag: 'railway:signal:electricity:ref', title: 'Electricity signal idreseau' }
-  - { tag: 'railway:signal:electricity:transition:ref', title: 'Electricity transition idreseau' }
-  - { tag: 'railway:signal:bimode:ref', title: 'Bimode signal idreseau' }
-  - { tag: 'railway:signal:wrong_road:entry:ref', title: 'Wrong road entry idreseau' }
-  - { tag: 'railway:signal:wrong_road:exit:ref', title: 'Wrong road exit idreseau' }
-  - { tag: 'railway:signal:radio:mode:ref', title: 'Radio mode idreseau' }
-  - { tag: 'railway:signal:radio:channel:ref', title: 'Radio channel idreseau' }
-  - { tag: 'railway:signal:crossing:ref', title: 'Crossing idreseau' }
-  - { tag: 'railway:signal:crossing_hint:ref', title: 'Crossing hint idreseau' }
-  - { tag: 'railway:signal:crossing_info:ref', title: 'Crossing info idreseau' }
-  - { tag: 'railway:signal:station:ref', title: 'Station idreseau' }
-  - { tag: 'railway:signal:station_distant:ref', title: 'Station distant idreseau' }
-  - { tag: 'railway:signal:facility:ref', title: 'Facility idreseau' }
-  - { tag: 'railway:signal:facility_distant:ref', title: 'Facility distant idreseau' }
-  - { tag: 'railway:signal:servicing:ref', title: 'Servicing idreseau' }
-  - { tag: 'railway:signal:servicing_distant:ref', title: 'Servicing distant idreseau' }
-  - { tag: 'railway:signal:snowplow:ref', title: 'Snowplow idreseau' }
-  - { tag: 'railway:signal:whistle:ref', title: 'Whistle idreseau' }
-  - { tag: 'railway:signal:structure:ref', title: 'Structure idreseau' }
-  - { tag: 'railway:signal:clearance:ref', title: 'Clearance idreseau' }
-  - { tag: 'railway:signal:switch:ref', title: 'Switch idreseau' }
-  - { tag: 'railway:signal:coupling:ref', title: 'Coupling idreseau' }
+  - { tag: 'railway:signal:main:ref', title: 'Main signal reference' }
+  - { tag: 'railway:signal:distant:ref', title: 'Distant signal reference' }
+  - { tag: 'railway:signal:lightbox:ref', title: 'Lightbox reference' }
+  - { tag: 'railway:signal:minor:ref', title: 'Minor signal reference' }
+  - { tag: 'railway:signal:stop:ref', title: 'Stop signal reference' }
+  - { tag: 'railway:signal:stop_distant:ref', title: 'Stop distant reference' }
+  - { tag: 'railway:signal:stop:any:ref', title: 'Stop any reference' }
+  - { tag: 'railway:signal:stop:conventional:ref', title: 'Stop conventional reference' }
+  - { tag: 'railway:signal:stop:suburban:ref', title: 'Stop suburban reference' }
+  - { tag: 'railway:signal:stop:regional:ref', title: 'Stop regional reference' }
+  - { tag: 'railway:signal:stop:highspeed:ref', title: 'Stop highspeed reference' }
+  - { tag: 'railway:signal:stop:accessibility:ref', title: 'Stop accessibility reference' }
+  - { tag: 'railway:signal:speed_limit:ref', title: 'Speed limit reference' }
+  - { tag: 'railway:signal:speed_limit:marker:ref', title: 'Speed limit marker reference' }
+  - { tag: 'railway:signal:speed_limit:switch:ref', title: 'Speed limit switch reference' }
+  - { tag: 'railway:signal:speed_limit:transition:ref', title: 'Speed limit transition reference' }
+  - { tag: 'railway:signal:speed_limit:switchable:ref', title: 'Speed limit switchable reference' }
+  - { tag: 'railway:signal:speed_limit:freight:ref', title: 'Speed limit freight reference' }
+  - { tag: 'railway:signal:speed_limit_distant:ref', title: 'Speed limit distant reference' }
+  - { tag: 'railway:signal:speed_limit_distant:fixed:ref', title: 'Speed limit distant fixed reference' }
+  - { tag: 'railway:signal:speed_limit_distant:switchable:ref', title: 'Speed limit distant switchable reference' }
+  - { tag: 'railway:signal:speed_limit_distant:fast:ref', title: 'Speed limit distant fast reference' }
+  - { tag: 'railway:signal:speed_limit_distant:railcar:ref', title: 'Speed limit distant railcar reference' }
+  - { tag: 'railway:signal:speed_limit_distant:freight:ref', title: 'Speed limit distant freight reference' }
+  - { tag: 'railway:signal:speed_limit_distant:restriction:ref', title: 'Speed limit distant restriction reference' }
+  - { tag: 'railway:signal:route:ref', title: 'Route signal reference' }
+  - { tag: 'railway:signal:route_distant:ref', title: 'Route distant reference' }
+  - { tag: 'railway:signal:route_info:ref', title: 'Route info reference' }
+  - { tag: 'railway:signal:shunting:ref', title: 'Shunting signal reference' }
+  - { tag: 'railway:signal:shunting_route:depot:ref', title: 'Shunting route depot reference' }
+  - { tag: 'railway:signal:shunting_route:stabling:ref', title: 'Shunting route stabling reference' }
+  - { tag: 'railway:signal:shunting_route:short_block:ref', title: 'Shunting route short block reference' }
+  - { tag: 'railway:signal:shunting_route:dead_end:ref', title: 'Shunting route dead end reference' }
+  - { tag: 'railway:signal:shunting_route:buffer_stop:ref', title: 'Shunting route buffer stop reference' }
+  - { tag: 'railway:signal:departure:ref', title: 'Departure signal reference' }
+  - { tag: 'railway:signal:train_protection:ref', title: 'Train protection reference' }
+  - { tag: 'railway:signal:train_protection:main:ref', title: 'Train protection main reference' }
+  - { tag: 'railway:signal:train_protection:system_change:ref', title: 'Train protection system change reference' }
+  - { tag: 'railway:signal:train_protection_distant:ref', title: 'Train protection distant reference' }
+  - { tag: 'railway:signal:electricity:ref', title: 'Electricity signal reference' }
+  - { tag: 'railway:signal:electricity:transition:ref', title: 'Electricity transition reference' }
+  - { tag: 'railway:signal:bimode:ref', title: 'Bimode signal reference' }
+  - { tag: 'railway:signal:wrong_road:entry:ref', title: 'Wrong road entry reference' }
+  - { tag: 'railway:signal:wrong_road:exit:ref', title: 'Wrong road exit reference' }
+  - { tag: 'railway:signal:radio:mode:ref', title: 'Radio mode reference' }
+  - { tag: 'railway:signal:radio:channel:ref', title: 'Radio channel reference' }
+  - { tag: 'railway:signal:crossing:ref', title: 'Crossing reference' }
+  - { tag: 'railway:signal:crossing_hint:ref', title: 'Crossing hint reference' }
+  - { tag: 'railway:signal:crossing_info:ref', title: 'Crossing info reference' }
+  - { tag: 'railway:signal:station:ref', title: 'Station reference' }
+  - { tag: 'railway:signal:station_distant:ref', title: 'Station distant reference' }
+  - { tag: 'railway:signal:facility:ref', title: 'Facility reference' }
+  - { tag: 'railway:signal:facility_distant:ref', title: 'Facility distant reference' }
+  - { tag: 'railway:signal:servicing:ref', title: 'Servicing reference' }
+  - { tag: 'railway:signal:servicing_distant:ref', title: 'Servicing distant reference' }
+  - { tag: 'railway:signal:snowplow:ref', title: 'Snowplow reference' }
+  - { tag: 'railway:signal:whistle:ref', title: 'Whistle reference' }
+  - { tag: 'railway:signal:structure:ref', title: 'Structure reference' }
+  - { tag: 'railway:signal:clearance:ref', title: 'Clearance reference' }
+  - { tag: 'railway:signal:switch:ref', title: 'Switch reference' }
+  - { tag: 'railway:signal:coupling:ref', title: 'Coupling reference' }
 
 # A mapping of every type of signal that is imported
 # Every type that is known in the tag array above should also be present here
