@@ -22,16 +22,14 @@ async function promiseResultsOrErrors(promises) {
 
 async function parseSvgDimensions(feature) {
   const svg = await fs.promises.readFile(`symbols/${feature}.svg`, 'utf8')
-  // Only the attributes of the root <svg> element: inner elements (rect, image...) can have their own width/height
-  const root = svg.match(/<svg\b[^>]*>/)?.[0]
-  const width = root?.match(/\swidth="([^"]+)"/)
-  const height = root?.match(/\sheight="([^"]+)"/)
-  if (!width || !height) {
+  // Crude way of parsing SVG width/height. But given that all SVG icons are compressed and similar SVG content, this works fine.
+  const matches = svg.match(/<svg [^>]*width="([^"]+)"[^>]*height="([^"]+)"[^>]*>/)
+  if (!matches) {
     throw new Error(`Could not find <svg> element with width/height for feature ${feature} in SVG content "${svg}"`)
   }
   return {
-    width: parseFloat(width[1]),
-    height: parseFloat(height[1]),
+    width: parseFloat(matches[1]),
+    height: parseFloat(matches[2]),
   }
 }
 
@@ -66,6 +64,15 @@ const featureColumns = signals_railway_signals.types.flatMap(type => [
   { ...type, subtype: null, name: type.type },
   ...(type.subtypes ?? []).map(subtype => ({ ...type, subtype, name: `${type.type}__${subtype}` })),
 ])
+
+const declaredTags = new Set(signals_railway_signals.tags.map(tag => tag.tag))
+
+// Caption tag of a feature column ("railway:signal:<type>[:<subtype>]:caption"),
+// or NULL when the tag is not declared (no such column in the signals table)
+function captionSql(column) {
+  const tag = `railway:signal:${column.type}${column.subtype ? `:${column.subtype}` : ''}:caption`
+  return declaredTags.has(tag) ? `"${tag}"` : 'NULL'
+}
 
 const signalsWithSignalType = await promiseResultsOrErrors(
   signals_railway_signals.features
@@ -290,11 +297,11 @@ CREATE OR REPLACE VIEW signal_features_view AS
           CASE ${signalsWithSignalType.map((feature, index) => ({...feature, rank: index })).filter(feature => feature.tags.find(it => it.tag === `railway:signal:${column.type}`) && featureSubtype(feature, column.type) === column.subtype).map(feature => `
             -- ${feature.country ? `(${feature.country}) ` : ''}${feature.description}
             WHEN ${matchFeatureTagsSql(feature.tags)}
-              THEN ${feature.signalType === column.type ? `array_cat(${featureIconsSql(feature.icon)}, ARRAY[${feature.type ? `'${feature.type}'` : 'NULL'}, "railway:signal:${column.type}:deactivated"::text, '${feature.rank}', '${feature.inline === true}'])` : 'NULL'}
+              THEN ${feature.signalType === column.type ? `array_cat(${featureIconsSql(feature.icon)}, ARRAY[${feature.type ? `'${feature.type}'` : 'NULL'}, "railway:signal:${column.type}:deactivated"::text, '${feature.rank}', '${feature.inline === true}', ${captionSql(column)}])` : 'NULL'}
             `).join('')}
             -- Unknown signal (${column.type}), left to the subtype columns when a subtype key is present
             ${column.subtype || subtypesOfType[column.type].length === 0 ? 'ELSE' : `WHEN ${subtypesOfType[column.type].map(subtype => `"railway:signal:${column.type}:${subtype}" IS NULL`).join(' AND ')} THEN`}
-              ARRAY['general/signal-unknown-${column.type}', NULL, '17.1', '0', '0', NULL, 'false', NULL, 'false']
+              ARRAY['general/signal-unknown-${column.type}', NULL, '17.1', '0', '0', NULL, "railway:signal:${column.type}:deactivated"::text, NULL, 'false', ${captionSql(column)}]
         END
       END as feature_${column.name}`).join(',')}
     FROM signals s
@@ -314,6 +321,7 @@ CREATE OR REPLACE VIEW signal_features_view AS
       feature_${column.name}[7]::boolean as deactivated,
       feature_${column.name}[8]::INT as rank,
       feature_${column.name}[9]::boolean as inline,
+      feature_${column.name}[10] as caption,
       '${column.category}' as category
     FROM signals_with_features_0
     WHERE feature_${column.name} IS NOT NULL
@@ -330,6 +338,7 @@ CREATE OR REPLACE VIEW signal_features_view AS
       false as deactivated,
       NULL as rank,
       false as inline,
+      NULL as caption,
       'other' as category
     FROM signals_with_features_0
     WHERE railway = 'signal'
@@ -360,6 +369,14 @@ CREATE OR REPLACE VIEW signal_features_view AS
       (array_agg(category ORDER BY rank))[1] as category
     FROM signals_with_features_2
     GROUP BY signal_id, inline, deactivated, row_index
+  ),
+  -- Captions of every feature of a signal, in feature order (inline rows included)
+  signal_captions AS (
+    SELECT
+      signal_id,
+      nullif(array_remove(array_agg(caption ORDER BY rank ASC NULLS LAST), null), '{}'::text[]) as caption
+    FROM signals_with_features_1
+    GROUP BY signal_id
   )
   -- Group features by signal, and aggregate the results
   SELECT
@@ -372,7 +389,8 @@ CREATE OR REPLACE VIEW signal_features_view AS
     array_agg(feature ORDER BY rank ASC NULLS LAST) as features,
     array_agg(deactivated ORDER BY rank ASC NULLS LAST) as deactivated,
     array_agg(icon_height ORDER BY rank ASC NULLS LAST) as icon_height,
-    MAX(rank) as rank
+    MAX(rank) as rank,
+    (SELECT caption FROM signal_captions c WHERE c.signal_id = sf.signal_id) as caption
   FROM signals_with_features_3 sf
   GROUP BY signal_id;
 
@@ -400,7 +418,7 @@ CREATE OR REPLACE VIEW railway_signals_view AS
     railway,
     sd.direction_both,
     ref,
-    caption,
+    nullif(array_remove(array_cat(ARRAY["railway:signal:caption"], sf.caption), null), '{}'::text[]) as caption,
     position,
     wikidata,
     wikimedia_commons,
@@ -482,7 +500,7 @@ CREATE OR REPLACE FUNCTION railway_signals(z integer, x integer, y integer)
         ST_AsMVTGeom(way, ST_TileEnvelope(z, x, y), extent => 4096, buffer => 64, clip_geom => true) AS way,
         railway,
         ref,
-        caption,
+        array_to_string(caption, '\n') AS caption,
         azimuth,
         direction_both,
         feature0,
